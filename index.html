@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>THE MOBS</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #f5f1e8;
+            font-family: Arial, Helvetica, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* NAVIGATION */
+
+        header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 28px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: 900;
+            letter-spacing: -1.5px;
+        }
+
+        nav {
+            display: flex;
+            gap: 35px;
+        }
+
+        nav a {
+            color: #f5f1e8;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        nav a:hover {
+            opacity: 0.55;
+        }
+
+        /* HERO */
+
+        .hero {
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 20px 80px;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: "M";
+            position: absolute;
+            font-size: 70vw;
+            font-weight: 900;
+            line-height: 0.7;
+            color: rgba(255,255,255,0.025);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .eyebrow {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 35px;
+            opacity: 0.65;
+        }
+
+        .hero h1 {
+            font-size: clamp(90px, 18vw, 260px);
+            line-height: 0.72;
+            font-weight: 900;
+            letter-spacing: -12px;
+            text-transform: uppercase;
+        }
+
+        .hero h1 span {
+            display: block;
+        }
+
+        .hero h1 .small-s {
+            display: inline;
+            font-size: 0.48em;
+            vertical-align: top;
+            letter-spacing: -5px;
+        }
+
+        .hero-description {
+            max-width: 500px;
+            margin: 55px auto 0;
+            font-size: 15px;
+            line-height: 1.7;
+            color: #aaa59b;
+        }
+
+        .hero-actions {
+            margin-top: 35px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 16px 32px;
+            border: 1px solid #f5f1e8;
+            color: #f5f1e8;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            transition: all 0.25s ease;
+        }
+
+        .button:hover {
+            background: #f5f1e8;
+            color: #0a0a0a;
+        }
+
+        .button.secondary {
+            border-color: #444;
+            color: #aaa59b;
+        }
+
+        .button.secondary:hover {
+            border-color: #f5f1e8;
+            color: #0a0a0a;
+            background: #f5f1e8;
+        }
+
+        /* INTRO */
+
+        .intro {
+            min-height: 60vh;
+            padding: 120px 8%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-top: 1px solid #222;
+            border-bottom: 1px solid #222;
+        }
+
+        .intro-inner {
+            max-width: 1000px;
+            text-align: center;
+        }
+
+        .intro h2 {
+            font-size: clamp(40px, 7vw, 90px);
+            line-height: 0.95;
+            letter-spacing: -4px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .intro p {
+            max-width: 650px;
+            margin: 35px auto 0;
+            color: #999;
+            line-height: 1.8;
+            font-size: 15px;
+        }
+
+        /* FOOTER */
+
+        footer {
+            padding: 35px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #666;
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 650px) {
+
+            header {
+                padding: 22px 20px;
+            }
+
+            nav {
+                gap: 15px;
+            }
+
+            nav a {
+                font-size: 9px;
+            }
+
+            .hero h1 {
+                letter-spacing: -7px;
+            }
+
+            .hero-description {
+                font-size: 14px;
+            }
+
+            .intro {
+                padding: 90px 25px;
+            }
+
+            .intro h2 {
+                letter-spacing: -2px;
+            }
+
+            footer {
+                padding: 25px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+
+        <div class="logo">
+            THE MOBS
+        </div>
+
+        <nav>
+            <a href="#">Home</a>
+            <a href="#about">About</a>
+            <a href="#">Menu</a>
+        </nav>
+
+    </header>
+
+
+    <main>
+
+        <!-- HERO -->
+
+        <section class="hero">
+
+            <div class="hero-content">
+
+                <div class="eyebrow">
+                    Welcome to the other side
+                </div>
+
+                <h1>
+                    MOB<span class="small-s">S</span>
+                </h1>
+
+                <p class="hero-description">
+                    One place. Different sides.
+                    <br>
+                    Food, people and a personality of its own.
+                </p>
+
+                <div class="hero-actions">
+
+                    <a href="#" class="button">
+                        Explore the Menu
+                    </a>
+
+                    <a href="#about" class="button secondary">
+                        Discover MOBS
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ABOUT -->
+
+        <section class="intro" id="about">
+
+            <div class="intro-inner">
+
+                <h2>
+                    Everyone<br>
+                    has a side.
+                </h2>
+
+                <p>
+                    THE MOBS is more than a place to eat.
+                    It is a character, a mood and a different side
+                    of the people who walk through the door.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+
+        <span>© 2026 THE MOBS</span>
+
+        <span>Made for the MOBS</span>
+
+    </footer>
+
+</body>
+</html>
