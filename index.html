@@ -3,453 +3,219 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="THE MOBS — One place. Different sides. Food, people and a personality of its own.">
-<title>THE MOBS — The Other Side</title>
+
+<title>THE MOBS® — The Other Side</title>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800;900&display=swap');
-
-:root{
-  --black:#080808;
-  --black-2:#101010;
-  --white:#f4efe6;
-  --yellow:#f2c94c;
-  --gray:#8d8d8d;
-  --line:rgba(244,239,230,.14);
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{
-  background:var(--black);
-  color:var(--white);
-  font-family:Inter,Arial,sans-serif;
-  overflow-x:hidden;
-}
-a{color:inherit;text-decoration:none}
-button{font:inherit}
-
-.page{
-  width:min(1400px,100%);
-  margin:auto;
-  padding:0 34px;
+html {
+    scroll-behavior: smooth;
 }
 
-/* ---------- HEADER ---------- */
-header{
-  position:fixed;
-  top:0;left:0;right:0;
-  z-index:50;
-  background:linear-gradient(var(--black),rgba(8,8,8,.92),transparent);
-}
-.nav{
-  width:min(1400px,100%);
-  margin:auto;
-  padding:24px 34px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-.logo{
-  font-family:"Archivo Black",Impact,sans-serif;
-  font-size:22px;
-  letter-spacing:-1.5px;
-}
-.logo span{color:var(--yellow);font-size:.58em;vertical-align:top;margin-left:1px}
-nav{display:flex;gap:34px}
-nav a{
-  font-size:12px;
-  font-weight:800;
-  letter-spacing:.04em;
-  text-transform:uppercase;
-  transition:.2s;
-}
-nav a:hover{color:var(--yellow)}
-.menu-btn{display:none;background:none;border:0;color:var(--white);font-size:25px}
-
-/* ---------- HERO ---------- */
-.hero{
-  min-height:100vh;
-  display:grid;
-  place-items:center;
-  position:relative;
-  padding-top:70px;
-}
-.hero:before,.hero:after{
-  content:"";
-  position:absolute;
-  pointer-events:none;
-}
-.hero:before{
-  width:70vw;height:70vw;
-  max-width:900px;max-height:900px;
-  background:
-    linear-gradient(135deg,transparent 49%,rgba(255,255,255,.025) 50%,transparent 51%),
-    linear-gradient(45deg,transparent 49%,rgba(255,255,255,.018) 50%,transparent 51%);
-  opacity:.8;
-}
-.hero-card{
-  width:min(680px,90vw);
-  min-height:570px;
-  background:#111;
-  border:1px solid rgba(255,255,255,.025);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  position:relative;
-  overflow:hidden;
-  box-shadow:0 30px 100px rgba(0,0,0,.45);
-}
-.hero-card:before{
-  content:"";
-  position:absolute;
-  inset:-20%;
-  background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.025) 50%,transparent 65%);
-  transform:rotate(7deg);
-}
-.kicker{
-  font-size:10px;
-  font-weight:800;
-  letter-spacing:.42em;
-  color:#aaa;
-  margin-bottom:36px;
-  position:relative;
-}
-.wordmark{
-  font-family:"Archivo Black",Impact,sans-serif;
-  font-size:clamp(90px,15vw,175px);
-  line-height:.72;
-  letter-spacing:-.075em;
-  position:relative;
-  color:var(--white);
-}
-.wordmark sup{
-  font-family:Inter,sans-serif;
-  font-size:.17em;
-  letter-spacing:-.02em;
-  vertical-align:top;
-  position:relative;
-  top:-.2em;
-}
-.hero-copy{
-  max-width:440px;
-  margin:48px 20px 30px;
-  color:#aaa;
-  font-size:14px;
-  line-height:1.8;
-  position:relative;
-}
-.hero-copy strong{color:var(--white)}
-.cta-row{display:flex;gap:10px;position:relative}
-.btn{
-  border:1px solid var(--white);
-  padding:14px 28px;
-  text-transform:uppercase;
-  letter-spacing:.12em;
-  font-size:10px;
-  font-weight:900;
-  transition:.2s;
-}
-.btn:hover{background:var(--white);color:var(--black)}
-.btn.secondary{border-color:#393939;color:#aaa}
-.btn.secondary:hover{background:#222;color:var(--white);border-color:#555}
-
-.scroll{
-  position:absolute;
-  bottom:26px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:9px;
-  letter-spacing:.3em;
-  color:#666;
-  text-transform:uppercase;
+body {
+    background: #080808;
+    color: #f4f0e8;
+    font-family: Arial, Helvetica, sans-serif;
+    min-height: 100vh;
 }
 
-/* ---------- SECTIONS ---------- */
-section{padding:120px 0}
-.section-head{
-  display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-  gap:30px;
-  margin-bottom:48px;
-}
-.eyebrow{
-  color:var(--yellow);
-  font-size:10px;
-  font-weight:900;
-  letter-spacing:.3em;
-  text-transform:uppercase;
-  margin-bottom:12px;
-}
-h2{
-  font-family:"Archivo Black",Impact,sans-serif;
-  font-size:clamp(42px,7vw,88px);
-  line-height:.9;
-  letter-spacing:-.06em;
-}
-.section-note{
-  max-width:360px;
-  color:#858585;
-  font-size:13px;
-  line-height:1.8;
+a {
+    color: inherit;
+    text-decoration: none;
 }
 
-/* ---------- ABOUT ---------- */
-.about-grid{
-  display:grid;
-  grid-template-columns:1.1fr .9fr;
-  gap:70px;
-  align-items:center;
-}
-.about-big{
-  font-family:"Archivo Black",Impact,sans-serif;
-  font-size:clamp(30px,4vw,58px);
-  line-height:1.02;
-  letter-spacing:-.045em;
-}
-.about-big span{color:var(--yellow)}
-.about-text{
-  color:#8c8c8c;
-  font-size:14px;
-  line-height:1.9;
-  margin-top:28px;
-  max-width:680px;
-}
-.side-box{
-  min-height:430px;
-  background:#111;
-  border:1px solid var(--line);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  position:relative;
-}
-.side-box .m-letter{
-  position:absolute;
-  font-family:"Archivo Black",Impact,sans-serif;
-  font-size:330px;
-  line-height:1;
-  color:#181818;
-}
-.mob{
-  width:170px;height:170px;
-  border-radius:50%;
-  background:var(--white);
-  position:relative;
-  z-index:2;
-}
-.mob:before,.mob:after{
-  content:"";
-  position:absolute;
-  top:62px;
-  width:16px;height:16px;
-  background:var(--black);
-  border-radius:50%;
-}
-.mob:before{left:48px}.mob:after{right:48px}
-.mob-mouth{
-  position:absolute;
-  left:50%;
-  top:94px;
-  width:48px;height:5px;
-  transform:translateX(-50%);
-  background:var(--black);
-  border-radius:5px;
-}
-.mob-caption{
-  z-index:3;
-  margin-top:30px;
-  font-size:10px;
-  letter-spacing:.3em;
-  font-weight:800;
-  text-transform:uppercase;
-  color:#777;
+/* HEADER */
+
+header {
+    height: 90px;
+    padding: 0 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 10;
 }
 
-/* ---------- MENU ---------- */
-.menu-section{background:#0c0c0c}
-.menu-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  border-top:1px solid var(--line);
-}
-.menu-item{
-  min-height:260px;
-  padding:28px;
-  border-right:1px solid var(--line);
-  border-bottom:1px solid var(--line);
-  position:relative;
-  transition:.25s;
-}
-.menu-item:nth-child(3n){border-right:0}
-.menu-item:hover{background:#131313}
-.menu-no{font-size:10px;color:#555;font-weight:800}
-.menu-item h3{
-  font-family:"Archivo Black",Impact,sans-serif;
-  font-size:28px;
-  letter-spacing:-.04em;
-  margin-top:60px;
-}
-.menu-item p{font-size:12px;color:#777;line-height:1.6;margin-top:10px;max-width:280px}
-.price{position:absolute;right:28px;bottom:28px;color:var(--yellow);font-weight:800;font-size:13px}
-
-/* ---------- MOBS WORLD ---------- */
-.world-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  border-top:1px solid var(--line);
-  border-left:1px solid var(--line);
-}
-.world-item{
-  min-height:360px;
-  padding:30px;
-  border-right:1px solid var(--line);
-  border-bottom:1px solid var(--line);
-  position:relative;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  transition:.25s;
-  overflow:hidden;
-}
-.world-item:hover{
-  background:#151515;
-  transform:translateY(-3px);
-}
-.world-item.world-featured{
-  background:#111;
-}
-.world-item.world-featured:hover{
-  background:#171717;
-}
-.world-no{
-  font-size:10px;
-  color:#555;
-  font-weight:800;
-  letter-spacing:.08em;
-}
-.world-content{
-  position:relative;
-  z-index:2;
-}
-.world-kicker{
-  color:var(--yellow);
-  font-size:9px;
-  font-weight:900;
-  letter-spacing:.25em;
-  margin-bottom:12px;
-}
-.world-item h3{
-  font-family:"Archivo Black",Impact,sans-serif;
-  font-size:clamp(36px,5vw,64px);
-  letter-spacing:-.055em;
-  line-height:.9;
-}
-.world-item p{
-  font-size:12px;
-  color:#777;
-  line-height:1.7;
-  margin-top:16px;
-  max-width:430px;
-}
-.world-arrow{
-  position:absolute;
-  right:30px;
-  bottom:25px;
-  color:var(--yellow);
-  font-size:28px;
-  z-index:2;
+.logo {
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -1px;
 }
 
-/* ---------- OTHER SIDES ---------- */
-.sides-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:12px;
+.logo sup {
+    font-size: 9px;
+    position: relative;
+    top: -10px;
 }
-.side-card{
-  min-height:300px;
-  border:1px solid var(--line);
-  padding:25px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  transition:.25s;
-}
-.side-card:hover{background:#111;transform:translateY(-4px)}
-.side-card .num{font-size:10px;color:#555}
-.side-card h3{
-  font-family:"Archivo Black",Impact,sans-serif;
-  font-size:32px;
-  letter-spacing:-.05em;
-}
-.side-card p{font-size:11px;color:#777;line-height:1.6;margin-top:8px}
-.arrow{color:var(--yellow);font-size:20px}
 
-/* ---------- MANIFESTO ---------- */
-.manifesto{
-  border-top:1px solid var(--line);
-  border-bottom:1px solid var(--line);
-  text-align:center;
-  padding:120px 20px;
+nav {
+    display: flex;
+    gap: 35px;
 }
-.manifesto p{
-  font-family:"Archivo Black",Impact,sans-serif;
-  font-size:clamp(38px,7vw,90px);
-  line-height:.94;
-  letter-spacing:-.06em;
-  max-width:1100px;
-  margin:auto;
-}
-.manifesto span{color:var(--yellow)}
 
-/* ---------- FOOTER ---------- */
-footer{
-  padding:38px 34px;
-  width:min(1400px,100%);
-  margin:auto;
-  display:flex;
-  justify-content:space-between;
-  gap:30px;
-  color:#666;
-  font-size:10px;
-  letter-spacing:.12em;
-  text-transform:uppercase;
+nav a {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .5px;
 }
-footer strong{color:var(--white)}
 
-/* ---------- RESPONSIVE ---------- */
-@media(max-width:850px){
-  .page{padding:0 18px}
-  .nav{padding:20px 18px}
-  nav{display:none}
-  .menu-btn{display:block}
-  .hero-card{min-height:500px}
-  .about-grid{grid-template-columns:1fr;gap:35px}
-  .menu-grid{grid-template-columns:1fr 1fr}
-  .world-grid{grid-template-columns:1fr}
-  .menu-item:nth-child(3n){border-right:1px solid var(--line)}
-  .menu-item:nth-child(2n){border-right:0}
-  .sides-grid{grid-template-columns:1fr 1fr}
-  .section-head{display:block}
-  .section-note{margin-top:20px}
+nav a:hover {
+    opacity: .55;
 }
-@media(max-width:520px){
-  .hero{padding-top:40px}
-  .hero-card{min-height:450px}
-  .kicker{font-size:8px;letter-spacing:.28em;margin-bottom:28px}
-  .hero-copy{font-size:12px;margin:38px 18px 25px}
-  .cta-row{flex-direction:column;width:70%}
-  .btn{text-align:center}
-  section{padding:80px 0}
-  .menu-grid,.sides-grid,.world-grid{grid-template-columns:1fr}
-  .menu-item,.menu-item:nth-child(2n),.menu-item:nth-child(3n),.world-item{border-right:0}
-  .side-box{min-height:350px}
-  footer{padding:30px 18px;flex-direction:column}
+
+/* HERO */
+
+.hero {
+    min-height: calc(100vh - 90px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 6%;
+}
+
+.hero-box {
+    width: min(100%, 900px);
+    min-height: 490px;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #171717 0%,
+            #101010 55%,
+            #0d0d0d 100%
+        );
+
+    border: 1px solid #151515;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+}
+
+.kicker {
+    font-size: 10px;
+    letter-spacing: 6px;
+    font-weight: 700;
+    color: #aaa;
+    margin-bottom: 30px;
+}
+
+.mob-title {
+    font-size: clamp(90px, 17vw, 180px);
+    line-height: .75;
+    font-weight: 900;
+    letter-spacing: -10px;
+    position: relative;
+}
+
+.mob-title sup {
+    font-size: 24px;
+    position: absolute;
+    top: -5px;
+    right: -25px;
+    letter-spacing: 0;
+}
+
+.description {
+    margin-top: 45px;
+    max-width: 480px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #aaa;
+}
+
+.description strong {
+    display: block;
+    color: #f4f0e8;
+    margin-top: 5px;
+}
+
+/* BUTTONS */
+
+.buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.btn {
+    min-width: 160px;
+    padding: 15px 25px;
+    border: 1px solid #777;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    transition: .2s ease;
+}
+
+.btn.primary {
+    background: #f4f0e8;
+    color: #080808;
+    border-color: #f4f0e8;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+/* BOTTOM */
+
+.scroll {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    letter-spacing: 5px;
+    color: #555;
+}
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+
+    header {
+        height: 70px;
+        padding: 0 20px;
+    }
+
+    nav {
+        gap: 15px;
+    }
+
+    nav a {
+        font-size: 10px;
+    }
+
+    .hero {
+        padding: 20px;
+    }
+
+    .hero-box {
+        min-height: 550px;
+    }
+
+    .mob-title {
+        font-size: 100px;
+        letter-spacing: -7px;
+    }
+
+    .buttons {
+        flex-direction: column;
+        width: 80%;
+    }
+
+    .btn {
+        width: 100%;
+    }
 }
 </style>
 </head>
@@ -457,210 +223,62 @@ footer strong{color:var(--white)}
 <body>
 
 <header>
-  <div class="nav">
-    <a href="#home" class="logo">THE MOBS<sup>®</sup></a>
+
+    <a href="./" class="logo">
+        THE MOBS<sup>®</sup>
+    </a>
+
     <nav>
-      <a href="#home">Home</a>
-      <a href="#about">About</a>
-      <a href="#world">MOBS WORLD</a>
+        <a href="./">HOME</a>
+        <a href="#about">ABOUT</a>
+        <a href="#world">MOBS WORLD</a>
     </nav>
-    <button class="menu-btn" aria-label="Open menu">☰</button>
-  </div>
+
 </header>
 
-<main>
 
-<section id="home" class="hero">
-  <div class="hero-card">
-    <div class="kicker">WELCOME TO THE OTHER SIDE</div>
-    <div class="wordmark">MOB<sup>S</sup></div>
-    <p class="hero-copy">
-      One place. Different sides.<br>
-      <strong>Food, people and a personality of its own.</strong>
-    </p>
-    <div class="cta-row">
-      <a class="btn" href="#world">ENTER MOBS WORLD</a>
-      <a class="btn secondary" href="#about">DISCOVER MOBS</a>
-    </div>
-  </div>
-  <div class="scroll">Scroll to enter</div>
-</section>
+<main class="hero">
 
-<section id="about">
-  <div class="page">
-    <div class="section-head">
-      <div>
-        <div class="eyebrow">01 — The idea</div>
-        <h2>NOT THE<br>MAIN<br>CHARACTER.</h2>
-      </div>
-      <p class="section-note">Still important to the story. THE MOBS is built around the idea that everyone has another side.</p>
-    </div>
+    <section class="hero-box">
 
-    <div class="about-grid">
-      <div>
-        <div class="about-big">
-          THE MOBS is a place for the <span>other side</span> of you.
+        <div class="kicker">
+            WELCOME TO THE OTHER SIDE
         </div>
-        <p class="about-text">
-          We start with food — but MOB is bigger than a restaurant.
-          It is a character, a culture and a world that can live across
-          food, people, objects, wear and whatever comes next.
-        </p>
-      </div>
 
-      <div class="side-box">
-        <div class="m-letter">M</div>
-        <div class="mob">
-          <div class="mob-mouth"></div>
+        <div class="mob-title">
+            MOB<sup>S</sup>
         </div>
-        <div class="mob-caption">Meet the MOB</div>
-      </div>
-    </div>
-  </div>
-</section>
 
-<section id="world" class="menu-section">
-  <div class="page">
-    <div class="section-head">
-      <div>
-        <div class="eyebrow">02 — MOBS WORLD</div>
-        <h2>ENTER<br>THE<br>WORLD.</h2>
-      </div>
-      <p class="section-note">
-        THE MOBS is the master brand. Choose a side and enter its own experience.
-        Each MOBS has its own interface, identity and future.
-      </p>
-    </div>
+        <div class="description">
+            One place. Different sides.
 
-    <div class="world-grid">
-      <a class="world-item world-featured" href="customer/index.html">
-        <div class="world-no">01 / FOOD</div>
-        <div class="world-content">
-          <div class="world-kicker">RESTAURANT</div>
-          <h3>MOBS FOOD</h3>
-          <p>Enter the restaurant. Browse the food, build your order and continue directly to the customer experience.</p>
+            <strong>
+                Food, people and a personality of its own.
+            </strong>
         </div>
-        <div class="world-arrow">↗</div>
-      </a>
 
-      <a class="world-item" href="#future">
-        <div class="world-no">02 / WEAR</div>
-        <div class="world-content">
-          <div class="world-kicker">COMING LATER</div>
-          <h3>MOBS WEAR</h3>
-          <p>A dedicated experience for the things you wear. Its own interface will be developed separately.</p>
-        </div>
-        <div class="world-arrow">↗</div>
-      </a>
+        <div class="buttons">
 
-      <a class="world-item" href="#future">
-        <div class="world-no">03 / OBJECTS</div>
-        <div class="world-content">
-          <div class="world-kicker">COMING LATER</div>
-          <h3>MOBS OBJECTS</h3>
-          <p>Objects and everyday things with a MOB point of view. A separate experience comes next.</p>
-        </div>
-        <div class="world-arrow">↗</div>
-      </a>
+            <!-- CUSTOMER -->
+            <a href="./customer/" class="btn primary">
+                ENTER MOBS WORLD
+            </a>
 
-      <a class="world-item" href="#future">
-        <div class="world-no">04 / STUDIO</div>
-        <div class="world-content">
-          <div class="world-kicker">COMING LATER</div>
-          <h3>MOBS STUDIO</h3>
-          <p>Characters, content and experiments from the other side.</p>
-        </div>
-        <div class="world-arrow">↗</div>
-      </a>
-    </div>
-  </div>
-</section>
+            <!-- CUSTOMER / FOOD -->
+            <a href="./customer/" class="btn">
+                DISCOVER MOBS
+            </a>
 
-<section id="future">
-  <div class="page">
-    <div class="section-head">
-      <div>
-        <div class="eyebrow">03 — THE OTHER SIDES</div>
-        <h2>MORE<br>THAN<br>FOOD.</h2>
-      </div>
-      <p class="section-note">THE MOBS is the master brand. Food is where the story starts, not where it ends.</p>
-    </div>
+        </div>
 
-    <div class="sides-grid">
-      <article class="side-card">
-        <div class="num">01 / WEAR</div>
-        <div>
-          <h3>WEAR</h3>
-          <p>The MOB moves from the table to what you wear.</p>
-        </div>
-        <div class="arrow">↗</div>
-      </article>
-      <article class="side-card">
-        <div class="num">02 / OBJECTS</div>
-        <div>
-          <h3>OBJECTS</h3>
-          <p>Objects and everyday things with a MOB point of view.</p>
-        </div>
-        <div class="arrow">↗</div>
-      </article>
-      <article class="side-card">
-        <div class="num">03 / STUDIO</div>
-        <div>
-          <h3>STUDIO</h3>
-          <p>Content, characters and experiments from the other side.</p>
-        </div>
-        <div class="arrow">↗</div>
-      </article>
-      <article class="side-card">
-        <div class="num">04 / NEXT</div>
-        <div>
-          <h3>MORE</h3>
-          <p>New sides of THE MOBS will enter the world over time.</p>
-        </div>
-        <div class="arrow">+</div>
-      </article>
-    </div>
-  </div>
-</section>
-
-<div class="manifesto">
-  <p>
-    EVERYONE HAS<br>
-    <span>ANOTHER SIDE.</span><br>
-    THIS IS OURS.
-  </p>
-</div>
+    </section>
 
 </main>
 
-<footer>
-  <div>© 2026 <strong>THE MOBS</strong></div>
-  <div>Made for the MOBS</div>
-</footer>
 
-<script>
-const menuBtn = document.querySelector('.menu-btn');
-const nav = document.querySelector('nav');
-
-menuBtn.addEventListener('click', () => {
-  const open = nav.style.display === 'flex';
-  nav.style.display = open ? '' : 'flex';
-  nav.style.position = 'absolute';
-  nav.style.top = '65px';
-  nav.style.right = '18px';
-  nav.style.flexDirection = 'column';
-  nav.style.gap = '18px';
-  nav.style.background = '#111';
-  nav.style.padding = '22px';
-  nav.style.border = '1px solid rgba(244,239,230,.14)';
-});
-
-document.querySelectorAll('nav a').forEach(a => {
-  a.addEventListener('click', () => {
-    if (window.innerWidth <= 850) nav.style.display = '';
-  });
-});
-</script>
+<div class="scroll">
+    SCROLL TO ENTER
+</div>
 
 </body>
 </html>
