@@ -297,6 +297,74 @@ h2{
 .menu-item p{font-size:12px;color:#777;line-height:1.6;margin-top:10px;max-width:280px}
 .price{position:absolute;right:28px;bottom:28px;color:var(--yellow);font-weight:800;font-size:13px}
 
+/* ---------- MOBS WORLD ---------- */
+.world-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  border-top:1px solid var(--line);
+  border-left:1px solid var(--line);
+}
+.world-item{
+  min-height:360px;
+  padding:30px;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  transition:.25s;
+  overflow:hidden;
+}
+.world-item:hover{
+  background:#151515;
+  transform:translateY(-3px);
+}
+.world-item.world-featured{
+  background:#111;
+}
+.world-item.world-featured:hover{
+  background:#171717;
+}
+.world-no{
+  font-size:10px;
+  color:#555;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+.world-content{
+  position:relative;
+  z-index:2;
+}
+.world-kicker{
+  color:var(--yellow);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.25em;
+  margin-bottom:12px;
+}
+.world-item h3{
+  font-family:"Archivo Black",Impact,sans-serif;
+  font-size:clamp(36px,5vw,64px);
+  letter-spacing:-.055em;
+  line-height:.9;
+}
+.world-item p{
+  font-size:12px;
+  color:#777;
+  line-height:1.7;
+  margin-top:16px;
+  max-width:430px;
+}
+.world-arrow{
+  position:absolute;
+  right:30px;
+  bottom:25px;
+  color:var(--yellow);
+  font-size:28px;
+  z-index:2;
+}
+
 /* ---------- OTHER SIDES ---------- */
 .sides-grid{
   display:grid;
@@ -363,6 +431,7 @@ footer strong{color:var(--white)}
   .hero-card{min-height:500px}
   .about-grid{grid-template-columns:1fr;gap:35px}
   .menu-grid{grid-template-columns:1fr 1fr}
+  .world-grid{grid-template-columns:1fr}
   .menu-item:nth-child(3n){border-right:1px solid var(--line)}
   .menu-item:nth-child(2n){border-right:0}
   .sides-grid{grid-template-columns:1fr 1fr}
@@ -377,8 +446,8 @@ footer strong{color:var(--white)}
   .cta-row{flex-direction:column;width:70%}
   .btn{text-align:center}
   section{padding:80px 0}
-  .menu-grid,.sides-grid{grid-template-columns:1fr}
-  .menu-item,.menu-item:nth-child(2n),.menu-item:nth-child(3n){border-right:0}
+  .menu-grid,.sides-grid,.world-grid{grid-template-columns:1fr}
+  .menu-item,.menu-item:nth-child(2n),.menu-item:nth-child(3n),.world-item{border-right:0}
   .side-box{min-height:350px}
   footer{padding:30px 18px;flex-direction:column}
 }
@@ -393,8 +462,7 @@ footer strong{color:var(--white)}
     <nav>
       <a href="#home">Home</a>
       <a href="#about">About</a>
-      <a href="#menu">Menu</a>
-      <a href="#sides">The Mobs</a>
+      <a href="#world">MOBS WORLD</a>
     </nav>
     <button class="menu-btn" aria-label="Open menu">☰</button>
   </div>
@@ -411,8 +479,8 @@ footer strong{color:var(--white)}
       <strong>Food, people and a personality of its own.</strong>
     </p>
     <div class="cta-row">
-      <a class="btn" href="#menu">Explore the menu</a>
-      <a class="btn secondary" href="#about">Discover MOBS</a>
+      <a class="btn" href="#world">ENTER MOBS WORLD</a>
+      <a class="btn secondary" href="#about">DISCOVER MOBS</a>
     </div>
   </div>
   <div class="scroll">Scroll to enter</div>
@@ -451,62 +519,68 @@ footer strong{color:var(--white)}
   </div>
 </section>
 
-<section id="menu" class="menu-section">
+<section id="world" class="menu-section">
   <div class="page">
     <div class="section-head">
       <div>
-        <div class="eyebrow">02 — Food</div>
-        <h2>THE<br>MENU.</h2>
+        <div class="eyebrow">02 — MOBS WORLD</div>
+        <h2>ENTER<br>THE<br>WORLD.</h2>
       </div>
-      <p class="section-note">Simple names. Strong personality. The menu is designed to feel like THE MOBS, not like a generic restaurant.</p>
+      <p class="section-note">
+        THE MOBS is the master brand. Choose a side and enter its own experience.
+        Each MOBS has its own interface, identity and future.
+      </p>
     </div>
 
-    <div class="menu-grid">
-      <article class="menu-item">
-        <div class="menu-no">01</div>
-        <h3>THE MOB BURGER</h3>
-        <p>Our signature burger. Straight to the point.</p>
-        <div class="price">—</div>
-      </article>
-      <article class="menu-item">
-        <div class="menu-no">02</div>
-        <h3>OTHER SIDE FRIES</h3>
-        <p>Crispy, simple and made to disappear.</p>
-        <div class="price">—</div>
-      </article>
-      <article class="menu-item">
-        <div class="menu-no">03</div>
-        <h3>MOB CHICKEN</h3>
-        <p>Comfort food with a little attitude.</p>
-        <div class="price">—</div>
-      </article>
-      <article class="menu-item">
-        <div class="menu-no">04</div>
-        <h3>THE OTHER ONE</h3>
-        <p>A rotating item for the side of you that changes.</p>
-        <div class="price">—</div>
-      </article>
-      <article class="menu-item">
-        <div class="menu-no">05</div>
-        <h3>MOB COFFEE</h3>
-        <p>For the mornings, nights and everything between.</p>
-        <div class="price">—</div>
-      </article>
-      <article class="menu-item">
-        <div class="menu-no">06</div>
-        <h3>MOB DESSERT</h3>
-        <p>End it on the right side.</p>
-        <div class="price">—</div>
-      </article>
+    <div class="world-grid">
+      <a class="world-item world-featured" href="customer/">
+        <div class="world-no">01 / FOOD</div>
+        <div class="world-content">
+          <div class="world-kicker">RESTAURANT</div>
+          <h3>MOBS FOOD</h3>
+          <p>Enter the restaurant. Browse the food, build your order and continue directly to the customer experience.</p>
+        </div>
+        <div class="world-arrow">↗</div>
+      </a>
+
+      <a class="world-item" href="#future">
+        <div class="world-no">02 / WEAR</div>
+        <div class="world-content">
+          <div class="world-kicker">COMING LATER</div>
+          <h3>MOBS WEAR</h3>
+          <p>A dedicated experience for the things you wear. Its own interface will be developed separately.</p>
+        </div>
+        <div class="world-arrow">↗</div>
+      </a>
+
+      <a class="world-item" href="#future">
+        <div class="world-no">03 / OBJECTS</div>
+        <div class="world-content">
+          <div class="world-kicker">COMING LATER</div>
+          <h3>MOBS OBJECTS</h3>
+          <p>Objects and everyday things with a MOB point of view. A separate experience comes next.</p>
+        </div>
+        <div class="world-arrow">↗</div>
+      </a>
+
+      <a class="world-item" href="#future">
+        <div class="world-no">04 / STUDIO</div>
+        <div class="world-content">
+          <div class="world-kicker">COMING LATER</div>
+          <h3>MOBS STUDIO</h3>
+          <p>Characters, content and experiments from the other side.</p>
+        </div>
+        <div class="world-arrow">↗</div>
+      </a>
     </div>
   </div>
 </section>
 
-<section id="sides">
+<section id="future">
   <div class="page">
     <div class="section-head">
       <div>
-        <div class="eyebrow">03 — The world</div>
+        <div class="eyebrow">03 — THE OTHER SIDES</div>
         <h2>MORE<br>THAN<br>FOOD.</h2>
       </div>
       <p class="section-note">THE MOBS is the master brand. Food is where the story starts, not where it ends.</p>
@@ -514,15 +588,7 @@ footer strong{color:var(--white)}
 
     <div class="sides-grid">
       <article class="side-card">
-        <div class="num">01 / FOOD</div>
-        <div>
-          <h3>FOOD</h3>
-          <p>Restaurants, coffee and products built around the MOB personality.</p>
-        </div>
-        <div class="arrow">↗</div>
-      </article>
-      <article class="side-card">
-        <div class="num">02 / WEAR</div>
+        <div class="num">01 / WEAR</div>
         <div>
           <h3>WEAR</h3>
           <p>The MOB moves from the table to what you wear.</p>
@@ -530,7 +596,7 @@ footer strong{color:var(--white)}
         <div class="arrow">↗</div>
       </article>
       <article class="side-card">
-        <div class="num">03 / OBJECTS</div>
+        <div class="num">02 / OBJECTS</div>
         <div>
           <h3>OBJECTS</h3>
           <p>Objects and everyday things with a MOB point of view.</p>
@@ -538,12 +604,20 @@ footer strong{color:var(--white)}
         <div class="arrow">↗</div>
       </article>
       <article class="side-card">
-        <div class="num">04 / STUDIO</div>
+        <div class="num">03 / STUDIO</div>
         <div>
           <h3>STUDIO</h3>
           <p>Content, characters and experiments from the other side.</p>
         </div>
         <div class="arrow">↗</div>
+      </article>
+      <article class="side-card">
+        <div class="num">04 / NEXT</div>
+        <div>
+          <h3>MORE</h3>
+          <p>New sides of THE MOBS will enter the world over time.</p>
+        </div>
+        <div class="arrow">+</div>
       </article>
     </div>
   </div>
