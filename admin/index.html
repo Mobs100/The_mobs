@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MOBS Admin</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- ======================================================
+     SIDEBAR
+====================================================== -->
+
+<aside class="sidebar">
+
+    <div class="brand">
+
+        <div class="brand-mark">
+            M
+        </div>
+
+        <div>
+
+            <div class="logo">
+                MOBS
+            </div>
+
+            <div class="admin-title">
+                ADMIN PANEL
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <nav class="admin-nav">
+
+        <button
+            type="button"
+            class="nav-btn active"
+            data-section="dashboard"
+            onclick="showSection('dashboard')"
+        >
+            <span>⌂</span>
+            Dashboard
+        </button>
+
+
+        <button
+            type="button"
+            class="nav-btn"
+            data-section="categories"
+            onclick="showSection('categories')"
+        >
+            <span>☷</span>
+            Categories
+        </button>
+
+
+        <button
+            type="button"
+            class="nav-btn"
+            data-section="products"
+            onclick="showSection('products')"
+        >
+            <span>▦</span>
+            Products
+        </button>
+
+    </nav>
+
+</aside>
+
+
+<!-- ======================================================
+     MAIN
+====================================================== -->
+
+<main class="main-content">
+
+
+    <!-- ==================================================
+         DASHBOARD
+    ================================================== -->
+
+    <section
+        id="dashboard"
+        class="section"
+    >
+
+        <div class="page-head">
+
+            <div>
+
+                <div class="eyebrow">
+                    MOBS MANAGEMENT
+                </div>
+
+                <h1>
+                    Dashboard
+                </h1>
+
+                <p class="muted">
+                    Manage your menu and products.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="secondary-btn"
+                onclick="loadDashboard()"
+            >
+                ↻ Refresh
+            </button>
+
+        </div>
+
+
+        <div class="dashboard-cards">
+
+
+            <div class="card">
+
+                <div class="card-label">
+                    Restaurants
+                </div>
+
+                <div
+                    class="card-value"
+                    id="restaurantsCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-label">
+                    Categories
+                </div>
+
+                <div
+                    class="card-value"
+                    id="categoriesCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-label">
+                    Products
+                </div>
+
+                <div
+                    class="card-value"
+                    id="productsCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-label">
+                    Available Products
+                </div>
+
+                <div
+                    class="card-value"
+                    id="availableProductsCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ==================================================
+         CATEGORIES
+    ================================================== -->
+
+    <section
+        id="categories"
+        class="section hidden"
+    >
+
+        <div class="page-head">
+
+            <div>
+
+                <div class="eyebrow">
+                    MENU
+                </div>
+
+                <h1>
+                    Categories
+                </h1>
+
+                <p class="muted">
+                    Create and manage product categories.
+                </p>
+
+            </div>
+
+
+            <!-- IMPORTANT:
+                 This calls addCategory directly.
+                 No undefined openCategoryForm().
+            -->
+
+            <button
+                type="button"
+                class="primary-btn"
+                onclick="showCategoryForm()"
+            >
+                + Add Category
+            </button>
+
+        </div>
+
+
+
+        <!-- ==================================================
+             CATEGORY FORM
+        ================================================== -->
+
+        <div
+            id="categoryForm"
+            class="form-card hidden"
+        >
+
+            <div class="form-title-row">
+
+                <div>
+
+                    <h2>
+                        Add Category
+                    </h2>
+
+                    <p class="muted">
+                        Enter the category details below.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!--
+                Editing ID is kept for future edit support.
+            -->
+
+            <input
+                type="hidden"
+                id="editingCategoryId"
+            >
+
+
+
+            <div class="form-grid">
+
+
+                <!-- CATEGORY NAME -->
+
+                <label>
+
+                    <span>
+                        Category name *
+                    </span>
+
+                    <input
+                        type="text"
+                        id="categoryName"
+                        placeholder="e.g. Burgers"
+                    >
+
+                </label>
+
+
+
+                <!-- SORT ORDER -->
+
+                <label>
+
+                    <span>
+                        Sort order
+                    </span>
+
+                    <input
+                        type="number"
+                        id="categorySortOrder"
+                        value="0"
+                        step="1"
+                        min="0"
+                    >
+
+                </label>
+
+
+
+                <!-- DESCRIPTION -->
+
+                <label class="full">
+
+                    <span>
+                        Description
+                    </span>
+
+                    <textarea
+                        id="categoryDescription"
+                        placeholder="Category description"
+                    ></textarea>
+
+                </label>
+
+
+
+                <!-- IMAGE URL -->
+
+                <label class="full">
+
+                    <span>
+                        Image URL
+                    </span>
+
+                    <input
+                        type="url"
+                        id="categoryImage"
+                        placeholder="https://..."
+                    >
+
+                </label>
+
+            </div>
+
+
+
+            <!-- ACTIVE -->
+
+            <div class="toggles">
+
+                <label class="toggle">
+
+                    <input
+                        type="checkbox"
+                        id="categoryActive"
+                        checked
+                    >
+
+                    <span class="toggle-ui"></span>
+
+                    <span>
+                        Active
+                    </span>
+
+                </label>
+
+            </div>
+
+
+
+            <!-- ACTIONS -->
+
+            <div class="form-actions">
+
+                <button
+                    type="button"
+                    class="primary-btn"
+                    onclick="addCategory()"
+                >
+                    Save Category
+                </button>
+
+
+                <button
+                    type="button"
+                    class="secondary-btn"
+                    onclick="hideCategoryForm()"
+                >
+                    Cancel
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- CATEGORY LIST -->
+
+        <div
+            id="categoriesList"
+            class="items-list"
+        >
+
+            <div class="loading">
+                Loading categories...
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ==================================================
+         PRODUCTS
+    ================================================== -->
+
+    <section
+        id="products"
+        class="section hidden"
+    >
+
+        <div class="page-head">
+
+            <div>
+
+                <div class="eyebrow">
+                    MENU
+                </div>
+
+                <h1>
+                    Products
+                </h1>
+
+                <p class="muted">
+                    Add, edit, hide and organize your products.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="primary-btn"
+                onclick="showProductForm()"
+            >
+                + Add Product
+            </button>
+
+        </div>
+
+
+
+        <!-- ==================================================
+             PRODUCT FORM
+        ================================================== -->
+
+        <div
+            id="productForm"
+            class="form-card hidden"
+        >
+
+            <div class="form-title-row">
+
+                <div>
+
+                    <h2>
+                        Add Product
+                    </h2>
+
+                    <p class="muted">
+                        Fill in the product details below.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="icon-btn"
+                    onclick="hideProductForm()"
+                    aria-label="Close"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+
+            <input
+                type="hidden"
+                id="editingProductId"
+            >
+
+
+
+            <div class="form-grid">
+
+
+                <!-- PRODUCT NAME -->
+
+                <label>
+
+                    <span>
+                        Product name *
+                    </span>
+
+                    <input
+                        type="text"
+                        id="productName"
+                        placeholder="Product name"
+                    >
+
+                </label>
+
+
+
+                <!-- PRICE -->
+
+                <label>
+
+                    <span>
+                        Price (SAR) *
+                    </span>
+
+                    <input
+                        type="number"
+                        id="productPrice"
+                        placeholder="0.00"
+                        step="0.01"
+                        min="0"
+                    >
+
+                </label>
+
+
+
+                <!-- DESCRIPTION -->
+
+                <label class="full">
+
+                    <span>
+                        Description
+                    </span>
+
+                    <textarea
+                        id="productDescription"
+                        placeholder="Product description"
+                    ></textarea>
+
+                </label>
+
+
+
+                <!-- CATEGORY -->
+
+                <label>
+
+                    <span>
+                        Category
+                    </span>
+
+                    <select id="productCategory">
+
+                        <option value="">
+                            Select Category
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+
+                <!-- SORT -->
+
+                <label>
+
+                    <span>
+                        Sort order
+                    </span>
+
+                    <input
+                        type="number"
+                        id="productSortOrder"
+                        value="0"
+                        step="1"
+                        min="0"
+                    >
+
+                </label>
+
+
+
+                <!-- IMAGE -->
+
+                <label class="full">
+
+                    <span>
+                        Image URL
+                    </span>
+
+                    <input
+                        type="url"
+                        id="productImage"
+                        placeholder="https://..."
+                    >
+
+                </label>
+
+            </div>
+
+
+
+            <!-- PRODUCT OPTIONS -->
+
+            <div class="toggles">
+
+
+                <label class="toggle">
+
+                    <input
+                        type="checkbox"
+                        id="productAvailable"
+                        checked
+                    >
+
+                    <span class="toggle-ui"></span>
+
+                    <span>
+                        Available
+                    </span>
+
+                </label>
+
+
+
+                <label class="toggle">
+
+                    <input
+                        type="checkbox"
+                        id="productFeatured"
+                    >
+
+                    <span class="toggle-ui"></span>
+
+                    <span>
+                        Featured
+                    </span>
+
+                </label>
+
+            </div>
+
+
+
+            <!-- IMAGE PREVIEW -->
+
+            <div
+                id="imagePreview"
+                class="image-preview hidden"
+            >
+
+                <img
+                    id="previewImg"
+                    src=""
+                    alt="Preview"
+                >
+
+            </div>
+
+
+
+            <!-- ACTIONS -->
+
+            <div class="form-actions">
+
+                <button
+                    type="button"
+                    class="primary-btn"
+                    id="saveProductBtn"
+                    onclick="addProduct()"
+                >
+                    Save Product
+                </button>
+
+
+                <button
+                    type="button"
+                    class="secondary-btn"
+                    onclick="hideProductForm()"
+                >
+                    Cancel
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ==================================================
+             PRODUCT TOOLBAR
+        ================================================== -->
+
+        <div class="toolbar">
+
+            <input
+                id="productSearch"
+                class="search-input"
+                type="search"
+                placeholder="Search products..."
+                oninput="filterProducts()"
+            >
+
+
+            <select
+                id="productFilter"
+                class="filter-select"
+                onchange="filterProducts()"
+            >
+
+                <option value="all">
+                    All products
+                </option>
+
+                <option value="available">
+                    Available
+                </option>
+
+                <option value="hidden">
+                    Hidden
+                </option>
+
+                <option value="featured">
+                    Featured
+                </option>
+
+            </select>
+
+        </div>
+
+
+
+        <!-- PRODUCT LIST -->
+
+        <div
+            id="productsList"
+            class="products-list"
+        >
+
+            <div class="loading">
+                Loading products...
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+
+<!-- ======================================================
+     TOAST
+====================================================== -->
+
+<div
+    id="toast"
+    class="toast"
+></div>
+
+
+
+<!-- ======================================================
+     SUPABASE
+====================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+<!-- ======================================================
+     APP JS
+====================================================== -->
+
+<script src="app.js"></script>
+
+
+
+<!-- ======================================================
+     FORM HELPERS
+====================================================== -->
+
+<script>
+
+    /*
+     These functions only control showing/hiding forms.
+     Database operations remain inside app.js.
+    */
+
+
+    function showCategoryForm() {
+
+        const form =
+            document.getElementById("categoryForm");
+
+        if (!form) return;
+
+        form.classList.remove("hidden");
+
+        const input =
+            document.getElementById("categoryName");
+
+        if (input) {
+            input.focus();
+        }
+    }
+
+
+
+    function hideCategoryForm() {
+
+        const form =
+            document.getElementById("categoryForm");
+
+        if (!form) return;
+
+        form.classList.add("hidden");
+
+        const name =
+            document.getElementById("categoryName");
+
+        const description =
+            document.getElementById("categoryDescription");
+
+        const image =
+            document.getElementById("categoryImage");
+
+        const sort =
+            document.getElementById("categorySortOrder");
+
+        if (name) {
+            name.value = "";
+        }
+
+        if (description) {
+            description.value = "";
+        }
+
+        if (image) {
+            image.value = "";
+        }
+
+        if (sort) {
+            sort.value = "0";
+        }
+
+        const active =
+            document.getElementById("categoryActive");
+
+        if (active) {
+            active.checked = true;
+        }
+    }
+
+
+
+    function showProductForm() {
+
+        const form =
+            document.getElementById("productForm");
+
+        if (!form) return;
+
+        form.classList.remove("hidden");
+
+        if (typeof loadProductCategories === "function") {
+            loadProductCategories();
+        }
+
+        const input =
+            document.getElementById("productName");
+
+        if (input) {
+            input.focus();
+        }
+    }
+
+
+
+    function hideProductForm() {
+
+        const form =
+            document.getElementById("productForm");
+
+        if (!form) return;
+
+        form.classList.add("hidden");
+    }
+
+
+
+    /*
+     Keep compatibility with any old code that may call
+     these names.
+    */
+
+    function openCategoryForm() {
+        showCategoryForm();
+    }
+
+
+    function closeCategoryForm() {
+        hideCategoryForm();
+    }
+
+
+    function openProductForm() {
+        showProductForm();
+    }
+
+
+    function closeProductForm() {
+        hideProductForm();
+    }
+
+</script>
+
+
+</body>
+</html>
