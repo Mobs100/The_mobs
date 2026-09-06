@@ -3,31 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="THE MOBS — One place. Different sides. Food, people and a personality of its own.">
-<title>THE MOBS — The Other Side</title>
+
+<meta
+  name="description"
+  content="THE MOBS — One place. Different sides. Food, people and a personality of its own."
+>
+
+<title>THE MOBS — The Other Side of the Story</title>
 
 <style>
+
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root{
-  --black:#080808;
-  --black-2:#101010;
-  --white:#f4efe6;
-  --yellow:#f2c94c;
-  --gray:#8d8d8d;
-  --line:rgba(244,239,230,.14);
+  --bg:#e5e5e1;
+  --black:#111111;
+  --white:#f8f6f0;
+  --yellow:#e5b82f;
+  --gray:#777777;
+  --gray-light:#cfcfca;
+  --food-dark:#292929;
 }
 
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+/* ---------- RESET ---------- */
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
 body{
-  background:var(--black);
-  color:var(--white);
+  background:var(--bg);
+  color:var(--black);
   font-family:Inter,Arial,sans-serif;
   overflow-x:hidden;
 }
-a{color:inherit;text-decoration:none}
-button{font:inherit}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+button{
+  font:inherit;
+}
+
+/* ---------- PAGE ---------- */
 
 .page{
   width:min(1400px,100%);
@@ -36,27 +62,62 @@ button{font:inherit}
 }
 
 /* ---------- HEADER ---------- */
+
 header{
   position:fixed;
-  top:0;left:0;right:0;
+  top:0;
+  left:0;
+  right:0;
   z-index:50;
-  background:linear-gradient(var(--black),rgba(8,8,8,.92),transparent);
+
+  background:linear-gradient(
+    var(--bg),
+    rgba(229,229,225,.92),
+    transparent
+  );
 }
+
 .nav{
   width:min(1400px,100%);
   margin:auto;
+
   padding:24px 34px;
+
   display:flex;
   align-items:center;
   justify-content:space-between;
 }
+
+/* ---------- FORMAL SMALL LOGO ---------- */
+
 .logo{
+  display:flex;
+  align-items:center;
+
   font-family:"Archivo Black",Impact,sans-serif;
   font-size:22px;
+  line-height:1;
+
   letter-spacing:-1.5px;
 }
-.logo span{color:var(--yellow);font-size:.58em;vertical-align:top;margin-left:1px}
-nav{display:flex;gap:34px}
+
+.logo sup{
+  font-family:Inter,Arial,sans-serif;
+  color:var(--yellow);
+
+  font-size:.42em;
+  vertical-align:top;
+
+  margin-left:2px;
+  position:relative;
+  top:-1px;
+}
+
+nav{
+  display:flex;
+  gap:34px;
+}
+
 nav a{
   font-size:12px;
   font-weight:800;
@@ -64,602 +125,1174 @@ nav a{
   text-transform:uppercase;
   transition:.2s;
 }
-nav a:hover{color:var(--yellow)}
-.menu-btn{display:none;background:none;border:0;color:var(--white);font-size:25px}
+
+nav a:hover{
+  color:var(--yellow);
+}
+
+.menu-btn{
+  display:none;
+
+  background:none;
+  border:0;
+
+  color:var(--black);
+
+  font-size:25px;
+}
 
 /* ---------- HERO ---------- */
+
 .hero{
   min-height:100vh;
-  display:grid;
-  place-items:center;
-  position:relative;
-  padding-top:70px;
-}
-.hero:before,.hero:after{
-  content:"";
-  position:absolute;
-  pointer-events:none;
-}
-.hero:before{
-  width:70vw;height:70vw;
-  max-width:900px;max-height:900px;
-  background:
-    linear-gradient(135deg,transparent 49%,rgba(255,255,255,.025) 50%,transparent 51%),
-    linear-gradient(45deg,transparent 49%,rgba(255,255,255,.018) 50%,transparent 51%);
-  opacity:.8;
-}
-.hero-card{
-  width:min(680px,90vw);
-  min-height:570px;
-  background:#111;
-  border:1px solid rgba(255,255,255,.025);
+
   display:flex;
-  flex-direction:column;
   align-items:center;
   justify-content:center;
-  text-align:center;
+
   position:relative;
+
+  padding:70px 20px 40px;
+
   overflow:hidden;
-  box-shadow:0 30px 100px rgba(0,0,0,.45);
 }
-.hero-card:before{
+
+.hero:before{
   content:"";
+
   position:absolute;
-  inset:-20%;
-  background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.025) 50%,transparent 65%);
-  transform:rotate(7deg);
+
+  width:75vw;
+  height:75vw;
+
+  max-width:1000px;
+  max-height:1000px;
+
+  border-radius:50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255,255,255,.55) 0%,
+      rgba(255,255,255,0) 68%
+    );
+
+  pointer-events:none;
 }
-.kicker{
-  font-size:10px;
-  font-weight:800;
-  letter-spacing:.42em;
-  color:#aaa;
-  margin-bottom:36px;
+
+.hero-content{
+  width:min(1100px,92vw);
+
+  display:flex;
+  flex-direction:column;
+
+  align-items:center;
+  justify-content:center;
+
+  text-align:center;
+
   position:relative;
 }
-.wordmark{
-  font-family:"Archivo Black",Impact,sans-serif;
-  font-size:clamp(90px,15vw,175px);
-  line-height:.72;
-  letter-spacing:-.075em;
-  position:relative;
-  color:var(--white);
+
+/* ---------- HERO LOGO ---------- */
+
+.hero-logo{
+  width:min(900px,90vw);
+  height:auto;
+  display:block;
+  overflow:visible;
 }
-.wordmark sup{
-  font-family:Inter,sans-serif;
-  font-size:.17em;
-  letter-spacing:-.02em;
-  vertical-align:top;
-  position:relative;
-  top:-.2em;
-}
+
+/* ---------- HERO TEXT ---------- */
+
 .hero-copy{
-  max-width:440px;
-  margin:48px 20px 30px;
-  color:#aaa;
-  font-size:14px;
-  line-height:1.8;
+  margin:24px 20px 32px;
+
+  color:#777;
+
+  font-size:11px;
+
+  line-height:1.5;
+
+  letter-spacing:.16em;
+
+  text-transform:uppercase;
+
   position:relative;
 }
-.hero-copy strong{color:var(--white)}
-.cta-row{display:flex;gap:10px;position:relative}
+
+/* ---------- BUTTON ---------- */
+
+.cta-row{
+  display:flex;
+
+  gap:10px;
+
+  position:relative;
+}
+
 .btn{
-  border:1px solid var(--white);
-  padding:14px 28px;
+  border:1px solid var(--black);
+
+  padding:14px 30px;
+
   text-transform:uppercase;
+
   letter-spacing:.12em;
+
   font-size:10px;
+
   font-weight:900;
+
   transition:.2s;
 }
-.btn:hover{background:var(--white);color:var(--black)}
-.btn.secondary{border-color:#393939;color:#aaa}
-.btn.secondary:hover{background:#222;color:var(--white);border-color:#555}
+
+.btn:hover{
+  background:var(--black);
+  color:var(--white);
+}
+
+/* ---------- SCROLL ---------- */
 
 .scroll{
   position:absolute;
+
   bottom:26px;
+
   left:50%;
+
   transform:translateX(-50%);
+
   font-size:9px;
+
   letter-spacing:.3em;
-  color:#666;
+
+  color:#888;
+
   text-transform:uppercase;
 }
 
 /* ---------- SECTIONS ---------- */
-section{padding:120px 0}
+
+section{
+  padding:120px 0;
+}
+
 .section-head{
   display:flex;
+
   align-items:flex-end;
+
   justify-content:space-between;
+
   gap:30px;
-  margin-bottom:48px;
+
+  margin-bottom:70px;
 }
-.eyebrow{
-  color:var(--yellow);
-  font-size:10px;
-  font-weight:900;
-  letter-spacing:.3em;
-  text-transform:uppercase;
-  margin-bottom:12px;
-}
+
 h2{
   font-family:"Archivo Black",Impact,sans-serif;
+
   font-size:clamp(42px,7vw,88px);
+
   line-height:.9;
+
   letter-spacing:-.06em;
 }
+
 .section-note{
   max-width:360px;
-  color:#858585;
+
+  color:#777;
+
   font-size:13px;
+
   line-height:1.8;
 }
 
 /* ---------- ABOUT ---------- */
+
 .about-grid{
   display:grid;
+
   grid-template-columns:1.1fr .9fr;
-  gap:70px;
+
+  gap:80px;
+
   align-items:center;
 }
+
 .about-big{
   font-family:"Archivo Black",Impact,sans-serif;
+
   font-size:clamp(30px,4vw,58px);
+
   line-height:1.02;
+
   letter-spacing:-.045em;
 }
-.about-big span{color:var(--yellow)}
+
+.about-big span{
+  color:var(--yellow);
+}
+
 .about-text{
-  color:#8c8c8c;
+  color:#777;
+
   font-size:14px;
+
   line-height:1.9;
+
   margin-top:28px;
+
   max-width:680px;
 }
+
+/* ---------- MOB CHARACTER ---------- */
+
 .side-box{
   min-height:430px;
-  background:#111;
-  border:1px solid var(--line);
+
+  background:transparent;
+
+  border:0;
+
   display:flex;
+
   flex-direction:column;
+
   align-items:center;
+
   justify-content:center;
+
   position:relative;
 }
+
 .side-box .m-letter{
   position:absolute;
+
   font-family:"Archivo Black",Impact,sans-serif;
+
   font-size:330px;
+
   line-height:1;
-  color:#181818;
+
+  color:#d9d9d4;
+
+  z-index:0;
 }
+
+/* MOB FACE */
+
 .mob{
-  width:170px;height:170px;
+  width:170px;
+
+  height:170px;
+
   border-radius:50%;
-  background:var(--white);
+
+  background:#ffffff;
+
+  border:3px solid var(--black);
+
   position:relative;
+
   z-index:2;
 }
-.mob:before,.mob:after{
+
+/* EYES */
+
+.mob:before,
+.mob:after{
   content:"";
+
   position:absolute;
+
   top:62px;
-  width:16px;height:16px;
+
+  width:16px;
+
+  height:16px;
+
   background:var(--black);
+
   border-radius:50%;
 }
-.mob:before{left:48px}.mob:after{right:48px}
+
+.mob:before{
+  left:48px;
+}
+
+.mob:after{
+  right:48px;
+}
+
+/* MOUTH */
+
 .mob-mouth{
   position:absolute;
+
   left:50%;
+
   top:94px;
-  width:48px;height:5px;
+
+  width:48px;
+
+  height:5px;
+
   transform:translateX(-50%);
+
   background:var(--black);
+
   border-radius:5px;
 }
+
+/* CHARACTER CAPTION */
+
 .mob-caption{
   z-index:3;
-  margin-top:30px;
-  font-size:10px;
-  letter-spacing:.3em;
-  font-weight:800;
-  text-transform:uppercase;
-  color:#777;
-}
 
-/* ---------- MENU ---------- */
-.menu-section{background:#0c0c0c}
-.menu-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  border-top:1px solid var(--line);
+  margin-top:30px;
+
+  font-size:10px;
+
+  letter-spacing:.3em;
+
+  font-weight:800;
+
+  text-transform:uppercase;
+
+  color:#666;
 }
-.menu-item{
-  min-height:260px;
-  padding:28px;
-  border-right:1px solid var(--line);
-  border-bottom:1px solid var(--line);
-  position:relative;
-  transition:.25s;
-}
-.menu-item:nth-child(3n){border-right:0}
-.menu-item:hover{background:#131313}
-.menu-no{font-size:10px;color:#555;font-weight:800}
-.menu-item h3{
-  font-family:"Archivo Black",Impact,sans-serif;
-  font-size:28px;
-  letter-spacing:-.04em;
-  margin-top:60px;
-}
-.menu-item p{font-size:12px;color:#777;line-height:1.6;margin-top:10px;max-width:280px}
-.price{position:absolute;right:28px;bottom:28px;color:var(--yellow);font-weight:800;font-size:13px}
 
 /* ---------- MOBS WORLD ---------- */
+
+.world-section{
+  background:var(--bg);
+}
+
 .world-grid{
   display:grid;
+
   grid-template-columns:repeat(2,1fr);
-  border-top:1px solid var(--line);
-  border-left:1px solid var(--line);
+
+  gap:0;
 }
+
 .world-item{
-  min-height:360px;
-  padding:30px;
-  border-right:1px solid var(--line);
-  border-bottom:1px solid var(--line);
+  min-height:350px;
+
+  padding:34px;
+
+  border:0;
+
+  border-bottom:1px solid #cfcfca;
+
   position:relative;
+
   display:flex;
+
   flex-direction:column;
+
   justify-content:space-between;
+
   transition:.25s;
+
   overflow:hidden;
 }
+
+.world-item:nth-child(odd){
+  border-right:1px solid #cfcfca;
+}
+
 .world-item:hover{
-  background:#151515;
-  transform:translateY(-3px);
+  background:rgba(255,255,255,.32);
 }
+
+/* ---------- FOOD CARD ---------- */
+
 .world-item.world-featured{
-  background:#111;
+  background:var(--food-dark);
+
+  color:var(--white);
 }
+
 .world-item.world-featured:hover{
-  background:#171717;
+  background:#333333;
 }
+
+/* ---------- CARD NUMBER ---------- */
+
 .world-no{
   font-size:10px;
-  color:#555;
+
+  color:#777;
+
   font-weight:800;
+
   letter-spacing:.08em;
 }
+
+.world-featured .world-no{
+  color:#999;
+}
+
+/* ---------- CARD CONTENT ---------- */
+
 .world-content{
   position:relative;
+
   z-index:2;
 }
-.world-kicker{
-  color:var(--yellow);
-  font-size:9px;
-  font-weight:900;
-  letter-spacing:.25em;
-  margin-bottom:12px;
-}
+
 .world-item h3{
   font-family:"Archivo Black",Impact,sans-serif;
+
   font-size:clamp(36px,5vw,64px);
+
   letter-spacing:-.055em;
+
   line-height:.9;
 }
+
 .world-item p{
   font-size:12px;
+
   color:#777;
+
   line-height:1.7;
+
   margin-top:16px;
+
   max-width:430px;
 }
+
+.world-featured p{
+  color:#c4c4c4;
+}
+
+/* ---------- CARD ARROW ---------- */
+
 .world-arrow{
   position:absolute;
+
   right:30px;
+
   bottom:25px;
+
   color:var(--yellow);
+
   font-size:28px;
+
   z-index:2;
 }
 
-/* ---------- OTHER SIDES ---------- */
-.sides-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:12px;
-}
-.side-card{
-  min-height:300px;
-  border:1px solid var(--line);
-  padding:25px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  transition:.25s;
-}
-.side-card:hover{background:#111;transform:translateY(-4px)}
-.side-card .num{font-size:10px;color:#555}
-.side-card h3{
-  font-family:"Archivo Black",Impact,sans-serif;
-  font-size:32px;
-  letter-spacing:-.05em;
-}
-.side-card p{font-size:11px;color:#777;line-height:1.6;margin-top:8px}
-.arrow{color:var(--yellow);font-size:20px}
-
 /* ---------- MANIFESTO ---------- */
+
 .manifesto{
-  border-top:1px solid var(--line);
-  border-bottom:1px solid var(--line);
+  border-top:1px solid #cfcfca;
+
+  border-bottom:1px solid #cfcfca;
+
   text-align:center;
-  padding:120px 20px;
+
+  padding:150px 20px;
 }
+
 .manifesto p{
   font-family:"Archivo Black",Impact,sans-serif;
+
   font-size:clamp(38px,7vw,90px);
+
   line-height:.94;
+
   letter-spacing:-.06em;
+
   max-width:1100px;
+
   margin:auto;
 }
-.manifesto span{color:var(--yellow)}
+
+.manifesto span{
+  color:var(--yellow);
+}
 
 /* ---------- FOOTER ---------- */
+
 footer{
   padding:38px 34px;
+
   width:min(1400px,100%);
+
   margin:auto;
+
   display:flex;
+
   justify-content:space-between;
+
   gap:30px;
-  color:#666;
+
+  color:#888;
+
   font-size:10px;
+
   letter-spacing:.12em;
+
   text-transform:uppercase;
 }
-footer strong{color:var(--white)}
+
+footer strong{
+  color:var(--black);
+}
 
 /* ---------- RESPONSIVE ---------- */
+
 @media(max-width:850px){
-  .page{padding:0 18px}
-  .nav{padding:20px 18px}
-  nav{display:none}
-  .menu-btn{display:block}
-  .hero-card{min-height:500px}
-  .about-grid{grid-template-columns:1fr;gap:35px}
-  .menu-grid{grid-template-columns:1fr 1fr}
-  .world-grid{grid-template-columns:1fr}
-  .menu-item:nth-child(3n){border-right:1px solid var(--line)}
-  .menu-item:nth-child(2n){border-right:0}
-  .sides-grid{grid-template-columns:1fr 1fr}
-  .section-head{display:block}
-  .section-note{margin-top:20px}
+
+  .page{
+    padding:0 18px;
+  }
+
+  .nav{
+    padding:20px 18px;
+  }
+
+  nav{
+    display:none;
+  }
+
+  .menu-btn{
+    display:block;
+  }
+
+  .logo{
+    font-size:19px;
+  }
+
+  .hero{
+    padding:60px 18px 40px;
+  }
+
+  .hero-content{
+    width:100%;
+  }
+
+  .hero-logo{
+    width:min(800px,94vw);
+  }
+
+  .about-grid{
+    grid-template-columns:1fr;
+    gap:35px;
+  }
+
+  .world-grid{
+    grid-template-columns:1fr;
+  }
+
+  .world-item:nth-child(odd){
+    border-right:0;
+  }
+
+  .section-head{
+    display:block;
+  }
+
+  .section-note{
+    margin-top:20px;
+  }
+
 }
+
 @media(max-width:520px){
-  .hero{padding-top:40px}
-  .hero-card{min-height:450px}
-  .kicker{font-size:8px;letter-spacing:.28em;margin-bottom:28px}
-  .hero-copy{font-size:12px;margin:38px 18px 25px}
-  .cta-row{flex-direction:column;width:70%}
-  .btn{text-align:center}
-  section{padding:80px 0}
-  .menu-grid,.sides-grid,.world-grid{grid-template-columns:1fr}
-  .menu-item,.menu-item:nth-child(2n),.menu-item:nth-child(3n),.world-item{border-right:0}
-  .side-box{min-height:350px}
-  footer{padding:30px 18px;flex-direction:column}
+
+  .hero{
+    padding:50px 12px 35px;
+  }
+
+  .hero-content{
+    width:100%;
+  }
+
+  .hero-logo{
+    width:94vw;
+  }
+
+  .hero-copy{
+    font-size:9px;
+
+    margin:20px 18px 28px;
+
+    letter-spacing:.12em;
+  }
+
+  .cta-row{
+    width:auto;
+  }
+
+  .btn{
+    text-align:center;
+
+    padding:14px 22px;
+  }
+
+  section{
+    padding:80px 0;
+  }
+
+  .world-item{
+    min-height:300px;
+  }
+
+  .side-box{
+    min-height:350px;
+  }
+
+  footer{
+    padding:30px 18px;
+
+    flex-direction:column;
+  }
+
 }
+
+/* ---------- MOBILE MENU ---------- */
+
+@media(max-width:850px){
+
+  nav.mobile-open{
+    display:flex;
+
+    position:absolute;
+
+    top:65px;
+
+    right:18px;
+
+    flex-direction:column;
+
+    gap:18px;
+
+    background:var(--bg);
+
+    padding:22px;
+
+    border:1px solid #d0d0cb;
+  }
+
+}
+
 </style>
 </head>
 
 <body>
 
+<!-- ================= HEADER ================= -->
+
 <header>
+
   <div class="nav">
-    <a href="#home" class="logo">THE MOBS<sup>®</sup></a>
+
+    <a href="#home" class="logo">
+      THE MOBS<sup>®</sup>
+    </a>
+
     <nav>
-      <a href="#home">Home</a>
-      <a href="#about">About</a>
-      <a href="#world">MOBS WORLD</a>
+
+      <a href="#home">
+        Home
+      </a>
+
+      <a href="#about">
+        About
+      </a>
+
+      <a href="#world">
+        MOBS WORLD
+      </a>
+
     </nav>
-    <button class="menu-btn" aria-label="Open menu">☰</button>
+
+    <button
+      class="menu-btn"
+      aria-label="Open menu"
+    >
+      ☰
+    </button>
+
   </div>
+
 </header>
 
 <main>
 
+<!-- ================= HERO ================= -->
+
 <section id="home" class="hero">
-  <div class="hero-card">
-    <div class="kicker">WELCOME TO THE OTHER SIDE</div>
-    <div class="wordmark">MOB<sup>S</sup></div>
+
+  <div class="hero-content">
+
+    <!-- LARGE MOBS LOGO -->
+
+    <svg
+      class="hero-logo"
+      viewBox="0 0 760 150"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-label="THE MOBS"
+    >
+
+      <!-- M -->
+
+      <path
+        d="M8 142V8H58L93 58L128 8H178V142H130V73L93 120L56 73V142H8Z"
+        fill="#111111"
+        stroke="#111111"
+        stroke-width="3"
+        stroke-linejoin="round"
+      />
+
+      <!-- THE -->
+
+      <text
+        x="18"
+        y="35"
+        fill="#f8f6f0"
+        font-family="Inter, Arial, sans-serif"
+        font-size="18"
+        font-weight="800"
+        letter-spacing="2"
+      >
+        THE
+      </text>
+
+      <!-- O -->
+
+      <circle
+        cx="250"
+        cy="75"
+        r="66"
+        fill="none"
+        stroke="#111111"
+        stroke-width="7"
+      />
+
+      <circle
+        cx="250"
+        cy="75"
+        r="54"
+        fill="none"
+        stroke="#111111"
+        stroke-width="2"
+      />
+
+      <!-- O EYES -->
+
+      <ellipse
+        cx="231"
+        cy="77"
+        rx="7"
+        ry="15"
+        fill="#111111"
+      />
+
+      <ellipse
+        cx="269"
+        cy="77"
+        rx="7"
+        ry="15"
+        fill="#111111"
+      />
+
+      <!-- B -->
+
+      <path
+        d="M350 8H428
+           C458 8 475 24 475 48
+           C475 64 467 74 454 79
+           C472 84 483 96 483 112
+           C483 132 467 142 435 142
+           H350Z
+
+           M389 38V65H420
+           C431 65 436 60 436 51
+           C436 42 430 38 420 38Z
+
+           M389 91V114H425
+           C436 114 442 110 442 102
+           C442 94 436 91 425 91Z"
+        fill="#111111"
+        fill-rule="evenodd"
+      />
+
+      <!-- S -->
+
+      <path
+        d="M605 18
+           C588 9 572 6 554 6
+           C529 6 513 20 513 40
+           C513 62 528 72 554 81
+           C570 87 576 91 576 100
+           C576 108 570 112 561 112
+           C547 112 535 106 522 96
+           L510 130
+           C525 140 544 146 564 146
+           C594 146 611 130 611 106
+           C611 84 597 73 572 64
+           C557 58 551 54 551 47
+           C551 40 556 37 564 37
+           C575 37 586 42 596 49
+           Z"
+        fill="#111111"
+      />
+
+    </svg>
+
+    <!-- ONLY HERO TAGLINE -->
+
     <p class="hero-copy">
-      One place. Different sides.<br>
-      <strong>Food, people and a personality of its own.</strong>
+      ONE PLACE. DIFFERENT SIDES.
     </p>
+
     <div class="cta-row">
-      <a class="btn" href="#world">ENTER MOBS WORLD</a>
-      <a class="btn secondary" href="#about">DISCOVER MOBS</a>
+
+      <a
+        class="btn"
+        href="#world"
+      >
+        ENTER MOBS WORLD
+      </a>
+
     </div>
+
   </div>
-  <div class="scroll">Scroll to enter</div>
+
+  <div class="scroll">
+    SCROLL TO ENTER
+  </div>
+
 </section>
 
+<!-- ================= ABOUT ================= -->
+
 <section id="about">
+
   <div class="page">
+
     <div class="section-head">
+
       <div>
-        <div class="eyebrow">01 — The idea</div>
-        <h2>NOT THE<br>MAIN<br>CHARACTER.</h2>
+
+        <h2>
+          NOT THE<br>
+          MAIN<br>
+          CHARACTER.
+        </h2>
+
       </div>
-      <p class="section-note">Still important to the story. THE MOBS is built around the idea that everyone has another side.</p>
+
+      <p class="section-note">
+
+        Still important to the story.
+        THE MOBS is built around
+        the idea that everyone has another side.
+
+      </p>
+
     </div>
 
     <div class="about-grid">
+
       <div>
+
         <div class="about-big">
-          THE MOBS is a place for the <span>other side</span> of you.
+
+          THE MOBS is a place for the
+          <span>other sides of you.</span>
+
         </div>
+
         <p class="about-text">
-          We start with food — but MOB is bigger than a restaurant.
-          It is a character, a culture and a world that can live across
-          food, people, objects, wear and whatever comes next.
+
+          MOB is a character, a culture and a world
+          that can live across food, people, objects,
+          wear and whatever comes next.
+
         </p>
+
       </div>
+
+      <!-- MOB CHARACTER -->
 
       <div class="side-box">
-        <div class="m-letter">M</div>
-        <div class="mob">
-          <div class="mob-mouth"></div>
+
+        <div class="m-letter">
+          M
         </div>
-        <div class="mob-caption">Meet the MOB</div>
+
+        <div class="mob">
+
+          <div class="mob-mouth"></div>
+
+        </div>
+
+        <div class="mob-caption">
+          MEET THE MOB
+        </div>
+
       </div>
+
     </div>
+
   </div>
+
 </section>
 
-<section id="world" class="menu-section">
+<!-- ================= MOBS WORLD ================= -->
+
+<section id="world" class="world-section">
+
   <div class="page">
+
     <div class="section-head">
+
       <div>
-        <div class="eyebrow">02 — MOBS WORLD</div>
-        <h2>ENTER<br>THE<br>WORLD.</h2>
+
+        <h2>
+          ENTER<br>
+          THE<br>
+          WORLD.
+        </h2>
+
       </div>
+
       <p class="section-note">
-        THE MOBS is the master brand. Choose a side and enter its own experience.
-        Each MOBS has its own interface, identity and future.
+
+        THE MOBS is the master brand.
+
+        Choose a side and enter its own experience.
+
+        Each MOB has its own interface, identity and future.
+
       </p>
+
     </div>
 
     <div class="world-grid">
-      <a class="world-item world-featured" href="./customer/index.html">
-        <div class="world-no">01 / FOOD</div>
-        <div class="world-content">
-          <div class="world-kicker">RESTAURANT</div>
-          <h3>MOBS FOOD</h3>
-          <p>Enter the restaurant. Browse the food, build your order and continue directly to the customer experience.</p>
+
+      <!-- FOOD -->
+
+      <a
+        class="world-item world-featured"
+        href="./customer/index.html"
+      >
+
+        <div class="world-no">
+          01 / FOOD
         </div>
-        <div class="world-arrow">↗</div>
+
+        <div class="world-content">
+
+          <h3>
+            MOBS FOOD
+          </h3>
+
+          <p>
+            Enter the restaurant.
+            Browse the food, build your order
+            and continue directly to the customer experience.
+          </p>
+
+        </div>
+
+        <div class="world-arrow">
+          ↗
+        </div>
+
       </a>
 
-      <a class="world-item" href="#future">
-        <div class="world-no">02 / WEAR</div>
-        <div class="world-content">
-          <div class="world-kicker">COMING LATER</div>
-          <h3>MOBS WEAR</h3>
-          <p>A dedicated experience for the things you wear. Its own interface will be developed separately.</p>
+      <!-- WEAR -->
+
+      <a
+        class="world-item"
+        href="./coming-soon.html"
+      >
+
+        <div class="world-no">
+          02 / WEAR
         </div>
-        <div class="world-arrow">↗</div>
+
+        <div class="world-content">
+
+          <h3>
+            MOBS WEAR
+          </h3>
+
+          <p>
+            The MOB moves from the table
+            to what you wear.
+          </p>
+
+        </div>
+
+        <div class="world-arrow">
+          ↗
+        </div>
+
       </a>
 
-      <a class="world-item" href="#future">
-        <div class="world-no">03 / OBJECTS</div>
-        <div class="world-content">
-          <div class="world-kicker">COMING LATER</div>
-          <h3>MOBS OBJECTS</h3>
-          <p>Objects and everyday things with a MOB point of view. A separate experience comes next.</p>
+      <!-- OBJECTS -->
+
+      <a
+        class="world-item"
+        href="./coming-soon.html"
+      >
+
+        <div class="world-no">
+          03 / OBJECTS
         </div>
-        <div class="world-arrow">↗</div>
+
+        <div class="world-content">
+
+          <h3>
+            MOBS OBJECTS
+          </h3>
+
+          <p>
+            Objects and everyday things
+            with a MOB point of view.
+          </p>
+
+        </div>
+
+        <div class="world-arrow">
+          ↗
+        </div>
+
       </a>
 
-      <a class="world-item" href="#future">
-        <div class="world-no">04 / STUDIO</div>
-        <div class="world-content">
-          <div class="world-kicker">COMING LATER</div>
-          <h3>MOBS STUDIO</h3>
-          <p>Characters, content and experiments from the other side.</p>
+      <!-- STUDIO -->
+
+      <a
+        class="world-item"
+        href="./coming-soon.html"
+      >
+
+        <div class="world-no">
+          04 / STUDIO
         </div>
-        <div class="world-arrow">↗</div>
+
+        <div class="world-content">
+
+          <h3>
+            MOBS STUDIO
+          </h3>
+
+          <p>
+            Characters, content and experiments
+            from the other side.
+          </p>
+
+        </div>
+
+        <div class="world-arrow">
+          ↗
+        </div>
+
       </a>
+
+      <!-- CAFE -->
+
+      <a
+        class="world-item"
+        href="./coming-soon.html"
+      >
+
+        <div class="world-no">
+          05 / CAFE
+        </div>
+
+        <div class="world-content">
+
+          <h3>
+            MOBS CAFE
+          </h3>
+
+          <p>
+            Coffee, conversations and another
+            side of the MOB experience.
+          </p>
+
+        </div>
+
+        <div class="world-arrow">
+          ↗
+        </div>
+
+      </a>
+
     </div>
+
   </div>
+
 </section>
 
-<section id="future">
-  <div class="page">
-    <div class="section-head">
-      <div>
-        <div class="eyebrow">03 — THE OTHER SIDES</div>
-        <h2>MORE<br>THAN<br>FOOD.</h2>
-      </div>
-      <p class="section-note">THE MOBS is the master brand. Food is where the story starts, not where it ends.</p>
-    </div>
-
-    <div class="sides-grid">
-      <article class="side-card">
-        <div class="num">01 / WEAR</div>
-        <div>
-          <h3>WEAR</h3>
-          <p>The MOB moves from the table to what you wear.</p>
-        </div>
-        <div class="arrow">↗</div>
-      </article>
-      <article class="side-card">
-        <div class="num">02 / OBJECTS</div>
-        <div>
-          <h3>OBJECTS</h3>
-          <p>Objects and everyday things with a MOB point of view.</p>
-        </div>
-        <div class="arrow">↗</div>
-      </article>
-      <article class="side-card">
-        <div class="num">03 / STUDIO</div>
-        <div>
-          <h3>STUDIO</h3>
-          <p>Content, characters and experiments from the other side.</p>
-        </div>
-        <div class="arrow">↗</div>
-      </article>
-      <article class="side-card">
-        <div class="num">04 / NEXT</div>
-        <div>
-          <h3>MORE</h3>
-          <p>New sides of THE MOBS will enter the world over time.</p>
-        </div>
-        <div class="arrow">+</div>
-      </article>
-    </div>
-  </div>
-</section>
+<!-- ================= MANIFESTO ================= -->
 
 <div class="manifesto">
+
   <p>
-    EVERYONE HAS<br>
-    <span>ANOTHER SIDE.</span><br>
+
+    EVERY STORY HAS<br>
+
+    <span>
+      MANY SIDES.
+    </span><br>
+
     THIS IS OURS.
+
   </p>
+
 </div>
 
 </main>
 
+<!-- ================= FOOTER ================= -->
+
 <footer>
-  <div>© 2026 <strong>THE MOBS</strong></div>
-  <div>Made for the MOBS</div>
+
+  <div>
+    © 2026 <strong>THE MOBS</strong>
+  </div>
+
+  <div>
+    MADE FOR THE MOBS
+  </div>
+
 </footer>
 
+<!-- ================= SCRIPT ================= -->
+
 <script>
+
 const menuBtn = document.querySelector('.menu-btn');
 const nav = document.querySelector('nav');
 
 menuBtn.addEventListener('click', () => {
-  const open = nav.style.display === 'flex';
-  nav.style.display = open ? '' : 'flex';
-  nav.style.position = 'absolute';
-  nav.style.top = '65px';
-  nav.style.right = '18px';
-  nav.style.flexDirection = 'column';
-  nav.style.gap = '18px';
-  nav.style.background = '#111';
-  nav.style.padding = '22px';
-  nav.style.border = '1px solid rgba(244,239,230,.14)';
+  nav.classList.toggle('mobile-open');
 });
 
 document.querySelectorAll('nav a').forEach(a => {
+
   a.addEventListener('click', () => {
-    if (window.innerWidth <= 850) nav.style.display = '';
+
+    if(window.innerWidth <= 850){
+      nav.classList.remove('mobile-open');
+    }
+
   });
+
 });
+
 </script>
 
 </body>

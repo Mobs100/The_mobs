@@ -3,141 +3,2700 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>MOBS FOOD — Customer</title>
+<title>THE MOBS — Customer</title>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Montserrat:wght@400;500;600;700;800&display=swap');
-:root{--cream:#f5f1e8;--black:#101010;--yellow:#f4b000;--gray:#686b6b;--soft:#efede7;--line:#ddd9cf;--danger:#df4141}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#d9d7d0;color:var(--black);font-family:Montserrat,Arial,sans-serif}button,input{font:inherit}button{cursor:pointer}
-.app{width:min(100%,520px);min-height:100vh;margin:auto;background:var(--cream);position:relative;overflow:hidden;box-shadow:0 0 45px #0002}.screen{min-height:100vh;padding:18px 18px 92px;display:none}.screen.active{display:block}.splash.active,.welcome.active{display:flex}.splash{align-items:flex-end;justify-content:center;background:var(--black);color:var(--cream);padding:0 18px 34px;position:relative}.splash:before{content:'MOBS';font:110px/1 Archivo Black;letter-spacing:-8px;position:absolute;top:29%;left:50%;transform:translateX(-50%);white-space:nowrap;color:var(--cream)}.face{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);width:185px;height:185px;border:4px solid var(--cream);border-radius:50%;background:var(--black)}.face:before,.face:after{content:'';position:absolute;top:48%;width:18px;height:33px;background:var(--cream);border-radius:50%}.face:before{left:34%}.face:after{right:34%}.face span{position:absolute;bottom:-98px;left:50%;transform:translateX(-50%);width:300px;text-align:center;font:22px/1.35 'Montserrat';font-weight:600;font-style:italic}.brand-lockup{font:12px/1 Montserrat;letter-spacing:3px;text-align:center;position:relative;z-index:2}.brand-lockup b{font:32px Archivo Black;letter-spacing:-2px;display:block;margin-bottom:10px}.welcome{flex-direction:column;align-items:center;justify-content:center;text-align:center;background:var(--cream)}.welcome .mark{width:235px;height:235px;background:var(--black);border-radius:50%;position:relative;margin-bottom:75px}.welcome .mark:before{content:'MOBS';font:72px Archivo Black;letter-spacing:-6px;color:var(--cream);position:absolute;left:50%;top:31%;transform:translateX(-50%)}.welcome .mark:after{content:'• •';font:bold 32px Arial;letter-spacing:23px;color:var(--black);background:var(--cream);width:92px;height:66px;border-radius:50%;position:absolute;left:50%;top:40%;transform:translateX(-50%);padding-left:20px}.script{font-size:18px;line-height:1.4;font-style:italic;max-width:230px}.underline{display:inline-block;border-bottom:4px solid var(--yellow);padding-bottom:2px}.btn{width:100%;border:0;border-radius:7px;padding:15px 18px;font-weight:800;margin-top:18px}.btn.yellow{background:var(--yellow)}.btn.black{background:var(--black);color:var(--cream)}.btn.outline{background:transparent;border:1px solid var(--black)}
-.top{display:flex;align-items:center;justify-content:space-between;padding:4px 0 17px}.back,.icon-btn{width:38px;height:38px;border:1px solid var(--line);background:#fff;border-radius:50%;display:grid;place-items:center}.logo{font:22px Archivo Black;letter-spacing:-2px}.logo small{font:7px Montserrat;letter-spacing:1px}.location-title{font:26px Archivo Black;line-height:1.02;letter-spacing:-1px;margin:30px 0 10px}.muted{color:var(--gray);font-size:12px;line-height:1.55}.search{height:45px;border:1px solid var(--line);background:#fff;border-radius:7px;padding:0 13px;display:flex;align-items:center;gap:8px;color:var(--gray);font-size:12px}.locations{margin-top:15px}.loc{background:#fff;border-bottom:1px solid var(--line);padding:17px 10px;display:flex;align-items:center;gap:12px}.loc:first-child{border-radius:8px 8px 0 0}.loc:last-child{border-radius:0 0 8px 8px}.pin{width:30px;height:30px;border-radius:50%;background:var(--yellow);display:grid;place-items:center}.loc b{display:block;font-size:13px}.loc span{font-size:11px;color:var(--gray)}.arrow{margin-left:auto}
-.header-title{font:27px Archivo Black;letter-spacing:-1px}.pill{font-size:10px;padding:7px 10px;border-radius:20px;background:#fff;border:1px solid var(--line)}.hero-card{margin:12px 0 20px;background:var(--black);color:var(--cream);border-radius:10px;min-height:178px;padding:18px;position:relative;overflow:hidden}.hero-card h2{font:29px Archivo Black;max-width:210px;line-height:.95;margin:8px 0}.hero-card .food-art{position:absolute;right:-8px;bottom:-25px;width:170px;height:130px}.burger{width:150px;height:44px;background:#6e3519;border-radius:50%;position:absolute;bottom:34px;right:0;box-shadow:0 -18px 0 #d9a06b,0 -33px 0 #e9dfb0,0 -48px 0 #5b2c16,0 -62px 0 #6b3219}.burger:after{content:'';position:absolute;left:13px;right:13px;bottom:-8px;height:13px;background:#4e2514;border-radius:50%}.popular-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.section-title{font:17px Archivo Black}.see{font-size:10px;font-weight:700}.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}.food-card{background:#fff;border-radius:9px;padding:9px;min-height:182px;position:relative}.food-thumb{height:105px;background:#eee9df;border-radius:7px;position:relative;overflow:hidden}.food-thumb .burger{transform:scale(.67);transform-origin:right bottom;bottom:26px}.food-name{font-weight:800;font-size:11px;margin-top:9px}.food-price{font-size:10px;color:var(--gray);margin-top:4px}.fav{position:absolute;right:13px;top:13px;width:25px;height:25px;border-radius:50%;border:0;background:#fff}.badge{position:absolute;bottom:8px;right:8px;background:var(--yellow);font-size:8px;font-weight:800;border-radius:10px;padding:4px 6px}.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,520px);height:72px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;z-index:20}.nav-item{border:0;background:none;color:var(--gray);font-size:9px;font-weight:700;display:flex;flex-direction:column;gap:5px;align-items:center}.nav-item.active{color:var(--black)}.nav-icon{font-size:20px;line-height:1}.count-dot{position:absolute;background:var(--yellow);font-size:8px;border-radius:10px;padding:2px 5px;margin:-25px 0 0 15px}
-.categories{display:flex;gap:7px;overflow:auto;margin:15px 0}.cat{border:1px solid var(--line);background:#fff;padding:9px 14px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}.cat.active{background:var(--black);color:var(--cream);border-color:var(--black)}.list{display:grid;gap:9px}.row-card{background:#fff;border-radius:9px;padding:10px;display:flex;gap:11px;align-items:center}.row-thumb{width:82px;height:75px;border-radius:7px;background:#eee9df;position:relative;overflow:hidden;flex:none}.row-thumb .burger{transform:scale(.45);transform-origin:right bottom;bottom:16px}.row-info{flex:1}.row-info b{font-size:12px}.row-info p{font-size:9px;color:var(--gray);margin:5px 0}.row-price{font-size:11px;font-weight:700}.row-arrow{font-size:18px}
-.product-art{height:280px;background:#eee9df;border-radius:12px;position:relative;display:grid;place-items:center;margin-bottom:18px}.product-art .burger{transform:scale(1.15);position:relative;right:auto;bottom:auto}.product h1{font:31px Archivo Black;letter-spacing:-1px;margin:0}.rating{font-size:11px;margin:7px 0}.product .description{font-size:11px;color:var(--gray);line-height:1.6}.extras{margin-top:22px}.extra{background:#fff;border-bottom:1px solid var(--line);padding:13px;border-radius:7px;margin-bottom:6px;display:flex;justify-content:space-between;font-size:11px}.product-actions{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,520px);background:var(--cream);padding:12px 18px;border-top:1px solid var(--line);z-index:21}.product-actions .btn{margin:0;display:flex;justify-content:space-between}
-.cart-item{background:#fff;border-radius:9px;padding:10px;display:flex;gap:10px;margin-bottom:9px}.cart-item .row-thumb{width:72px;height:68px}.qty{display:flex;align-items:center;gap:8px;margin-top:8px}.qty button{width:24px;height:24px;border-radius:50%;border:1px solid var(--line);background:#fff}.summary{background:#fff;border-radius:9px;padding:15px;margin-top:18px}.sumline{display:flex;justify-content:space-between;font-size:11px;margin:9px 0}.sumline.total{font-size:15px;font-weight:800;border-top:1px solid var(--line);padding-top:12px;margin-top:13px}.stepper{display:flex;justify-content:space-between;margin:4px 0 20px}.step{font-size:9px;color:var(--gray);text-align:center}.step.active{color:var(--black);font-weight:800}.step i{display:block;width:23px;height:23px;border-radius:50%;background:#ddd;margin:auto auto 5px;font-style:normal;line-height:23px}.step.active i{background:var(--yellow)}.field{margin:10px 0}.field label{font-size:9px;font-weight:800;display:block;margin-bottom:6px}.field input{width:100%;height:45px;border:1px solid var(--line);border-radius:7px;padding:0 12px;background:#fff}.choice{background:#fff;border:1px solid var(--line);padding:14px;border-radius:8px;margin:8px 0;font-size:11px}.choice.selected{border:2px solid var(--yellow)}.success{text-align:center;padding-top:110px}.success .success-face{width:130px;height:130px;border:4px solid var(--black);border-radius:50%;margin:auto;position:relative}.success .success-face:before,.success .success-face:after{content:'';position:absolute;top:44%;width:13px;height:25px;background:var(--black);border-radius:50%}.success .success-face:before{left:30%}.success .success-face:after{right:30%}.order-code{font:22px Archivo Black;margin:18px 0}.track{background:#fff;border-radius:10px;padding:14px}.map{height:235px;border-radius:9px;background:#e4e0d7;position:relative;overflow:hidden;margin-bottom:12px}.map:before,.map:after{content:'';position:absolute;background:#fff;opacity:.8}.map:before{width:130%;height:10px;top:50%;left:-15%;transform:rotate(27deg)}.map:after{height:130%;width:10px;left:50%;top:-15%;transform:rotate(42deg)}.route{position:absolute;left:25%;bottom:28%;width:52%;height:2px;background:var(--yellow);transform:rotate(-20deg);z-index:2}.dot{position:absolute;width:30px;height:30px;border-radius:50%;background:var(--black);color:#fff;display:grid;place-items:center;z-index:3}.dot.a{left:20%;bottom:22%}.dot.b{right:17%;top:20%}.driver{display:flex;align-items:center;gap:12px;background:#fff;padding:12px;border-radius:9px}.driver-avatar{width:52px;height:52px;border-radius:50%;background:var(--black);position:relative}.driver-avatar:after{content:'••';color:var(--cream);position:absolute;left:15px;top:12px;font-size:17px;letter-spacing:7px}.actions{display:flex;gap:7px;margin-left:auto}.mini{border:1px solid var(--line);background:#fff;border-radius:7px;padding:8px;font-size:9px}
+
+:root{
+  --cream:#f5f1e8;
+  --black:#101010;
+  --yellow:#f4b000;
+  --gray:#686b6b;
+  --soft:#efede7;
+  --line:#ddd9cf;
+  --danger:#df4141;
+}
+
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  min-height:100%;
+  background:#d9d7d0;
+  color:var(--black);
+  font-family:Montserrat,Arial,sans-serif
+}
+
+button,input{font:inherit}
+button{cursor:pointer}
+
+.app{
+  width:min(100%,520px);
+  min-height:100vh;
+  margin:auto;
+  background:var(--cream);
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 0 45px #0002
+}
+
+.screen{
+  min-height:100vh;
+  padding:18px 18px 92px;
+  display:none
+}
+
+.screen.active{display:block}
+.splash.active,.welcome.active{display:flex}
+
+/* =========================================================
+   THE MOBS LOGO
+   O = FACE
+   S is clearly separated from B
+========================================================= */
+
+.mobs-logo{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:1em;
+  font-family:'Archivo Black',sans-serif;
+  font-weight:900;
+  letter-spacing:-.08em;
+  white-space:nowrap;
+}
+
+.mobs-logo .word-m{
+  display:inline-block;
+}
+
+.mobs-logo .logo-o{
+  width:.88em;
+  height:.88em;
+  border:clamp(2px,.08em,5px) solid currentColor;
+  border-radius:50%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  margin:0 .015em;
+  flex:none;
+}
+
+.mobs-logo .logo-o::before,
+.mobs-logo .logo-o::after{
+  content:"";
+  position:absolute;
+  top:34%;
+  width:13%;
+  height:28%;
+  background:currentColor;
+  border-radius:50%;
+}
+
+.mobs-logo .logo-o::before{left:29%}
+.mobs-logo .logo-o::after{right:29%}
+
+.mobs-logo .word-b{
+  display:inline-block;
+  margin-left:.015em;
+}
+
+.mobs-logo .word-s{
+  display:inline-block;
+  margin-left:.055em;
+}
+
+.mobs-logo.small{
+  font-size:25px;
+}
+
+.mobs-logo.medium{
+  font-size:42px;
+}
+
+.mobs-logo.large{
+  font-size:92px;
+}
+
+/* =========================================================
+   SPLASH
+========================================================= */
+
+.splash{
+  align-items:flex-end;
+  justify-content:center;
+  background:var(--black);
+  color:var(--cream);
+  padding:0 18px 34px;
+  position:relative
+}
+
+.splash .background-word{
+  position:absolute;
+  top:28%;
+  left:50%;
+  transform:translateX(-50%);
+  font:110px/1 'Archivo Black';
+  letter-spacing:-9px;
+  color:var(--cream);
+  opacity:.95;
+  white-space:nowrap;
+}
+
+.splash .face{
+  position:absolute;
+  left:50%;
+  top:54%;
+  transform:translate(-50%,-50%);
+  width:185px;
+  height:185px;
+  border:4px solid var(--cream);
+  border-radius:50%;
+  background:var(--black);
+}
+
+.splash .face::before,
+.splash .face::after{
+  content:'';
+  position:absolute;
+  top:42%;
+  width:18px;
+  height:33px;
+  background:var(--cream);
+  border-radius:50%
+}
+
+.splash .face::before{left:34%}
+.splash .face::after{right:34%}
+
+.splash .face span{
+  position:absolute;
+  bottom:-98px;
+  left:50%;
+  transform:translateX(-50%);
+  width:300px;
+  text-align:center;
+  font-size:18px;
+  line-height:1.35;
+  font-weight:600;
+  font-style:italic;
+}
+
+.brand-lockup{
+  text-align:center;
+  position:relative;
+  z-index:2;
+  font-size:12px;
+  line-height:1;
+  letter-spacing:3px;
+}
+
+.brand-lockup .mobs-logo{
+  font-size:32px;
+  margin-bottom:10px;
+}
+
+/* =========================================================
+   WELCOME
+========================================================= */
+
+.welcome{
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  background:var(--cream)
+}
+
+.welcome .mark{
+  width:235px;
+  height:235px;
+  background:var(--black);
+  border-radius:50%;
+  position:relative;
+  margin-bottom:75px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.welcome .mark .inside-logo{
+  color:var(--cream);
+  font-size:60px;
+}
+
+.welcome .mark .inside-logo .logo-o{
+  border-color:var(--cream);
+}
+
+.welcome .mark .inside-logo .logo-o::before,
+.welcome .mark .inside-logo .logo-o::after{
+  background:var(--cream);
+}
+
+.script{
+  font-size:18px;
+  line-height:1.4;
+  font-style:italic;
+  max-width:230px
+}
+
+.underline{
+  display:inline-block;
+  border-bottom:4px solid var(--yellow);
+  padding-bottom:2px
+}
+
+.btn{
+  width:100%;
+  border:0;
+  border-radius:7px;
+  padding:15px 18px;
+  font-weight:800;
+  margin-top:18px
+}
+
+.btn.yellow{background:var(--yellow)}
+.btn.black{background:var(--black);color:var(--cream)}
+.btn.outline{background:transparent;border:1px solid var(--black)}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:4px 0 17px
+}
+
+.back,
+.icon-btn{
+  width:38px;
+  height:38px;
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:50%;
+  display:grid;
+  place-items:center
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  line-height:1;
+}
+
+.logo .mobs-logo{
+  font-size:26px;
+}
+
+.location-title{
+  font:26px 'Archivo Black';
+  line-height:1.02;
+  letter-spacing:-1px;
+  margin:30px 0 10px
+}
+
+.muted{
+  color:var(--gray);
+  font-size:12px;
+  line-height:1.55
+}
+
+.search{
+  height:45px;
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:7px;
+  padding:0 13px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:var(--gray);
+  font-size:12px
+}
+
+/* =========================================================
+   LOCATIONS
+========================================================= */
+
+.locations{margin-top:15px}
+
+.loc{
+  background:#fff;
+  border-bottom:1px solid var(--line);
+  padding:17px 10px;
+  display:flex;
+  align-items:center;
+  gap:12px
+}
+
+.loc:first-child{border-radius:8px 8px 0 0}
+.loc:last-child{border-radius:0 0 8px 8px}
+
+.pin{
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  background:var(--yellow);
+  display:grid;
+  place-items:center
+}
+
+.loc b{
+  display:block;
+  font-size:13px
+}
+
+.loc span{
+  font-size:11px;
+  color:var(--gray)
+}
+
+.arrow{margin-left:auto}
+
+/* =========================================================
+   HOME
+========================================================= */
+
+.header-title{
+  font:27px 'Archivo Black';
+  letter-spacing:-1px
+}
+
+.pill{
+  font-size:10px;
+  padding:7px 10px;
+  border-radius:20px;
+  background:#fff;
+  border:1px solid var(--line)
+}
+
+.hero-card{
+  margin:12px 0 20px;
+  background:var(--black);
+  color:var(--cream);
+  border-radius:10px;
+  min-height:178px;
+  padding:18px;
+  position:relative;
+  overflow:hidden
+}
+
+.hero-card h2{
+  font:29px 'Archivo Black';
+  max-width:210px;
+  line-height:.95;
+  margin:8px 0
+}
+
+.hero-card .food-art{
+  position:absolute;
+  right:-8px;
+  bottom:-25px;
+  width:170px;
+  height:130px
+}
+
+.burger{
+  width:150px;
+  height:44px;
+  background:#6e3519;
+  border-radius:50%;
+  position:absolute;
+  bottom:34px;
+  right:0;
+  box-shadow:
+    0 -18px 0 #d9a06b,
+    0 -33px 0 #e9dfb0,
+    0 -48px 0 #5b2c16,
+    0 -62px 0 #6b3219
+}
+
+.burger:after{
+  content:'';
+  position:absolute;
+  left:13px;
+  right:13px;
+  bottom:-8px;
+  height:13px;
+  background:#4e2514;
+  border-radius:50%
+}
+
+.popular-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px
+}
+
+.section-title{
+  font:17px 'Archivo Black'
+}
+
+.see{
+  font-size:10px;
+  font-weight:700
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px
+}
+
+.food-card{
+  background:#fff;
+  border-radius:9px;
+  padding:9px;
+  min-height:182px;
+  position:relative
+}
+
+.food-thumb{
+  height:105px;
+  background:#eee9df;
+  border-radius:7px;
+  position:relative;
+  overflow:hidden
+}
+
+.food-thumb .burger{
+  transform:scale(.67);
+  transform-origin:right bottom;
+  bottom:26px
+}
+
+.food-name{
+  font-weight:800;
+  font-size:11px;
+  margin-top:9px
+}
+
+.food-price{
+  font-size:10px;
+  color:var(--gray);
+  margin-top:4px
+}
+
+.fav{
+  position:absolute;
+  right:13px;
+  top:13px;
+  width:25px;
+  height:25px;
+  border-radius:50%;
+  border:0;
+  background:#fff
+}
+
+.badge{
+  position:absolute;
+  bottom:8px;
+  right:8px;
+  background:var(--yellow);
+  font-size:8px;
+  font-weight:800;
+  border-radius:10px;
+  padding:4px 6px
+}
+
+/* =========================================================
+   BOTTOM NAV
+========================================================= */
+
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(100%,520px);
+  height:72px;
+  background:#fff;
+  border-top:1px solid var(--line);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  z-index:20
+}
+
+.nav-item{
+  border:0;
+  background:none;
+  color:var(--gray);
+  font-size:9px;
+  font-weight:700;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  align-items:center
+}
+
+.nav-item.active{color:var(--black)}
+
+.nav-icon{
+  font-size:20px;
+  line-height:1
+}
+
+.count-dot{
+  position:absolute;
+  background:var(--yellow);
+  font-size:8px;
+  border-radius:10px;
+  padding:2px 5px;
+  margin:-25px 0 0 15px
+}
+
+/* =========================================================
+   MENU
+========================================================= */
+
+.categories{
+  display:flex;
+  gap:7px;
+  overflow:auto;
+  margin:15px 0
+}
+
+.cat{
+  border:1px solid var(--line);
+  background:#fff;
+  padding:9px 14px;
+  border-radius:20px;
+  font-size:10px;
+  font-weight:700;
+  white-space:nowrap
+}
+
+.cat.active{
+  background:var(--black);
+  color:var(--cream);
+  border-color:var(--black)
+}
+
+.list{
+  display:grid;
+  gap:9px
+}
+
+.row-card{
+  background:#fff;
+  border-radius:9px;
+  padding:10px;
+  display:flex;
+  gap:11px;
+  align-items:center
+}
+
+.row-thumb{
+  width:82px;
+  height:75px;
+  border-radius:7px;
+  background:#eee9df;
+  position:relative;
+  overflow:hidden;
+  flex:none
+}
+
+.row-thumb .burger{
+  transform:scale(.45);
+  transform-origin:right bottom;
+  bottom:16px
+}
+
+.row-info{flex:1}
+
+.row-info b{font-size:12px}
+
+.row-info p{
+  font-size:9px;
+  color:var(--gray);
+  margin:5px 0
+}
+
+.row-price{
+  font-size:11px;
+  font-weight:700
+}
+
+.row-arrow{font-size:18px}
+
+/* =========================================================
+   PRODUCT
+========================================================= */
+
+.product-art{
+  height:280px;
+  background:#eee9df;
+  border-radius:12px;
+  position:relative;
+  display:grid;
+  place-items:center;
+  margin-bottom:18px
+}
+
+.product-art .burger{
+  transform:scale(1.15);
+  position:relative;
+  right:auto;
+  bottom:auto
+}
+
+.product h1{
+  font:31px 'Archivo Black';
+  letter-spacing:-1px;
+  margin:0
+}
+
+.rating{
+  font-size:11px;
+  margin:7px 0
+}
+
+.product .description{
+  font-size:11px;
+  color:var(--gray);
+  line-height:1.6
+}
+
+.extras{margin-top:22px}
+
+.extra{
+  background:#fff;
+  border-bottom:1px solid var(--line);
+  padding:13px;
+  border-radius:7px;
+  margin-bottom:6px;
+  display:flex;
+  justify-content:space-between;
+  font-size:11px
+}
+
+.product-actions{
+  position:fixed;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(100%,520px);
+  background:var(--cream);
+  padding:12px 18px;
+  border-top:1px solid var(--line);
+  z-index:21
+}
+
+.product-actions .btn{
+  margin:0;
+  display:flex;
+  justify-content:space-between
+}
+
+/* =========================================================
+   CART / CHECKOUT
+========================================================= */
+
+.cart-item{
+  background:#fff;
+  border-radius:9px;
+  padding:10px;
+  display:flex;
+  gap:10px;
+  margin-bottom:9px
+}
+
+.cart-item .row-thumb{
+  width:72px;
+  height:68px
+}
+
+.qty{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:8px
+}
+
+.qty button{
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  border:1px solid var(--line);
+  background:#fff
+}
+
+.summary{
+  background:#fff;
+  border-radius:9px;
+  padding:15px;
+  margin-top:18px
+}
+
+.sumline{
+  display:flex;
+  justify-content:space-between;
+  font-size:11px;
+  margin:9px 0
+}
+
+.sumline.total{
+  font-size:15px;
+  font-weight:800;
+  border-top:1px solid var(--line);
+  padding-top:12px;
+  margin-top:13px
+}
+
+.stepper{
+  display:flex;
+  justify-content:space-between;
+  margin:4px 0 20px
+}
+
+.step{
+  font-size:9px;
+  color:var(--gray);
+  text-align:center
+}
+
+.step.active{
+  color:var(--black);
+  font-weight:800
+}
+
+.step i{
+  display:block;
+  width:23px;
+  height:23px;
+  border-radius:50%;
+  background:#ddd;
+  margin:auto auto 5px;
+  font-style:normal;
+  line-height:23px
+}
+
+.step.active i{background:var(--yellow)}
+
+.field{margin:10px 0}
+
+.field label{
+  font-size:9px;
+  font-weight:800;
+  display:block;
+  margin-bottom:6px
+}
+
+.field input{
+  width:100%;
+  height:45px;
+  border:1px solid var(--line);
+  border-radius:7px;
+  padding:0 12px;
+  background:#fff
+}
+
+.choice{
+  background:#fff;
+  border:1px solid var(--line);
+  padding:14px;
+  border-radius:8px;
+  margin:8px 0;
+  font-size:11px
+}
+
+.choice.selected{
+  border:2px solid var(--yellow)
+}
+
+/* =========================================================
+   SUCCESS / TRACKING
+========================================================= */
+
+.success{
+  text-align:center;
+  padding-top:110px
+}
+
+.success .success-face{
+  width:130px;
+  height:130px;
+  border:4px solid var(--black);
+  border-radius:50%;
+  margin:auto;
+  position:relative
+}
+
+.success .success-face:before,
+.success .success-face:after{
+  content:'';
+  position:absolute;
+  top:44%;
+  width:13px;
+  height:25px;
+  background:var(--black);
+  border-radius:50%
+}
+
+.success .success-face:before{left:30%}
+.success .success-face:after{right:30%}
+
+.order-code{
+  font:22px 'Archivo Black';
+  margin:18px 0
+}
+
+.track{
+  background:#fff;
+  border-radius:10px;
+  padding:14px
+}
+
+.map{
+  height:235px;
+  border-radius:9px;
+  background:#e4e0d7;
+  position:relative;
+  overflow:hidden;
+  margin-bottom:12px
+}
+
+.map:before,
+.map:after{
+  content:'';
+  position:absolute;
+  background:#fff;
+  opacity:.8
+}
+
+.map:before{
+  width:130%;
+  height:10px;
+  top:50%;
+  left:-15%;
+  transform:rotate(27deg)
+}
+
+.map:after{
+  height:130%;
+  width:10px;
+  left:50%;
+  top:-15%;
+  transform:rotate(42deg)
+}
+
+.route{
+  position:absolute;
+  left:25%;
+  bottom:28%;
+  width:52%;
+  height:2px;
+  background:var(--yellow);
+  transform:rotate(-20deg);
+  z-index:2
+}
+
+.dot{
+  position:absolute;
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  background:var(--black);
+  color:#fff;
+  display:grid;
+  place-items:center;
+  z-index:3
+}
+
+.dot.a{
+  left:20%;
+  bottom:22%
+}
+
+.dot.b{
+  right:17%;
+  top:20%
+}
+
+.driver{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:#fff;
+  padding:12px;
+  border-radius:9px
+}
+
+.driver-avatar{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  background:var(--black);
+  position:relative
+}
+
+.driver-avatar:after{
+  content:'••';
+  color:var(--cream);
+  position:absolute;
+  left:15px;
+  top:12px;
+  font-size:17px;
+  letter-spacing:7px
+}
+
+.actions{
+  display:flex;
+  gap:7px;
+  margin-left:auto
+}
+
+.mini{
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:7px;
+  padding:8px;
+  font-size:9px
+}
+
+/* =========================================================
+   DESKTOP
+========================================================= */
+
 @media(min-width:800px){
-  html,body{background:var(--cream)}
-  .app{width:100%;max-width:none;min-height:100vh;margin:0;background:var(--cream);box-shadow:none;border-radius:0;overflow:visible}
-  .screen{width:100%;max-width:1280px;margin:0 auto;min-height:100vh;padding:34px 56px 70px;}
-  .screen:not(.splash):not(.welcome){display:none}
-  .screen.active:not(.splash):not(.welcome){display:block}
-  .top{padding:0 0 28px;border-bottom:1px solid var(--line);margin-bottom:28px}
-  .logo{font-size:30px}.header-title{font-size:38px}.back,.icon-btn{width:44px;height:44px}
-  .search{height:52px;font-size:13px;border-radius:10px}
-  .bottom-nav{position:fixed;left:0;bottom:0;transform:none;width:100%;height:66px;border-top:1px solid var(--line);border-radius:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:0 22%;}
-  .nav-item{font-size:10px}.nav-icon{font-size:22px}
-  .product-actions{position:fixed;left:auto;right:0;bottom:66px;transform:none;width:420px;background:transparent;border:0;padding:14px 56px;z-index:21}
-  .btn{max-width:100%;padding:16px 22px;border-radius:8px}
 
-  #home.active{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(360px,.75fr);grid-template-rows:auto auto auto 1fr;column-gap:34px;align-content:start}
-  #home .top{grid-column:1/-1}
-  #home>.search{grid-column:1/-1;margin-bottom:8px}
-  #home .hero-card{grid-column:1;grid-row:3/5;min-height:430px;border-radius:16px;padding:34px;display:flex;flex-direction:column;justify-content:flex-start}
-  #home .hero-card h2{font-size:58px;max-width:430px;margin:18px 0;line-height:.9}
-  #home .hero-card .btn{font-size:12px;width:max-content!important;padding:14px 20px}
-  #home .hero-card .food-art{right:0;bottom:20px;width:52%;height:55%}
-  #home .hero-card .burger{transform:scale(1.45);transform-origin:right bottom}
-  #home .popular-head{grid-column:2;grid-row:3;margin:0 0 12px}
-  #home .cards{grid-column:2;grid-row:4;grid-template-columns:1fr 1fr;gap:14px}
-  #home .food-card{min-height:260px;padding:12px;border-radius:12px}
+  html,body{
+    background:var(--cream)
+  }
+
+  .app{
+    width:100%;
+    max-width:none;
+    min-height:100vh;
+    margin:0;
+    background:var(--cream);
+    box-shadow:none;
+    border-radius:0;
+    overflow:visible
+  }
+
+  .screen{
+    width:100%;
+    max-width:1280px;
+    margin:0 auto;
+    min-height:100vh;
+    padding:34px 56px 70px
+  }
+
+  .screen:not(.splash):not(.welcome){
+    display:none
+  }
+
+  .screen.active:not(.splash):not(.welcome){
+    display:block
+  }
+
+  .top{
+    padding:0 0 28px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:28px
+  }
+
+  .logo .mobs-logo{
+    font-size:30px
+  }
+
+  .header-title{font-size:38px}
+
+  .back,
+  .icon-btn{
+    width:44px;
+    height:44px
+  }
+
+  .search{
+    height:52px;
+    font-size:13px;
+    border-radius:10px
+  }
+
+  .bottom-nav{
+    position:fixed;
+    left:0;
+    bottom:0;
+    transform:none;
+    width:100%;
+    height:66px;
+    border-top:1px solid var(--line);
+    border-radius:0;
+    background:rgba(255,255,255,.96);
+    backdrop-filter:blur(12px);
+    padding:0 22%
+  }
+
+  .nav-item{font-size:10px}
+  .nav-icon{font-size:22px}
+
+  .product-actions{
+    position:fixed;
+    left:auto;
+    right:0;
+    bottom:66px;
+    transform:none;
+    width:420px;
+    background:transparent;
+    border:0;
+    padding:14px 56px;
+    z-index:21
+  }
+
+  .btn{
+    max-width:100%;
+    padding:16px 22px;
+    border-radius:8px
+  }
+
+  /* HOME */
+
+  #home.active{
+    display:grid;
+    grid-template-columns:minmax(0,1.45fr) minmax(360px,.75fr);
+    grid-template-rows:auto auto auto 1fr;
+    column-gap:34px;
+    align-content:start
+  }
+
+  #home .top{
+    grid-column:1/-1
+  }
+
+  #home>.search{
+    grid-column:1/-1;
+    margin-bottom:8px
+  }
+
+  #home .hero-card{
+    grid-column:1;
+    grid-row:3/5;
+    min-height:430px;
+    border-radius:16px;
+    padding:34px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start
+  }
+
+  #home .hero-card h2{
+    font-size:58px;
+    max-width:430px;
+    margin:18px 0;
+    line-height:.9
+  }
+
+  #home .hero-card .btn{
+    font-size:12px;
+    width:max-content!important;
+    padding:14px 20px
+  }
+
+  #home .hero-card .food-art{
+    right:0;
+    bottom:20px;
+    width:52%;
+    height:55%
+  }
+
+  #home .hero-card .burger{
+    transform:scale(1.45);
+    transform-origin:right bottom
+  }
+
+  #home .popular-head{
+    grid-column:2;
+    grid-row:3;
+    margin:0 0 12px
+  }
+
+  #home .cards{
+    grid-column:2;
+    grid-row:4;
+    grid-template-columns:1fr 1fr;
+    gap:14px
+  }
+
+  #home .food-card{
+    min-height:260px;
+    padding:12px;
+    border-radius:12px
+  }
+
   #home .food-thumb{height:165px}
-  #home .food-thumb .burger{transform:scale(.9);bottom:32px}
-  #home .food-name{font-size:13px}.food-price{font-size:11px}
 
-  #location.active{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-content:center}
-  #location .top{grid-column:1/-1}
-  #location .location-title{font-size:64px;margin:0;align-self:center}
-  #location .search,#location .locations{grid-column:2}
+  #home .food-thumb .burger{
+    transform:scale(.9);
+    bottom:32px
+  }
+
+  #home .food-name{font-size:13px}
+  #home .food-price{font-size:11px}
+
+  /* LOCATION */
+
+  #location.active{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:36px;
+    align-content:center
+  }
+
+  #location .top{
+    grid-column:1/-1
+  }
+
+  #location .location-title{
+    font-size:64px;
+    margin:0;
+    align-self:center
+  }
+
+  #location .search,
+  #location .locations{
+    grid-column:2
+  }
+
   #location .search{margin-bottom:10px}
   #location .locations{margin-top:0}
+
   .loc{padding:20px 14px}
 
-  #menu.active{display:grid;grid-template-columns:1fr 1fr;gap:26px 20px;align-content:start}
-  #menu .top,#menu .categories{grid-column:1/-1}
-  #menu .categories{overflow:visible;flex-wrap:wrap}
-  #menu .list{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-  .row-card{padding:14px;border-radius:12px;min-height:120px}
-  .row-thumb{width:125px;height:100px}
-  .row-thumb .burger{transform:scale(.62)}
-  .row-info b{font-size:14px}.row-info p{font-size:10px}.row-price{font-size:12px}
+  /* MENU */
 
-  #product.active{display:grid;grid-template-columns:1.15fr .85fr;gap:34px;align-content:start}
-  #product .top{grid-column:1/-1}
-  #product .product-art{grid-column:1;grid-row:2/6;height:610px;border-radius:16px;margin:0}
-  #product .product-art .burger{transform:scale(2)}
-  #product h1,#product .rating,#product .description,#product .extras{grid-column:2}
-  #product h1{font-size:48px;margin-top:30px}.product .description{font-size:13px;max-width:540px}
+  #menu.active{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:26px 20px;
+    align-content:start
+  }
+
+  #menu .top,
+  #menu .categories{
+    grid-column:1/-1
+  }
+
+  #menu .categories{
+    overflow:visible;
+    flex-wrap:wrap
+  }
+
+  #menu .list{
+    grid-column:1/-1;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px
+  }
+
+  .row-card{
+    padding:14px;
+    border-radius:12px;
+    min-height:120px
+  }
+
+  .row-thumb{
+    width:125px;
+    height:100px
+  }
+
+  .row-thumb .burger{
+    transform:scale(.62)
+  }
+
+  .row-info b{font-size:14px}
+  .row-info p{font-size:10px}
+  .row-price{font-size:12px}
+
+  /* PRODUCT */
+
+  #product.active{
+    display:grid;
+    grid-template-columns:1.15fr .85fr;
+    gap:34px;
+    align-content:start
+  }
+
+  #product .top{
+    grid-column:1/-1
+  }
+
+  #product .product-art{
+    grid-column:1;
+    grid-row:2/6;
+    height:610px;
+    border-radius:16px;
+    margin:0
+  }
+
+  #product .product-art .burger{
+    transform:scale(2)
+  }
+
+  #product h1,
+  #product .rating,
+  #product .description,
+  #product .extras{
+    grid-column:2
+  }
+
+  #product h1{
+    font-size:48px;
+    margin-top:30px
+  }
+
+  .product .description{
+    font-size:13px;
+    max-width:540px
+  }
+
   #product .extras{margin-top:10px}
 
-  #cart.active,#checkout.active,#payment.active,#review.active{max-width:1100px}
-  #cart.active{display:grid;grid-template-columns:1.3fr .7fr;gap:22px;align-content:start}
-  #cart .top,#cart>#cartItems{grid-column:1/-1}
-  #cart .summary{grid-column:2;grid-row:3}
-  #cart>.btn{grid-column:2;grid-row:4}
-  #cartItems{display:grid;grid-template-columns:1fr;gap:10px}
+  /* CART */
+
+  #cart.active,
+  #checkout.active,
+  #payment.active,
+  #review.active{
+    max-width:1100px
+  }
+
+  #cart.active{
+    display:grid;
+    grid-template-columns:1.3fr .7fr;
+    gap:22px;
+    align-content:start
+  }
+
+  #cart .top,
+  #cart>#cartItems{
+    grid-column:1/-1
+  }
+
+  #cart .summary{
+    grid-column:2;
+    grid-row:3
+  }
+
+  #cart>.btn{
+    grid-column:2;
+    grid-row:4
+  }
+
+  #cartItems{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px
+  }
+
   .cart-item{padding:14px}
 
-  #checkout.active,#payment.active,#review.active{display:block}
-  #checkout .stepper,#payment .stepper,#review .stepper{max-width:720px;margin:0 auto 30px}
-  #checkout .choice,#payment .choice,#review .summary{max-width:720px;margin-left:auto;margin-right:auto}
-  #checkout>.btn,#payment>.btn,#review>.btn{display:block;max-width:720px;margin-left:auto;margin-right:auto}
+  #checkout.active,
+  #payment.active,
+  #review.active{
+    display:block
+  }
 
-  #success.active{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-  #success .success-face{width:180px;height:180px}
-  #success .choice,#success .btn{width:420px}
+  #checkout .stepper,
+  #payment .stepper,
+  #review .stepper{
+    max-width:720px;
+    margin:0 auto 30px
+  }
 
-  #tracking.active{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-content:start}
-  #tracking .top{grid-column:1/-1}
-  #tracking .track{grid-column:1/-1;display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:start}
-  #tracking .track>.muted,#tracking .track> b{grid-column:1/-1}
-  #tracking .map{height:500px;grid-column:1;grid-row:3/6}
-  #tracking .choice,#tracking .driver{grid-column:2}
+  #checkout .choice,
+  #payment .choice,
+  #review .summary{
+    max-width:720px;
+    margin-left:auto;
+    margin-right:auto
+  }
 
-  #orders.active,#profile.active{max-width:1000px}
+  #checkout>.btn,
+  #payment>.btn,
+  #review>.btn{
+    display:block;
+    max-width:720px;
+    margin-left:auto;
+    margin-right:auto
+  }
+
+  /* SUCCESS */
+
+  #success.active{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center
+  }
+
+  #success .success-face{
+    width:180px;
+    height:180px
+  }
+
+  #success .choice,
+  #success .btn{
+    width:420px
+  }
+
+  /* TRACKING */
+
+  #tracking.active{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+    align-content:start
+  }
+
+  #tracking .top{
+    grid-column:1/-1
+  }
+
+  #tracking .track{
+    grid-column:1/-1;
+    display:grid;
+    grid-template-columns:1.2fr .8fr;
+    gap:18px;
+    align-items:start
+  }
+
+  #tracking .track>.muted,
+  #tracking .track> b{
+    grid-column:1/-1
+  }
+
+  #tracking .map{
+    height:500px;
+    grid-column:1;
+    grid-row:3/6
+  }
+
+  #tracking .choice,
+  #tracking .driver{
+    grid-column:2
+  }
+
+  #orders.active,
+  #profile.active{
+    max-width:1000px
+  }
+
   #orders .row-card{margin-bottom:12px}
-  #profile .choice{max-width:760px;margin-left:auto;margin-right:auto}
 
-  .splash.active,.welcome.active{width:100%;max-width:none;margin:0}
-  .splash:before{font-size:220px;letter-spacing:-16px}
-  .face{width:300px;height:300px;border-width:6px}
-  .face:before,.face:after{width:28px;height:52px}.face span{font-size:28px;width:380px;bottom:-125px}
-  .brand-lockup{font-size:16px;letter-spacing:5px}.brand-lockup b{font-size:48px}
-  .welcome .mark{width:330px;height:330px;margin-bottom:95px}.welcome .mark:before{font-size:100px}.welcome .mark:after{font-size:42px;width:130px;height:88px}
-  .welcome .script{font-size:22px;max-width:340px}.welcome .btn{width:420px}
+  #profile .choice{
+    max-width:760px;
+    margin-left:auto;
+    margin-right:auto
+  }
+
+  /* SPLASH / WELCOME */
+
+  .splash.active,
+  .welcome.active{
+    width:100%;
+    max-width:none;
+    margin:0
+  }
+
+  .splash .background-word{
+    font-size:220px;
+    letter-spacing:-16px
+  }
+
+  .splash .face{
+    width:300px;
+    height:300px;
+    border-width:6px
+  }
+
+  .splash .face::before,
+  .splash .face::after{
+    width:28px;
+    height:52px
+  }
+
+  .splash .face span{
+    font-size:28px;
+    width:380px;
+    bottom:-125px
+  }
+
+  .brand-lockup{
+    font-size:16px;
+    letter-spacing:5px
+  }
+
+  .brand-lockup .mobs-logo{
+    font-size:48px
+  }
+
+  .welcome .mark{
+    width:330px;
+    height:330px;
+    margin-bottom:95px
+  }
+
+  .welcome .mark .inside-logo{
+    font-size:88px
+  }
+
+  .welcome .script{
+    font-size:22px;
+    max-width:340px
+  }
+
+  .welcome .btn{width:420px}
 }
+
 @media(min-width:1400px){
-  .screen{padding-left:80px;padding-right:80px}
+
+  .screen{
+    padding-left:80px;
+    padding-right:80px
+  }
+
   #home .hero-card{min-height:500px}
+
   #home .hero-card h2{font-size:72px}
 }
 </style>
 </head>
+
 <body>
+
 <div class="app">
-<section id="splash" class="screen splash active"><div class="face"><span>Good Food<br>for Every Background.</span></div><div class="brand-lockup"><b>THE MOBS®</b>RESTAURANT</div></section>
-<section id="welcome" class="screen welcome"><div class="mark"></div><div class="script">Good Food<br><span class="underline">for Every Background.</span></div><button class="btn yellow" onclick="go('location')">LET'S GET STARTED →</button><button class="btn outline" onclick="go('location')">I ALREADY HAVE AN ACCOUNT</button></section>
-<section id="location" class="screen"><div class="top"><button class="back" onclick="go('welcome')">←</button><div class="logo">MOBS</div><span></span></div><h1 class="location-title">Where are you<br>ordering from?</h1><div class="search">⌕ <span>Search for area or city.</span></div><div class="locations"><div class="loc" onclick="go('home')"><div class="pin">⌖</div><div><b>Use my current location</b><span>Fastest option</span></div><span class="arrow">›</span></div><div class="loc" onclick="go('home')"><div class="pin">●</div><div><b>Dammam</b><span>20 – 30 min</span></div><span class="arrow">›</span></div><div class="loc" onclick="go('home')"><div class="pin">●</div><div><b>Al Khobar</b><span>25 – 35 min</span></div><span class="arrow">›</span></div><div class="loc" onclick="go('home')"><div class="pin">●</div><div><b>Al Khobar Corniche</b><span>25 – 35 min</span></div><span class="arrow">›</span></div><div class="loc" onclick="go('home')"><div class="pin">●</div><div><b>Al Faisaliah</b><span>30 – 40 min</span></div><span class="arrow">›</span></div></div></section>
-<section id="home" class="screen"><div class="top"><div><div class="muted">⌖ Dammam⌄</div><b style="font-size:10px">Delivering in 20 – 30 min</b></div><button class="icon-btn" onclick="go('cart')">🛒<span id="navCount" class="count-dot">0</span></button></div><div class="search">⌕ <span>Search for burgers, fries, drinks...</span></div><div class="hero-card"><div class="kicker" style="color:var(--yellow);font-size:9px;letter-spacing:2px">MOBS FOOD</div><h2>CLASSIC.<br>NEVER FAILS.</h2><button class="btn yellow" style="width:auto;padding:11px 15px;font-size:10px" onclick="openProduct('Classic Burger')">ORDER NOW →</button><div class="food-art"><div class="burger"></div></div></div><div class="popular-head"><div class="section-title">Popular</div><span class="see" onclick="go('menu')">See All</span></div><div class="cards"><div class="food-card" onclick="openProduct('Classic Burger')"><button class="fav">♡</button><div class="food-thumb"><div class="burger"></div></div><div class="food-name">Classic Burger</div><div class="food-price">28 SAR</div><span class="badge">HOT</span></div><div class="food-card" onclick="openProduct('Mushroom Burger')"><button class="fav">♡</button><div class="food-thumb"><div class="burger"></div></div><div class="food-name">Mushroom Burger</div><div class="food-price">34 SAR</div></div></div><nav class="bottom-nav"><button class="nav-item active" onclick="go('home')"><span class="nav-icon">⌂</span>Home</button><button class="nav-item" onclick="go('menu')"><span class="nav-icon">▤</span>Menu</button><button class="nav-item" onclick="go('orders')"><span class="nav-icon">▣</span>Orders</button><button class="nav-item" onclick="go('profile')"><span class="nav-icon">●</span>Profile</button></nav></section>
-<section id="menu" class="screen"><div class="top"><button class="back" onclick="go('home')">←</button><div class="header-title">Our Menu</div><button class="icon-btn" onclick="go('cart')">🛒</button></div><div class="categories"><button class="cat active">All</button><button class="cat">Burgers</button><button class="cat">Sides</button><button class="cat">Drinks</button><button class="cat">MOBS Choice</button></div><div class="list"><div class="row-card" onclick="openProduct('Classic Burger')"><div class="row-thumb"><div class="burger"></div></div><div class="row-info"><b>Classic Burger</b><p>Grilled beef, fresh lettuce, tomato & MOBS sauce.</p><span class="row-price">28 SAR</span></div><span class="row-arrow">›</span></div><div class="row-card" onclick="openProduct('Cheese Burger')"><div class="row-thumb"><div class="burger"></div></div><div class="row-info"><b>Cheese Burger</b><p>Beef, melted cheese and signature sauce.</p><span class="row-price">32 SAR</span></div><span class="row-arrow">›</span></div><div class="row-card" onclick="openProduct('Mushroom Burger')"><div class="row-thumb"><div class="burger"></div></div><div class="row-info"><b>Mushroom Burger</b><p>Beef, mushrooms, cheese and creamy sauce.</p><span class="row-price">34 SAR</span></div><span class="row-arrow">›</span></div><div class="row-card" onclick="openProduct('MOBS Special')"><div class="row-thumb"><div class="burger"></div></div><div class="row-info"><b>MOBS Special</b><p>The one that does not need an introduction.</p><span class="row-price">36 SAR</span></div><span class="row-arrow">›</span></div></div></section>
-<section id="product" class="screen product"><div class="top"><button class="back" onclick="go('menu')">←</button><div class="logo">MOBS</div><button class="icon-btn">♡</button></div><div class="product-art"><div class="burger"></div></div><h1 id="productName">Classic Burger</h1><div class="rating">★ 4.9 <span class="muted"> · 120 reviews</span></div><p class="description">Grilled beef patty, fresh lettuce, tomato, cheese and our special sauce. Not the main character. Still important to the story.</p><div class="extras"><div class="section-title">Add Extras</div><div class="extra"><span>Extra Cheese</span><b>+4 SAR</b></div><div class="extra"><span>Extra Patty</span><b>+8 SAR</b></div><div class="extra"><span>BBQ Sauce</span><b>+2 SAR</b></div><div class="extra"><span>Spicy Sauce</span><b>+2 SAR</b></div></div><div class="product-actions"><button class="btn yellow" onclick="addToCart()"><span>Add to Cart</span><b id="productPrice">28 SAR</b></button></div></section>
-<section id="cart" class="screen"><div class="top"><button class="back" onclick="go('menu')">←</button><div class="header-title">Your Cart</div><span></span></div><div id="cartItems"></div><div class="summary"><div class="sumline"><span>Subtotal</span><b id="subtotal">0 SAR</b></div><div class="sumline"><span>Delivery Fee</span><b>8 SAR</b></div><div class="sumline"><span>Tax (15%)</span><b id="tax">0 SAR</b></div><div class="sumline total"><span>Total</span><b id="total">0 SAR</b></div></div><button class="btn black" onclick="go('checkout')">CHECKOUT →</button></section>
-<section id="checkout" class="screen"><div class="top"><button class="back" onclick="go('cart')">←</button><div class="header-title">Checkout</div><span></span></div><div class="stepper"><div class="step active"><i>✓</i>Address</div><div class="step"><i>2</i>Payment</div><div class="step"><i>3</i>Review</div></div><div class="section-title">Delivery Address</div><div class="choice selected"><b>Home</b><br><span class="muted">King Fahd Road, Dammam</span></div><div class="choice">＋ Add New Address</div><div class="field"><label>DELIVERY INSTRUCTIONS (OPTIONAL)</label><input placeholder="e.g. Ring the door bell."></div><button class="btn yellow" onclick="go('payment')">CONTINUE →</button></section>
-<section id="payment" class="screen"><div class="top"><button class="back" onclick="go('checkout')">←</button><div class="header-title">Payment Method</div><span></span></div><div class="stepper"><div class="step active"><i>✓</i>Address</div><div class="step active"><i>✓</i>Payment</div><div class="step"><i>3</i>Review</div></div><div class="choice">○ Mada Card</div><div class="choice">○ Credit / Debit Card</div><div class="choice">○ Apple Pay</div><div class="choice selected">◉ Cash on Delivery</div><button class="btn yellow" onclick="go('review')">CONTINUE →</button></section>
-<section id="review" class="screen"><div class="top"><button class="back" onclick="go('payment')">←</button><div class="header-title">Review Order</div><span></span></div><div class="stepper"><div class="step active"><i>✓</i>Address</div><div class="step active"><i>✓</i>Payment</div><div class="step active"><i>✓</i>Review</div></div><div id="reviewItems" class="summary"></div><button class="btn yellow" onclick="placeOrder()">PLACE ORDER →</button></section>
-<section id="success" class="screen success"><div class="success-face"></div><h1 style="font:28px Archivo Black">You're in the story!</h1><p class="muted">Your order has been placed successfully.</p><div class="order-code">#MOBS-1024</div><div class="choice">◷ Estimated arrival<br><b>20 – 30 min</b></div><button class="btn black" onclick="go('tracking')">TRACK ORDER →</button><button class="btn outline" onclick="go('home')">BACK TO HOME</button></section>
-<section id="tracking" class="screen"><div class="top"><button class="back" onclick="go('orders')">←</button><div class="header-title">Order Tracking</div><span></span></div><div class="track"><div class="muted">#MOBS-1024</div><b style="font-size:18px">Out for delivery</b><div class="map"><div class="route"></div><div class="dot a">●</div><div class="dot b">⌖</div></div><div class="choice selected"><b>✓ Your order is on the way!</b><br><span class="muted">Estimated time · 15 min</span></div><div class="driver"><div class="driver-avatar"></div><div><b>Mohammed</b><br><span class="muted">Your Driver</span></div><div class="actions"><button class="mini">Call</button><button class="mini">Message</button></div></div></div></section>
-<section id="orders" class="screen"><div class="top"><button class="back" onclick="go('home')">←</button><div class="header-title">My Orders</div><span></span></div><div class="categories"><button class="cat active">Active</button><button class="cat">Past</button></div><div class="row-card" onclick="go('tracking')"><div class="row-thumb"><div class="burger"></div></div><div class="row-info"><b>#MOBS-1024</b><p>2 items · 68 SAR</p><span class="row-price">Out for delivery</span></div><span class="row-arrow">›</span></div><div class="row-card"><div class="row-thumb"><div class="burger"></div></div><div class="row-info"><b>#MOBS-1023</b><p>3 items · 84 SAR</p><span class="muted">Delivered · Yesterday</span></div></div></section>
-<section id="profile" class="screen"><div class="top"><button class="back" onclick="go('home')">←</button><div class="header-title">Profile</div><span></span></div><div class="driver" style="margin-bottom:14px"><div class="driver-avatar"></div><div><b>Ahmed Ali</b><br><span class="muted">ahmed@example.com</span></div></div><div class="choice" onclick="go('orders')">My Orders <span style="float:right">›</span></div><div class="choice">♡ Favorites <span style="float:right">›</span></div><div class="choice">⌖ Addresses <span style="float:right">›</span></div><div class="choice">▣ Payment Methods <span style="float:right">›</span></div><div class="choice">◌ Notifications <span style="float:right">›</span></div><div class="choice">? Help & Support <span style="float:right">›</span></div><div class="choice">ⓘ About THE MOBS <span style="float:right">›</span></div><button class="btn outline">LOG OUT</button></section>
+
+<!-- =====================================================
+     SPLASH
+===================================================== -->
+
+<section id="splash" class="screen splash active">
+
+  <div class="background-word">MOBS</div>
+
+  <div class="face">
+    <span>
+      Good Food<br>
+      for Every Background.
+    </span>
+  </div>
+
+  <div class="brand-lockup">
+    <div class="mobs-logo">
+      <span class="word-m">M</span>
+      <span class="logo-o"></span>
+      <span class="word-b">B</span>
+      <span class="word-s">S</span>
+    </div>
+    RESTAURANT
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     WELCOME
+===================================================== -->
+
+<section id="welcome" class="screen welcome">
+
+  <div class="mark">
+    <div class="mobs-logo inside-logo">
+      <span class="word-m">M</span>
+      <span class="logo-o"></span>
+      <span class="word-b">B</span>
+      <span class="word-s">S</span>
+    </div>
+  </div>
+
+  <div class="script">
+    Good Food<br>
+    <span class="underline">for Every Background.</span>
+  </div>
+
+  <button class="btn yellow" onclick="go('location')">
+    LET'S GET STARTED →
+  </button>
+
+  <button class="btn outline" onclick="go('location')">
+    I ALREADY HAVE AN ACCOUNT
+  </button>
+
+</section>
+
+
+<!-- =====================================================
+     LOCATION
+===================================================== -->
+
+<section id="location" class="screen">
+
+  <div class="top">
+
+    <button class="back" onclick="go('welcome')">←</button>
+
+    <div class="logo">
+      <div class="mobs-logo">
+        <span class="word-m">M</span>
+        <span class="logo-o"></span>
+        <span class="word-b">B</span>
+        <span class="word-s">S</span>
+      </div>
+    </div>
+
+    <span></span>
+
+  </div>
+
+  <h1 class="location-title">
+    Where are you<br>
+    ordering from?
+  </h1>
+
+  <div class="search">
+    ⌕
+    <span>Search for area or city.</span>
+  </div>
+
+  <div class="locations">
+
+    <div class="loc" onclick="go('home')">
+      <div class="pin">⌖</div>
+      <div>
+        <b>Use my current location</b>
+        <span>Fastest option</span>
+      </div>
+      <span class="arrow">›</span>
+    </div>
+
+    <div class="loc" onclick="go('home')">
+      <div class="pin">●</div>
+      <div>
+        <b>Dammam</b>
+        <span>20 – 30 min</span>
+      </div>
+      <span class="arrow">›</span>
+    </div>
+
+    <div class="loc" onclick="go('home')">
+      <div class="pin">●</div>
+      <div>
+        <b>Al Khobar</b>
+        <span>25 – 35 min</span>
+      </div>
+      <span class="arrow">›</span>
+    </div>
+
+    <div class="loc" onclick="go('home')">
+      <div class="pin">●</div>
+      <div>
+        <b>Al Khobar Corniche</b>
+        <span>25 – 35 min</span>
+      </div>
+      <span class="arrow">›</span>
+    </div>
+
+    <div class="loc" onclick="go('home')">
+      <div class="pin">●</div>
+      <div>
+        <b>Al Faisaliah</b>
+        <span>30 – 40 min</span>
+      </div>
+      <span class="arrow">›</span>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     HOME
+===================================================== -->
+
+<section id="home" class="screen">
+
+  <div class="top">
+
+    <div>
+      <div class="muted">⌖ Dammam⌄</div>
+      <b style="font-size:10px">
+        Delivering in 20 – 30 min
+      </b>
+    </div>
+
+    <button class="icon-btn" onclick="go('cart')">
+      🛒
+      <span id="navCount" class="count-dot">0</span>
+    </button>
+
+  </div>
+
+  <div class="search">
+    ⌕
+    <span>Search for burgers, fries, drinks...</span>
+  </div>
+
+  <div class="hero-card">
+
+    <div style="
+      color:var(--yellow);
+      font-size:9px;
+      letter-spacing:2px
+    ">
+      MOBS FOOD
+    </div>
+
+    <h2>
+      CLASSIC.<br>
+      NEVER FAILS.
+    </h2>
+
+    <button
+      class="btn yellow"
+      style="width:auto;padding:11px 15px;font-size:10px"
+      onclick="openProduct('Classic Burger')"
+    >
+      ORDER NOW →
+    </button>
+
+    <div class="food-art">
+      <div class="burger"></div>
+    </div>
+
+  </div>
+
+  <div class="popular-head">
+    <div class="section-title">Popular</div>
+    <span class="see" onclick="go('menu')">See All</span>
+  </div>
+
+  <div class="cards">
+
+    <div
+      class="food-card"
+      onclick="openProduct('Classic Burger')"
+    >
+      <button class="fav">♡</button>
+
+      <div class="food-thumb">
+        <div class="burger"></div>
+      </div>
+
+      <div class="food-name">Classic Burger</div>
+      <div class="food-price">28 SAR</div>
+      <span class="badge">HOT</span>
+    </div>
+
+    <div
+      class="food-card"
+      onclick="openProduct('Mushroom Burger')"
+    >
+      <button class="fav">♡</button>
+
+      <div class="food-thumb">
+        <div class="burger"></div>
+      </div>
+
+      <div class="food-name">Mushroom Burger</div>
+      <div class="food-price">34 SAR</div>
+    </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+
+    <button
+      class="nav-item active"
+      onclick="go('home')"
+    >
+      <span class="nav-icon">⌂</span>
+      Home
+    </button>
+
+    <button
+      class="nav-item"
+      onclick="go('menu')"
+    >
+      <span class="nav-icon">▤</span>
+      Menu
+    </button>
+
+    <button
+      class="nav-item"
+      onclick="go('orders')"
+    >
+      <span class="nav-icon">▣</span>
+      Orders
+    </button>
+
+    <button
+      class="nav-item"
+      onclick="go('profile')"
+    >
+      <span class="nav-icon">●</span>
+      Profile
+    </button>
+
+  </nav>
+
+</section>
+
+
+<!-- =====================================================
+     MENU
+===================================================== -->
+
+<section id="menu" class="screen">
+
+  <div class="top">
+
+    <button class="back" onclick="go('home')">←</button>
+
+    <div class="header-title">Our Menu</div>
+
+    <button class="icon-btn" onclick="go('cart')">
+      🛒
+    </button>
+
+  </div>
+
+  <div class="categories">
+    <button class="cat active">All</button>
+    <button class="cat">Burgers</button>
+    <button class="cat">Sides</button>
+    <button class="cat">Drinks</button>
+    <button class="cat">MOBS Choice</button>
+  </div>
+
+  <div class="list">
+
+    <div
+      class="row-card"
+      onclick="openProduct('Classic Burger')"
+    >
+      <div class="row-thumb">
+        <div class="burger"></div>
+      </div>
+
+      <div class="row-info">
+        <b>Classic Burger</b>
+        <p>
+          Grilled beef, fresh lettuce, tomato & MOBS sauce.
+        </p>
+        <span class="row-price">28 SAR</span>
+      </div>
+
+      <span class="row-arrow">›</span>
+    </div>
+
+
+    <div
+      class="row-card"
+      onclick="openProduct('Cheese Burger')"
+    >
+      <div class="row-thumb">
+        <div class="burger"></div>
+      </div>
+
+      <div class="row-info">
+        <b>Cheese Burger</b>
+        <p>
+          Beef, melted cheese and signature sauce.
+        </p>
+        <span class="row-price">32 SAR</span>
+      </div>
+
+      <span class="row-arrow">›</span>
+    </div>
+
+
+    <div
+      class="row-card"
+      onclick="openProduct('Mushroom Burger')"
+    >
+      <div class="row-thumb">
+        <div class="burger"></div>
+      </div>
+
+      <div class="row-info">
+        <b>Mushroom Burger</b>
+        <p>
+          Beef, mushrooms, cheese and creamy sauce.
+        </p>
+        <span class="row-price">34 SAR</span>
+      </div>
+
+      <span class="row-arrow">›</span>
+    </div>
+
+
+    <div
+      class="row-card"
+      onclick="openProduct('MOBS Special')"
+    >
+      <div class="row-thumb">
+        <div class="burger"></div>
+      </div>
+
+      <div class="row-info">
+        <b>MOBS Special</b>
+        <p>
+          The one that does not need an introduction.
+        </p>
+        <span class="row-price">36 SAR</span>
+      </div>
+
+      <span class="row-arrow">›</span>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     PRODUCT
+===================================================== -->
+
+<section id="product" class="screen product">
+
+  <div class="top">
+
+    <button class="back" onclick="go('menu')">←</button>
+
+    <div class="logo">
+      <div class="mobs-logo">
+        <span class="word-m">M</span>
+        <span class="logo-o"></span>
+        <span class="word-b">B</span>
+        <span class="word-s">S</span>
+      </div>
+    </div>
+
+    <button class="icon-btn">♡</button>
+
+  </div>
+
+  <div class="product-art">
+    <div class="burger"></div>
+  </div>
+
+  <h1 id="productName">Classic Burger</h1>
+
+  <div class="rating">
+    ★ 4.9
+    <span class="muted"> · 120 reviews</span>
+  </div>
+
+  <p class="description">
+    Grilled beef patty, fresh lettuce, tomato, cheese and our special sauce.
+    Not the main character. Still important to the story.
+  </p>
+
+  <div class="extras">
+
+    <div class="section-title">Add Extras</div>
+
+    <div class="extra">
+      <span>Extra Cheese</span>
+      <b>+4 SAR</b>
+    </div>
+
+    <div class="extra">
+      <span>Extra Patty</span>
+      <b>+8 SAR</b>
+    </div>
+
+    <div class="extra">
+      <span>BBQ Sauce</span>
+      <b>+2 SAR</b>
+    </div>
+
+    <div class="extra">
+      <span>Spicy Sauce</span>
+      <b>+2 SAR</b>
+    </div>
+
+  </div>
+
+  <div class="product-actions">
+    <button class="btn yellow" onclick="addToCart()">
+      <span>Add to Cart</span>
+      <b id="productPrice">28 SAR</b>
+    </button>
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     CART
+===================================================== -->
+
+<section id="cart" class="screen">
+
+  <div class="top">
+
+    <button class="back" onclick="go('menu')">←</button>
+
+    <div class="header-title">Your Cart</div>
+
+    <span></span>
+
+  </div>
+
+  <div id="cartItems"></div>
+
+  <div class="summary">
+
+    <div class="sumline">
+      <span>Subtotal</span>
+      <b id="subtotal">0 SAR</b>
+    </div>
+
+    <div class="sumline">
+      <span>Delivery Fee</span>
+      <b>8 SAR</b>
+    </div>
+
+    <div class="sumline">
+      <span>Tax (15%)</span>
+      <b id="tax">0 SAR</b>
+    </div>
+
+    <div class="sumline total">
+      <span>Total</span>
+      <b id="total">0 SAR</b>
+    </div>
+
+  </div>
+
+  <button class="btn black" onclick="go('checkout')">
+    CHECKOUT →
+  </button>
+
+</section>
+
+
+<!-- =====================================================
+     CHECKOUT
+===================================================== -->
+
+<section id="checkout" class="screen">
+
+  <div class="top">
+
+    <button class="back" onclick="go('cart')">←</button>
+
+    <div class="header-title">Checkout</div>
+
+    <span></span>
+
+  </div>
+
+  <div class="stepper">
+
+    <div class="step active">
+      <i>✓</i>
+      Address
+    </div>
+
+    <div class="step">
+      <i>2</i>
+      Payment
+    </div>
+
+    <div class="step">
+      <i>3</i>
+      Review
+    </div>
+
+  </div>
+
+  <div class="section-title">Delivery Address</div>
+
+  <div class="choice selected">
+    <b>Home</b>
+    <br>
+    <span class="muted">
+      King Fahd Road, Dammam
+    </span>
+  </div>
+
+  <div class="choice">
+    ＋ Add New Address
+  </div>
+
+  <div class="field">
+    <label>
+      DELIVERY INSTRUCTIONS (OPTIONAL)
+    </label>
+
+    <input
+      placeholder="e.g. Ring the door bell."
+    >
+  </div>
+
+  <button
+    class="btn yellow"
+    onclick="go('payment')"
+  >
+    CONTINUE →
+  </button>
+
+</section>
+
+
+<!-- =====================================================
+     PAYMENT
+===================================================== -->
+
+<section id="payment" class="screen">
+
+  <div class="top">
+
+    <button class="back" onclick="go('checkout')">←</button>
+
+    <div class="header-title">
+      Payment Method
+    </div>
+
+    <span></span>
+
+  </div>
+
+  <div class="stepper">
+
+    <div class="step active">
+      <i>✓</i>
+      Address
+    </div>
+
+    <div class="step active">
+      <i>✓</i>
+      Payment
+    </div>
+
+    <div class="step">
+      <i>3</i>
+      Review
+    </div>
+
+  </div>
+
+  <div class="choice">
+    ○ Mada Card
+  </div>
+
+  <div class="choice">
+    ○ Credit / Debit Card
+  </div>
+
+  <div class="choice">
+    ○ Apple Pay
+  </div>
+
+  <div class="choice selected">
+    ◉ Cash on Delivery
+  </div>
+
+  <button
+    class="btn yellow"
+    onclick="go('review')"
+  >
+    CONTINUE →
+  </button>
+
+</section>
+
+
+<!-- =====================================================
+     REVIEW
+===================================================== -->
+
+<section id="review" class="screen">
+
+  <div class="top">
+
+    <button class="back" onclick="go('payment')">←</button>
+
+    <div class="header-title">
+      Review Order
+    </div>
+
+    <span></span>
+
+  </div>
+
+  <div class="stepper">
+
+    <div class="step active">
+      <i>✓</i>
+      Address
+    </div>
+
+    <div class="step active">
+      <i>✓</i>
+      Payment
+    </div>
+
+    <div class="step active">
+      <i>✓</i>
+      Review
+    </div>
+
+  </div>
+
+  <div id="reviewItems" class="summary"></div>
+
+  <button
+    class="btn yellow"
+    onclick="placeOrder()"
+  >
+    PLACE ORDER →
+  </button>
+
+</section>
+
+
+<!-- =====================================================
+     SUCCESS
+===================================================== -->
+
+<section id="success" class="screen success">
+
+  <div class="success-face"></div>
+
+  <h1 style="font:28px 'Archivo Black'">
+    You're in the story!
+  </h1>
+
+  <p class="muted">
+    Your order has been placed successfully.
+  </p>
+
+  <div class="order-code">
+    #MOBS-1024
+  </div>
+
+  <div class="choice">
+    ◷ Estimated arrival
+    <br>
+    <b>20 – 30 min</b>
+  </div>
+
+  <button
+    class="btn black"
+    onclick="go('tracking')"
+  >
+    TRACK ORDER →
+  </button>
+
+  <button
+    class="btn outline"
+    onclick="go('home')"
+  >
+    BACK TO HOME
+  </button>
+
+</section>
+
+
+<!-- =====================================================
+     TRACKING
+===================================================== -->
+
+<section id="tracking" class="screen">
+
+  <div class="top">
+
+    <button class="back" onclick="go('orders')">←</button>
+
+    <div class="header-title">
+      Order Tracking
+    </div>
+
+    <span></span>
+
+  </div>
+
+  <div class="track">
+
+    <div class="muted">
+      #MOBS-1024
+    </div>
+
+    <b style="font-size:18px">
+      Out for delivery
+    </b>
+
+    <div class="map">
+
+      <div class="route"></div>
+
+      <div class="dot a">●</div>
+
+      <div class="dot b">⌖</div>
+
+    </div>
+
+    <div class="choice selected">
+      <b>✓ Your order is on the way!</b>
+      <br>
+      <span class="muted">
+        Estimated time · 15 min
+      </span>
+    </div>
+
+    <div class="driver">
+
+      <div class="driver-avatar"></div>
+
+      <div>
+        <b>Mohammed</b>
+        <br>
+        <span class="muted">
+          Your Driver
+        </span>
+      </div>
+
+      <div class="actions">
+        <button class="mini">Call</button>
+        <button class="mini">Message</button>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     ORDERS
+===================================================== -->
+
+<section id="orders" class="screen">
+
+  <div class="top">
+
+    <button class="back" onclick="go('home')">←</button>
+
+    <div class="header-title">
+      My Orders
+    </div>
+
+    <span></span>
+
+  </div>
+
+  <div class="categories">
+    <button class="cat active">Active</button>
+    <button class="cat">Past</button>
+  </div>
+
+  <div class="row-card" onclick="go('tracking')">
+
+    <div class="row-thumb">
+      <div class="burger"></div>
+    </div>
+
+    <div class="row-info">
+      <b>#MOBS-1024</b>
+      <p>2 items · 68 SAR</p>
+      <span class="row-price">
+        Out for delivery
+      </span>
+    </div>
+
+    <span class="row-arrow">›</span>
+
+  </div>
+
+  <div class="row-card">
+
+    <div class="row-thumb">
+      <div class="burger"></div>
+    </div>
+
+    <div class="row-info">
+      <b>#MOBS-1023</b>
+      <p>3 items · 84 SAR</p>
+      <span class="muted">
+        Delivered · Yesterday
+      </span>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     PROFILE
+===================================================== -->
+
+<section id="profile" class="screen">
+
+  <div class="top">
+
+    <button class="back" onclick="go('home')">←</button>
+
+    <div class="header-title">
+      Profile
+    </div>
+
+    <span></span>
+
+  </div>
+
+  <div
+    class="driver"
+    style="margin-bottom:14px"
+  >
+
+    <div class="driver-avatar"></div>
+
+    <div>
+      <b>Ahmed Ali</b>
+      <br>
+      <span class="muted">
+        ahmed@example.com
+      </span>
+    </div>
+
+  </div>
+
+  <div class="choice" onclick="go('orders')">
+    My Orders
+    <span style="float:right">›</span>
+  </div>
+
+  <div class="choice">
+    ♡ Favorites
+    <span style="float:right">›</span>
+  </div>
+
+  <div class="choice">
+    ⌖ Addresses
+    <span style="float:right">›</span>
+  </div>
+
+  <div class="choice">
+    ▣ Payment Methods
+    <span style="float:right">›</span>
+  </div>
+
+  <div class="choice">
+    ◌ Notifications
+    <span style="float:right">›</span>
+  </div>
+
+  <div class="choice">
+    ? Help & Support
+    <span style="float:right">›</span>
+  </div>
+
+  <div class="choice">
+    ⓘ About THE MOBS
+    <span style="float:right">›</span>
+  </div>
+
+  <button class="btn outline">
+    LOG OUT
+  </button>
+
+</section>
+
 </div>
+
+
 <script>
-const screens=['splash','welcome','location','home','menu','product','cart','checkout','payment','review','success','tracking','orders','profile'];let cart=[];let currentProduct={name:'Classic Burger',price:28};
-function go(id){screens.forEach(s=>document.getElementById(s).classList.remove('active'));document.getElementById(id).classList.add('active');if(id==='cart')renderCart();if(id==='review')renderReview();window.scrollTo(0,0)}
-setTimeout(()=>go('welcome'),1400);
-function openProduct(name){const prices={'Classic Burger':28,'Cheese Burger':32,'Mushroom Burger':34,'MOBS Special':36};currentProduct={name,price:prices[name]||28};document.getElementById('productName').textContent=name;document.getElementById('productPrice').textContent=currentProduct.price+' SAR';go('product')}
-function addToCart(){cart.push({...currentProduct});updateCount();go('cart')}
-function updateCount(){document.querySelectorAll('#navCount,#count').forEach(x=>x&&(x.textContent=cart.length))}
-function renderCart(){const el=document.getElementById('cartItems');if(!cart.length){el.innerHTML='<div class="choice" style="text-align:center;padding:35px">Your cart is empty.<br><br><button class="btn yellow" onclick="go(\'menu\')">BROWSE MENU</button></div>'}else{el.innerHTML=cart.map((x,i)=>`<div class="cart-item"><div class="row-thumb"><div class="burger"></div></div><div class="row-info"><b>${x.name}</b><p>Freshly prepared for your story.</p><span class="row-price">${x.price} SAR</span><div class="qty"><button onclick="removeItem(${i})">−</button><b>1</b><button onclick="addSame(${i})">＋</button></div></div><b>${x.price} SAR</b></div>`).join('')};const sub=cart.reduce((a,x)=>a+x.price,0),tax=Math.round(sub*.15);document.getElementById('subtotal').textContent=sub+' SAR';document.getElementById('tax').textContent=tax+' SAR';document.getElementById('total').textContent=(sub+8+tax)+' SAR'}
-function removeItem(i){cart.splice(i,1);updateCount();renderCart()}function addSame(i){cart.push({...cart[i]});updateCount();renderCart()}
-function renderReview(){const sub=cart.reduce((a,x)=>a+x.price,0),tax=Math.round(sub*.15),total=sub+8+tax;document.getElementById('reviewItems').innerHTML=`<b>Order Summary</b>${cart.map(x=>`<div class="sumline"><span>${x.name}</span><b>${x.price} SAR</b></div>`).join('')}<div class="sumline"><span>Subtotal</span><b>${sub} SAR</b></div><div class="sumline"><span>Delivery Fee</span><b>8 SAR</b></div><div class="sumline"><span>Tax (15%)</span><b>${tax} SAR</b></div><div class="sumline total"><span>Total</span><b>${total} SAR</b></div>`}
-function placeOrder(){if(!cart.length){go('menu');return}go('success')}
+
+const screens=[
+  'splash',
+  'welcome',
+  'location',
+  'home',
+  'menu',
+  'product',
+  'cart',
+  'checkout',
+  'payment',
+  'review',
+  'success',
+  'tracking',
+  'orders',
+  'profile'
+];
+
+let cart=[];
+
+let currentProduct={
+  name:'Classic Burger',
+  price:28
+};
+
+function go(id){
+
+  screens.forEach(s=>{
+    document
+      .getElementById(s)
+      .classList
+      .remove('active');
+  });
+
+  document
+    .getElementById(id)
+    .classList
+    .add('active');
+
+  if(id==='cart') renderCart();
+
+  if(id==='review') renderReview();
+
+  window.scrollTo(0,0);
+}
+
+setTimeout(()=>{
+  go('welcome');
+},1400);
+
+
+function openProduct(name){
+
+  const prices={
+    'Classic Burger':28,
+    'Cheese Burger':32,
+    'Mushroom Burger':34,
+    'MOBS Special':36
+  };
+
+  currentProduct={
+    name,
+    price:prices[name]||28
+  };
+
+  document
+    .getElementById('productName')
+    .textContent=name;
+
+  document
+    .getElementById('productPrice')
+    .textContent=currentProduct.price+' SAR';
+
+  go('product');
+}
+
+
+function addToCart(){
+
+  cart.push({
+    ...currentProduct
+  });
+
+  updateCount();
+
+  go('cart');
+}
+
+
+function updateCount(){
+
+  document
+    .querySelectorAll('#navCount,#count')
+    .forEach(x=>{
+      if(x){
+        x.textContent=cart.length;
+      }
+    });
+}
+
+
+function renderCart(){
+
+  const el=document.getElementById('cartItems');
+
+  if(!cart.length){
+
+    el.innerHTML=`
+      <div
+        class="choice"
+        style="text-align:center;padding:35px"
+      >
+        Your cart is empty.
+        <br><br>
+
+        <button
+          class="btn yellow"
+          onclick="go('menu')"
+        >
+          BROWSE MENU
+        </button>
+
+      </div>
+    `;
+
+  }else{
+
+    el.innerHTML=cart.map((x,i)=>`
+
+      <div class="cart-item">
+
+        <div class="row-thumb">
+          <div class="burger"></div>
+        </div>
+
+        <div class="row-info">
+
+          <b>${x.name}</b>
+
+          <p>
+            Freshly prepared for your story.
+          </p>
+
+          <span class="row-price">
+            ${x.price} SAR
+          </span>
+
+          <div class="qty">
+
+            <button onclick="removeItem(${i})">
+              −
+            </button>
+
+            <b>1</b>
+
+            <button onclick="addSame(${i})">
+              ＋
+            </button>
+
+          </div>
+
+        </div>
+
+        <b>${x.price} SAR</b>
+
+      </div>
+
+    `).join('');
+  }
+
+  const sub=cart.reduce(
+    (a,x)=>a+x.price,
+    0
+  );
+
+  const tax=Math.round(sub*.15);
+
+  document.getElementById('subtotal')
+    .textContent=sub+' SAR';
+
+  document.getElementById('tax')
+    .textContent=tax+' SAR';
+
+  document.getElementById('total')
+    .textContent=(sub+8+tax)+' SAR';
+}
+
+
+function removeItem(i){
+
+  cart.splice(i,1);
+
+  updateCount();
+
+  renderCart();
+}
+
+
+function addSame(i){
+
+  cart.push({
+    ...cart[i]
+  });
+
+  updateCount();
+
+  renderCart();
+}
+
+
+function renderReview(){
+
+  const sub=cart.reduce(
+    (a,x)=>a+x.price,
+    0
+  );
+
+  const tax=Math.round(sub*.15);
+
+  const total=sub+8+tax;
+
+  document.getElementById('reviewItems').innerHTML=`
+
+    <b>Order Summary</b>
+
+    ${cart.map(x=>`
+
+      <div class="sumline">
+        <span>${x.name}</span>
+        <b>${x.price} SAR</b>
+      </div>
+
+    `).join('')}
+
+    <div class="sumline">
+      <span>Subtotal</span>
+      <b>${sub} SAR</b>
+    </div>
+
+    <div class="sumline">
+      <span>Delivery Fee</span>
+      <b>8 SAR</b>
+    </div>
+
+    <div class="sumline">
+      <span>Tax (15%)</span>
+      <b>${tax} SAR</b>
+    </div>
+
+    <div class="sumline total">
+      <span>Total</span>
+      <b>${total} SAR</b>
+    </div>
+
+  `;
+}
+
+
+function placeOrder(){
+
+  if(!cart.length){
+
+    go('menu');
+
+    return;
+  }
+
+  go('success');
+}
+
 </script>
-</body></html>
+
+</body>
+</html>
