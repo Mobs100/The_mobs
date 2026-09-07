@@ -1,944 +1,115 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>MOBS Admin</title>
-
-    <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>THE MOBS — Admin Console</title>
+<style>
+:root{--black:#111;--yellow:#f4b000;--white:#f7f7f5;--gray:#6b6b6b;--line:#e5e5e2;--card:#fff;--red:#d83b3b;--green:#2f9e62;--blue:#4a75d8}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--white);color:var(--black)}
+button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:flex;min-height:100vh}.side{width:245px;background:var(--black);color:#fff;padding:22px 14px;position:fixed;inset:0 auto 0 0;overflow:auto}.brand{font-weight:900;font-size:28px;letter-spacing:-2px;padding:10px 12px 24px}.brand span{display:inline-flex;border:3px solid #fff;border-radius:50%;width:37px;height:37px;align-items:center;justify-content:center;font-size:18px;vertical-align:middle;margin:0 2px}.brand small{display:block;font-size:9px;letter-spacing:4px;margin-left:3px;margin-top:2px}.group{color:#999;font-size:10px;font-weight:800;letter-spacing:1.5px;margin:18px 12px 7px}.nav button{width:100%;background:none;border:0;color:#ddd;text-align:left;padding:10px 12px;border-radius:10px;margin:2px 0;font-size:13px}.nav button:hover,.nav button.active{background:#242424;color:#fff}.nav button.active{box-shadow:inset 3px 0 0 var(--yellow)}.nav i{font-style:normal;width:24px;display:inline-block}.main{margin-left:245px;width:calc(100% - 245px)}.top{height:68px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:4}.search{background:#f1f1ef;border:0;border-radius:10px;padding:11px 14px;width:320px;outline:none}.topright{display:flex;gap:12px;align-items:center}.iconbtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px}.avatar{width:34px;height:34px;border-radius:50%;background:var(--black);color:#fff;display:grid;place-items:center;font-weight:800}.content{padding:28px}.page{display:none}.page.show{display:block}.titlebar{display:flex;align-items:end;justify-content:space-between;margin-bottom:20px}.title h1{margin:0;font-size:27px;letter-spacing:-.7px}.title p{margin:5px 0 0;color:var(--gray);font-size:13px}.btn{border:0;border-radius:10px;padding:11px 16px;font-weight:800}.primary{background:var(--yellow);color:#111}.dark{background:#111;color:#fff}.ghost{background:#fff;border:1px solid var(--line)}.danger{background:#fff0f0;color:var(--red);border:1px solid #ffd2d2}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:17px}.stat .label{color:var(--gray);font-size:12px}.stat .num{font-size:28px;font-weight:900;margin-top:6px}.stat .trend{font-size:11px;margin-top:8px;color:var(--green)}.layout2{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-top:16px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}.card h3{margin:0 0 15px;font-size:15px}.table{width:100%;border-collapse:collapse;font-size:12px}.table th{text-align:left;color:#777;font-size:10px;letter-spacing:.7px;text-transform:uppercase;padding:10px 9px;border-bottom:1px solid var(--line)}.table td{padding:12px 9px;border-bottom:1px solid #eee;vertical-align:middle}.table tr:last-child td{border-bottom:0}.pill{display:inline-block;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:800}.green{background:#e9f7ef;color:#267d4e}.yellow{background:#fff5d6;color:#8a6500}.graypill{background:#eee;color:#666}.red{background:#ffeaea;color:#a82b2b}.blue{background:#eaf0ff;color:#345bb4}.tabs{display:flex;gap:7px;margin-bottom:14px;overflow:auto}.tabs button{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 12px;font-size:11px}.tabs button.sel{background:#111;color:#fff;border-color:#111}.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.filters input,.filters select{border:1px solid var(--line);background:#fff;border-radius:9px;padding:10px 11px;font-size:12px}.orderid{font-weight:900}.money{font-weight:900}.kpirow{display:flex;gap:18px}.bar{height:7px;background:#eee;border-radius:9px;overflow:hidden}.bar span{display:block;height:100%;background:#111;border-radius:9px}.mini-list{display:grid;gap:10px}.mini{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding-bottom:10px}.mini:last-child{border:0}.product{display:flex;gap:10px;align-items:center}.thumb{width:42px;height:42px;border-radius:10px;background:#eee;display:grid;place-items:center;font-size:21px}.product b{display:block;font-size:12px}.product small{color:#777}.chart{height:220px;display:flex;align-items:end;gap:10px;padding:10px 5px}.col{flex:1;background:#111;border-radius:6px 6px 0 0;min-height:10px;position:relative}.col:nth-child(2n){background:#f4b000}.col label{position:absolute;top:calc(100% + 7px);font-size:9px;color:#777;left:50%;transform:translateX(-50%)}.detail{display:grid;grid-template-columns:1.35fr .65fr;gap:16px}.timeline{display:grid;gap:0}.step{display:flex;gap:13px;position:relative;padding-bottom:18px}.dot{width:24px;height:24px;border-radius:50%;background:#111;color:#fff;display:grid;place-items:center;font-size:11px;z-index:1}.step:not(:last-child):after{content:"";position:absolute;left:11px;top:24px;width:2px;height:calc(100% - 24px);background:#ddd}.step.done .dot{background:var(--yellow);color:#111}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:11px;font-weight:800}.field input,.field select,.field textarea{border:1px solid var(--line);border-radius:9px;padding:10px;background:#fff;outline:none}.check{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #eee;font-size:12px}.switch{width:42px;height:23px;background:#ddd;border-radius:20px;padding:3px}.switch.on{background:#111}.switch span{display:block;width:17px;height:17px;border-radius:50%;background:#fff;transition:.2s}.switch.on span{transform:translateX(19px)}.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:20}.modal.show{display:flex}.modalbox{background:#fff;width:min(700px,92vw);max-height:90vh;overflow:auto;border-radius:16px;padding:22px}.toast{position:fixed;right:24px;bottom:24px;background:#111;color:#fff;padding:12px 16px;border-radius:10px;display:none;z-index:30;font-size:12px}.toast.show{display:block}.login{min-height:100vh;display:none;place-items:center;background:#111}.loginbox{width:min(420px,92vw);background:#fff;border-radius:18px;padding:30px}.login .logo{text-align:center;font-weight:900;font-size:34px;margin-bottom:24px}.login .logo span{display:inline-grid;place-items:center;border:4px solid #111;border-radius:50%;width:43px;height:43px;font-size:21px}.mobilebar{display:none}
+@media(max-width:900px){.side{display:none}.main{margin-left:0;width:100%}.grid4{grid-template-columns:1fr 1fr}.layout2,.detail{grid-template-columns:1fr}.top{padding:0 15px}.search{width:180px}.content{padding:16px}.mobilebar{display:flex;position:fixed;bottom:0;left:0;right:0;height:60px;background:#111;z-index:10;justify-content:space-around;align-items:center}.mobilebar button{background:none;border:0;color:#ddd;font-size:10px}.mobilebar b{display:block;font-size:18px}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}}
+</style>
 </head>
-
 <body>
+<div id="login" class="login">
+ <div class="loginbox">
+  <div class="logo">THE M<span>O</span>BS</div>
+  <p style="text-align:center;color:#777;font-size:13px">Restaurant Management Console</p>
+  <div class="field"><label>EMAIL</label><input value="admin@themobs.com"></div>
+  <div class="field" style="margin-top:12px"><label>PASSWORD</label><input type="password" value="password"></div>
+  <button class="btn primary" style="width:100%;margin-top:18px" onclick="enter()">Sign in →</button>
+ </div>
+</div>
 
-<!-- ======================================================
-     SIDEBAR
-====================================================== -->
-
-<aside class="sidebar">
-
-    <div class="brand">
-
-        <div class="brand-mark">
-            M
-        </div>
-
-        <div>
-
-            <div class="logo">
-                MOBS
-            </div>
-
-            <div class="admin-title">
-                ADMIN PANEL
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <nav class="admin-nav">
-
-        <button
-            type="button"
-            class="nav-btn active"
-            data-section="dashboard"
-            onclick="showSection('dashboard')"
-        >
-            <span>⌂</span>
-            Dashboard
-        </button>
-
-
-        <button
-            type="button"
-            class="nav-btn"
-            data-section="categories"
-            onclick="showSection('categories')"
-        >
-            <span>☷</span>
-            Categories
-        </button>
-
-
-        <button
-            type="button"
-            class="nav-btn"
-            data-section="products"
-            onclick="showSection('products')"
-        >
-            <span>▦</span>
-            Products
-        </button>
-
-    </nav>
-
+<div id="app" class="app">
+<aside class="side">
+ <div class="brand">THE M<span>O</span>BS<small>RESTAURANT</small></div>
+ <div class="group">OVERVIEW</div>
+ <nav class="nav">
+  <button class="active" data-page="dashboard">▣ &nbsp; Dashboard</button>
+  <button data-page="orders">◫ &nbsp; Orders <em style="float:right;background:#f4b000;color:#111;border-radius:8px;padding:2px 5px;font-size:9px">8</em></button>
+  <button data-page="kitchen">◉ &nbsp; Kitchen / KDS</button>
+ </nav>
+ <div class="group">CATALOG</div><nav class="nav">
+  <button data-page="menu">☰ &nbsp; Menu</button><button data-page="products">▦ &nbsp; Products</button><button data-page="categories">◇ &nbsp; Categories</button><button data-page="modifiers">＋ &nbsp; Modifiers</button>
+ </nav>
+ <div class="group">OPERATIONS</div><nav class="nav">
+  <button data-page="customers">♙ &nbsp; Customers</button><button data-page="drivers">⌁ &nbsp; Drivers</button><button data-page="branches">⌖ &nbsp; Branches</button><button data-page="inventory">▤ &nbsp; Inventory</button>
+ </nav>
+ <div class="group">GROWTH & FINANCE</div><nav class="nav">
+  <button data-page="promos">◇ &nbsp; Promotions</button><button data-page="payments">◌ &nbsp; Payments</button><button data-page="reports">⌁ &nbsp; Reports</button>
+ </nav>
+ <div class="group">SYSTEM</div><nav class="nav">
+  <button data-page="notifications">♢ &nbsp; Notifications</button><button data-page="staff">♙ &nbsp; Staff & Roles</button><button data-page="audit">◷ &nbsp; Audit Log</button><button data-page="settings">⚙ &nbsp; Settings</button>
+ </nav>
 </aside>
-
-
-<!-- ======================================================
-     MAIN
-====================================================== -->
-
-<main class="main-content">
-
-
-    <!-- ==================================================
-         DASHBOARD
-    ================================================== -->
-
-    <section
-        id="dashboard"
-        class="section"
-    >
-
-        <div class="page-head">
-
-            <div>
-
-                <div class="eyebrow">
-                    MOBS MANAGEMENT
-                </div>
-
-                <h1>
-                    Dashboard
-                </h1>
-
-                <p class="muted">
-                    Manage your menu and products.
-                </p>
-
-            </div>
-
-
-            <button
-                type="button"
-                class="secondary-btn"
-                onclick="loadDashboard()"
-            >
-                ↻ Refresh
-            </button>
-
-        </div>
-
-
-        <div class="dashboard-cards">
-
-
-            <div class="card">
-
-                <div class="card-label">
-                    Restaurants
-                </div>
-
-                <div
-                    class="card-value"
-                    id="restaurantsCount"
-                >
-                    0
-                </div>
-
-            </div>
-
-
-            <div class="card">
-
-                <div class="card-label">
-                    Categories
-                </div>
-
-                <div
-                    class="card-value"
-                    id="categoriesCount"
-                >
-                    0
-                </div>
-
-            </div>
-
-
-            <div class="card">
-
-                <div class="card-label">
-                    Products
-                </div>
-
-                <div
-                    class="card-value"
-                    id="productsCount"
-                >
-                    0
-                </div>
-
-            </div>
-
-
-            <div class="card">
-
-                <div class="card-label">
-                    Available Products
-                </div>
-
-                <div
-                    class="card-value"
-                    id="availableProductsCount"
-                >
-                    0
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- ==================================================
-         CATEGORIES
-    ================================================== -->
-
-    <section
-        id="categories"
-        class="section hidden"
-    >
-
-        <div class="page-head">
-
-            <div>
-
-                <div class="eyebrow">
-                    MENU
-                </div>
-
-                <h1>
-                    Categories
-                </h1>
-
-                <p class="muted">
-                    Create and manage product categories.
-                </p>
-
-            </div>
-
-
-            <!-- IMPORTANT:
-                 This calls addCategory directly.
-                 No undefined openCategoryForm().
-            -->
-
-            <button
-                type="button"
-                class="primary-btn"
-                onclick="showCategoryForm()"
-            >
-                + Add Category
-            </button>
-
-        </div>
-
-
-
-        <!-- ==================================================
-             CATEGORY FORM
-        ================================================== -->
-
-        <div
-            id="categoryForm"
-            class="form-card hidden"
-        >
-
-            <div class="form-title-row">
-
-                <div>
-
-                    <h2>
-                        Add Category
-                    </h2>
-
-                    <p class="muted">
-                        Enter the category details below.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!--
-                Editing ID is kept for future edit support.
-            -->
-
-            <input
-                type="hidden"
-                id="editingCategoryId"
-            >
-
-
-
-            <div class="form-grid">
-
-
-                <!-- CATEGORY NAME -->
-
-                <label>
-
-                    <span>
-                        Category name *
-                    </span>
-
-                    <input
-                        type="text"
-                        id="categoryName"
-                        placeholder="e.g. Burgers"
-                    >
-
-                </label>
-
-
-
-                <!-- SORT ORDER -->
-
-                <label>
-
-                    <span>
-                        Sort order
-                    </span>
-
-                    <input
-                        type="number"
-                        id="categorySortOrder"
-                        value="0"
-                        step="1"
-                        min="0"
-                    >
-
-                </label>
-
-
-
-                <!-- DESCRIPTION -->
-
-                <label class="full">
-
-                    <span>
-                        Description
-                    </span>
-
-                    <textarea
-                        id="categoryDescription"
-                        placeholder="Category description"
-                    ></textarea>
-
-                </label>
-
-
-
-                <!-- IMAGE URL -->
-
-                <label class="full">
-
-                    <span>
-                        Image URL
-                    </span>
-
-                    <input
-                        type="url"
-                        id="categoryImage"
-                        placeholder="https://..."
-                    >
-
-                </label>
-
-            </div>
-
-
-
-            <!-- ACTIVE -->
-
-            <div class="toggles">
-
-                <label class="toggle">
-
-                    <input
-                        type="checkbox"
-                        id="categoryActive"
-                        checked
-                    >
-
-                    <span class="toggle-ui"></span>
-
-                    <span>
-                        Active
-                    </span>
-
-                </label>
-
-            </div>
-
-
-
-            <!-- ACTIONS -->
-
-            <div class="form-actions">
-
-                <button
-                    type="button"
-                    class="primary-btn"
-                    onclick="addCategory()"
-                >
-                    Save Category
-                </button>
-
-
-                <button
-                    type="button"
-                    class="secondary-btn"
-                    onclick="hideCategoryForm()"
-                >
-                    Cancel
-                </button>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- CATEGORY LIST -->
-
-        <div
-            id="categoriesList"
-            class="items-list"
-        >
-
-            <div class="loading">
-                Loading categories...
-            </div>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- ==================================================
-         PRODUCTS
-    ================================================== -->
-
-    <section
-        id="products"
-        class="section hidden"
-    >
-
-        <div class="page-head">
-
-            <div>
-
-                <div class="eyebrow">
-                    MENU
-                </div>
-
-                <h1>
-                    Products
-                </h1>
-
-                <p class="muted">
-                    Add, edit, hide and organize your products.
-                </p>
-
-            </div>
-
-
-            <button
-                type="button"
-                class="primary-btn"
-                onclick="showProductForm()"
-            >
-                + Add Product
-            </button>
-
-        </div>
-
-
-
-        <!-- ==================================================
-             PRODUCT FORM
-        ================================================== -->
-
-        <div
-            id="productForm"
-            class="form-card hidden"
-        >
-
-            <div class="form-title-row">
-
-                <div>
-
-                    <h2>
-                        Add Product
-                    </h2>
-
-                    <p class="muted">
-                        Fill in the product details below.
-                    </p>
-
-                </div>
-
-
-                <button
-                    type="button"
-                    class="icon-btn"
-                    onclick="hideProductForm()"
-                    aria-label="Close"
-                >
-                    ×
-                </button>
-
-            </div>
-
-
-
-            <input
-                type="hidden"
-                id="editingProductId"
-            >
-
-
-
-            <div class="form-grid">
-
-
-                <!-- PRODUCT NAME -->
-
-                <label>
-
-                    <span>
-                        Product name *
-                    </span>
-
-                    <input
-                        type="text"
-                        id="productName"
-                        placeholder="Product name"
-                    >
-
-                </label>
-
-
-
-                <!-- PRICE -->
-
-                <label>
-
-                    <span>
-                        Price (SAR) *
-                    </span>
-
-                    <input
-                        type="number"
-                        id="productPrice"
-                        placeholder="0.00"
-                        step="0.01"
-                        min="0"
-                    >
-
-                </label>
-
-
-
-                <!-- DESCRIPTION -->
-
-                <label class="full">
-
-                    <span>
-                        Description
-                    </span>
-
-                    <textarea
-                        id="productDescription"
-                        placeholder="Product description"
-                    ></textarea>
-
-                </label>
-
-
-
-                <!-- CATEGORY -->
-
-                <label>
-
-                    <span>
-                        Category
-                    </span>
-
-                    <select id="productCategory">
-
-                        <option value="">
-                            Select Category
-                        </option>
-
-                    </select>
-
-                </label>
-
-
-
-                <!-- SORT -->
-
-                <label>
-
-                    <span>
-                        Sort order
-                    </span>
-
-                    <input
-                        type="number"
-                        id="productSortOrder"
-                        value="0"
-                        step="1"
-                        min="0"
-                    >
-
-                </label>
-
-
-
-                <!-- IMAGE -->
-
-                <label class="full">
-
-                    <span>
-                        Image URL
-                    </span>
-
-                    <input
-                        type="url"
-                        id="productImage"
-                        placeholder="https://..."
-                    >
-
-                </label>
-
-            </div>
-
-
-
-            <!-- PRODUCT OPTIONS -->
-
-            <div class="toggles">
-
-
-                <label class="toggle">
-
-                    <input
-                        type="checkbox"
-                        id="productAvailable"
-                        checked
-                    >
-
-                    <span class="toggle-ui"></span>
-
-                    <span>
-                        Available
-                    </span>
-
-                </label>
-
-
-
-                <label class="toggle">
-
-                    <input
-                        type="checkbox"
-                        id="productFeatured"
-                    >
-
-                    <span class="toggle-ui"></span>
-
-                    <span>
-                        Featured
-                    </span>
-
-                </label>
-
-            </div>
-
-
-
-            <!-- IMAGE PREVIEW -->
-
-            <div
-                id="imagePreview"
-                class="image-preview hidden"
-            >
-
-                <img
-                    id="previewImg"
-                    src=""
-                    alt="Preview"
-                >
-
-            </div>
-
-
-
-            <!-- ACTIONS -->
-
-            <div class="form-actions">
-
-                <button
-                    type="button"
-                    class="primary-btn"
-                    id="saveProductBtn"
-                    onclick="addProduct()"
-                >
-                    Save Product
-                </button>
-
-
-                <button
-                    type="button"
-                    class="secondary-btn"
-                    onclick="hideProductForm()"
-                >
-                    Cancel
-                </button>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- ==================================================
-             PRODUCT TOOLBAR
-        ================================================== -->
-
-        <div class="toolbar">
-
-            <input
-                id="productSearch"
-                class="search-input"
-                type="search"
-                placeholder="Search products..."
-                oninput="filterProducts()"
-            >
-
-
-            <select
-                id="productFilter"
-                class="filter-select"
-                onchange="filterProducts()"
-            >
-
-                <option value="all">
-                    All products
-                </option>
-
-                <option value="available">
-                    Available
-                </option>
-
-                <option value="hidden">
-                    Hidden
-                </option>
-
-                <option value="featured">
-                    Featured
-                </option>
-
-            </select>
-
-        </div>
-
-
-
-        <!-- PRODUCT LIST -->
-
-        <div
-            id="productsList"
-            class="products-list"
-        >
-
-            <div class="loading">
-                Loading products...
-            </div>
-
-        </div>
-
-    </section>
-
-</main>
-
-
-
-<!-- ======================================================
-     TOAST
-====================================================== -->
-
-<div
-    id="toast"
-    class="toast"
-></div>
-
-
-
-<!-- ======================================================
-     SUPABASE
-====================================================== -->
+<main class="main">
+<header class="top"><input class="search" placeholder="Search orders, customers, products…" oninput="globalSearch(this.value)"><div class="topright"><button class="iconbtn" onclick="showToast('No new critical alerts')">♢</button><span style="font-size:12px;font-weight:800">Admin</span><div class="avatar">A</div></div></header>
+<div class="content">
+
+<section id="dashboard" class="page show">
+ <div class="titlebar"><div class="title"><h1>Good morning, Admin.</h1><p>Here’s what’s happening across THE MOBS today.</p></div><button class="btn primary" onclick="openModal('newOrder')">＋ New Order</button></div>
+ <div class="grid4">
+  <div class="stat"><div class="label">TODAY'S SALES</div><div class="num">8,420 SAR</div><div class="trend">↑ 12.4% vs yesterday</div></div>
+  <div class="stat"><div class="label">ORDERS</div><div class="num">186</div><div class="trend">↑ 8.1% vs yesterday</div></div>
+  <div class="stat"><div class="label">AVG. ORDER</div><div class="num">45.3 SAR</div><div class="trend">↑ 3.7%</div></div>
+  <div class="stat"><div class="label">ACTIVE ORDERS</div><div class="num">18</div><div class="trend" style="color:#8a6500">8 preparing · 10 delivery</div></div>
+ </div>
+ <div class="layout2">
+  <div class="card"><h3>Sales — Last 7 Days</h3><div class="chart"><div class="col" style="height:54%"><label>Sat</label></div><div class="col" style="height:72%"><label>Sun</label></div><div class="col" style="height:48%"><label>Mon</label></div><div class="col" style="height:81%"><label>Tue</label></div><div class="col" style="height:63%"><label>Wed</label></div><div class="col" style="height:90%"><label>Thu</label></div><div class="col" style="height:76%"><label>Fri</label></div></div></div>
+  <div class="card"><h3>Order Status</h3><div class="mini-list">
+   <div class="mini"><span>New</span><b>6</b></div><div class="mini"><span>Preparing</span><b>8</b></div><div class="mini"><span>Ready</span><b>4</b></div><div class="mini"><span>Out for delivery</span><b>10</b></div><div class="mini"><span>Delivered</span><b>158</b></div>
+  </div></div>
+ </div>
+ <div class="card" style="margin-top:16px"><h3>Recent Orders</h3><div id="dashOrders"></div></div>
+</section>
+
+<section id="orders" class="page">
+ <div class="titlebar"><div class="title"><h1>Orders</h1><p>Control the complete order lifecycle.</p></div><button class="btn primary" onclick="openModal('newOrder')">＋ New Order</button></div>
+ <div class="tabs"><button class="sel">All 186</button><button>New 6</button><button>Preparing 8</button><button>Ready 4</button><button>Delivery 10</button><button>Completed</button><button>Cancelled</button></div>
+ <div class="card"><div class="filters"><input placeholder="Search order ID or phone"><select><option>All branches</option><option>Dammam</option><option>Al Khobar</option></select><select><option>Today</option><option>Yesterday</option><option>Last 7 days</option></select></div><div id="ordersTable"></div></div>
+</section>
+
+<section id="kitchen" class="page">
+ <div class="titlebar"><div class="title"><h1>Kitchen / KDS</h1><p>Live production board for kitchen staff.</p></div><button class="btn dark" onclick="showToast('KDS sound enabled')">🔔 Sound On</button></div>
+ <div class="grid4">
+  <div class="card"><h3>NEW <span class="pill yellow">6</span></h3><div class="mini-list" id="knew"></div></div>
+  <div class="card"><h3>PREPARING <span class="pill blue">8</span></h3><div class="mini-list" id="kprep"></div></div>
+  <div class="card"><h3>READY <span class="pill green">4</span></h3><div class="mini-list" id="kready"></div></div>
+  <div class="card"><h3>DELAYED <span class="pill red">2</span></h3><div class="mini-list"><div class="mini"><b>#MOBS-1016</b><span class="pill red">+12m</span></div><div class="mini"><b>#MOBS-1011</b><span class="pill red">+8m</span></div></div></div>
+ </div>
+</section>
+
+<section id="menu" class="page">
+ <div class="titlebar"><div class="title"><h1>Menu Builder</h1><p>Control what customers see and when items are available.</p></div><button class="btn primary" onclick="openModal('product')">＋ Add Item</button></div>
+ <div class="card"><div class="tabs"><button class="sel">Main Characters</button><button>Side Characters</button><button>Supporting Drinks</button><button>MOBS Choice</button></div><div id="menuTable"></div></div>
+</section>
+
+<section id="products" class="page"><div class="titlebar"><div class="title"><h1>Products</h1><p>Items, prices, descriptions and availability.</p></div><button class="btn primary" onclick="openModal('product')">＋ New Product</button></div><div class="card"><div id="productTable"></div></div></section>
+<section id="categories" class="page"><div class="titlebar"><div class="title"><h1>Categories</h1><p>Structure the customer menu.</p></div><button class="btn primary" onclick="showToast('Category editor opened')">＋ New Category</button></div><div class="grid4" id="catCards"></div></section>
+<section id="modifiers" class="page"><div class="titlebar"><div class="title"><h1>Modifiers & Extras</h1><p>Upsells and customizable product options.</p></div><button class="btn primary" onclick="showToast('Modifier group created')">＋ New Group</button></div><div class="card" id="modifierTable"></div></section>
+
+<section id="customers" class="page"><div class="titlebar"><div class="title"><h1>Customers</h1><p>Customer accounts, order history and support context.</p></div></div><div class="card" id="customerTable"></div></section>
+<section id="drivers" class="page"><div class="titlebar"><div class="title"><h1>Drivers</h1><p>Availability, assignments and delivery performance.</p></div><button class="btn primary" onclick="showToast('Driver invitation sent')">＋ Add Driver</button></div><div class="card" id="driverTable"></div></section>
+<section id="branches" class="page"><div class="titlebar"><div class="title"><h1>Branches</h1><p>Locations, hours, delivery zones and branch status.</p></div><button class="btn primary" onclick="showToast('Branch editor opened')">＋ Add Branch</button></div><div class="grid4" id="branchCards"></div></section>
+<section id="inventory" class="page"><div class="titlebar"><div class="title"><h1>Inventory</h1><p>Stock levels and low-stock alerts.</p></div><button class="btn primary" onclick="showToast('Stock adjustment started')">＋ Stock Adjustment</button></div><div class="card" id="inventoryTable"></div></section>
+
+<section id="promos" class="page"><div class="titlebar"><div class="title"><h1>Promotions</h1><p>Coupons, offers and campaign controls.</p></div><button class="btn primary" onclick="showToast('Promotion created')">＋ New Promotion</button></div><div class="card" id="promoTable"></div></section>
+<section id="payments" class="page"><div class="titlebar"><div class="title"><h1>Payments</h1><p>Transactions, refunds and settlement status.</p></div><button class="btn ghost" onclick="showToast('Export prepared')">Export CSV</button></div><div class="grid4"><div class="stat"><div class="label">CAPTURED</div><div class="num">8,104 SAR</div></div><div class="stat"><div class="label">CASH</div><div class="num">2,330 SAR</div></div><div class="stat"><div class="label">REFUNDS</div><div class="num">180 SAR</div></div><div class="stat"><div class="label">FAILED</div><div class="num">74 SAR</div></div></div><div class="card" style="margin-top:16px" id="paymentTable"></div></section>
+<section id="reports" class="page"><div class="titlebar"><div class="title"><h1>Reports</h1><p>Operational and commercial performance.</p></div><button class="btn ghost" onclick="showToast('Report exported')">Export Report</button></div><div class="grid4"><div class="stat"><div class="label">GROSS SALES</div><div class="num">58.4K</div></div><div class="stat"><div class="label">ORDERS</div><div class="num">1,284</div></div><div class="stat"><div class="label">AOV</div><div class="num">45.5</div></div><div class="stat"><div class="label">REPEAT RATE</div><div class="num">31%</div></div></div><div class="layout2"><div class="card"><h3>Revenue by Category</h3><div class="mini-list"><div class="mini"><span>Main Characters</span><b>62%</b></div><div class="bar"><span style="width:62%"></span></div><div class="mini"><span>Side Characters</span><b>21%</b></div><div class="bar"><span style="width:21%"></span></div><div class="mini"><span>Supporting Drinks</span><b>17%</b></div><div class="bar"><span style="width:17%"></span></div></div></div><div class="card"><h3>Top Products</h3><div class="mini-list"><div class="mini"><span>Classic Burger</span><b>428</b></div><div class="mini"><span>MOBS Special</span><b>314</b></div><div class="mini"><span>French Fries</span><b>292</b></div></div></div></div></section>
+
+<section id="notifications" class="page"><div class="titlebar"><div class="title"><h1>Notifications</h1><p>Customer messaging and operational alerts.</p></div><button class="btn primary" onclick="showToast('Notification composer opened')">＋ Send Notification</button></div><div class="card" id="notificationTable"></div></section>
+<section id="staff" class="page"><div class="titlebar"><div class="title"><h1>Staff & Roles</h1><p>Access control and permissions.</p></div><button class="btn primary" onclick="showToast('Staff invitation sent')">＋ Invite Staff</button></div><div class="card" id="staffTable"></div></section>
+<section id="audit" class="page"><div class="titlebar"><div class="title"><h1>Audit Log</h1><p>Track important administrative actions.</p></div></div><div class="card" id="auditTable"></div></section>
+<section id="settings" class="page"><div class="titlebar"><div class="title"><h1>Settings</h1><p>Global restaurant, ordering and system configuration.</p></div><button class="btn primary" onclick="showToast('Settings saved')">Save Changes</button></div><div class="layout2"><div class="card"><h3>Restaurant Settings</h3><div class="formgrid"><div class="field"><label>RESTAURANT NAME</label><input value="THE MOBS"></div><div class="field"><label>CURRENCY</label><select><option>SAR — Saudi Riyal</option></select></div><div class="field"><label>ORDER PREP TIME</label><input value="20 - 30 min"></div><div class="field"><label>TAX</label><input value="15%"></div></div></div><div class="card"><h3>Feature Controls</h3><div class="check">Guest Checkout <div class="switch on" onclick="toggle(this)"><span></span></div></div><div class="check">Cash on Delivery <div class="switch on" onclick="toggle(this)"><span></span></div></div><div class="check">Driver Tracking <div class="switch on" onclick="toggle(this)"><span></span></div></div><div class="check">Maintenance Mode <div class="switch" onclick="toggle(this)"><span></span></div></div></div></div></section>
+
+</div></main>
+</div>
+<div class="mobilebar"><button onclick="go('dashboard')"><b>⌂</b>Home</button><button onclick="go('orders')"><b>◫</b>Orders</button><button onclick="go('kitchen')"><b>◉</b>Kitchen</button><button onclick="go('menu')"><b>☰</b>Menu</button><button onclick="go('settings')"><b>⚙</b>More</button></div>
+<div id="modal" class="modal" onclick="if(event.target===this)closeModal()"><div class="modalbox" id="modalbox"></div></div><div id="toast" class="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-
-<!-- ======================================================
-     APP JS
-====================================================== -->
-
 <script src="app.js"></script>
-
-
-
-<!-- ======================================================
-     FORM HELPERS
-====================================================== -->
-
-<script>
-
-    /*
-     These functions only control showing/hiding forms.
-     Database operations remain inside app.js.
-    */
-
-
-    function showCategoryForm() {
-
-        const form =
-            document.getElementById("categoryForm");
-
-        if (!form) return;
-
-        form.classList.remove("hidden");
-
-        const input =
-            document.getElementById("categoryName");
-
-        if (input) {
-            input.focus();
-        }
-    }
-
-
-
-    function hideCategoryForm() {
-
-        const form =
-            document.getElementById("categoryForm");
-
-        if (!form) return;
-
-        form.classList.add("hidden");
-
-        const name =
-            document.getElementById("categoryName");
-
-        const description =
-            document.getElementById("categoryDescription");
-
-        const image =
-            document.getElementById("categoryImage");
-
-        const sort =
-            document.getElementById("categorySortOrder");
-
-        if (name) {
-            name.value = "";
-        }
-
-        if (description) {
-            description.value = "";
-        }
-
-        if (image) {
-            image.value = "";
-        }
-
-        if (sort) {
-            sort.value = "0";
-        }
-
-        const active =
-            document.getElementById("categoryActive");
-
-        if (active) {
-            active.checked = true;
-        }
-    }
-
-
-
-    function showProductForm() {
-
-        const form =
-            document.getElementById("productForm");
-
-        if (!form) return;
-
-        form.classList.remove("hidden");
-
-        if (typeof loadProductCategories === "function") {
-            loadProductCategories();
-        }
-
-        const input =
-            document.getElementById("productName");
-
-        if (input) {
-            input.focus();
-        }
-    }
-
-
-
-    function hideProductForm() {
-
-        const form =
-            document.getElementById("productForm");
-
-        if (!form) return;
-
-        form.classList.add("hidden");
-    }
-
-
-
-    /*
-     Keep compatibility with any old code that may call
-     these names.
-    */
-
-    function openCategoryForm() {
-        showCategoryForm();
-    }
-
-
-    function closeCategoryForm() {
-        hideCategoryForm();
-    }
-
-
-    function openProductForm() {
-        showProductForm();
-    }
-
-
-    function closeProductForm() {
-        hideProductForm();
-    }
-
-</script>
-
-
 </body>
 </html>
