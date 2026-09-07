@@ -1,0 +1,771 @@
+
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root{
+  --bg:#e5e5e1;
+  --black:#111111;
+  --white:#f8f6f0;
+  --yellow:#e5b82f;
+  --gray:#777777;
+  --gray-light:#cfcfca;
+  --food-dark:#292929;
+}
+
+/* ---------- RESET ---------- */
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  background:var(--bg);
+  color:var(--black);
+  font-family:Inter,Arial,sans-serif;
+  overflow-x:hidden;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+button{
+  font:inherit;
+}
+
+/* ---------- PAGE ---------- */
+
+.page{
+  width:min(1400px,100%);
+  margin:auto;
+  padding:0 34px;
+}
+
+/* ---------- HEADER ---------- */
+
+header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:50;
+
+  background:linear-gradient(
+    var(--bg),
+    rgba(229,229,225,.92),
+    transparent
+  );
+}
+
+.nav{
+  width:min(1400px,100%);
+  margin:auto;
+
+  padding:24px 34px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+/* ---------- FORMAL SMALL LOGO ---------- */
+
+.logo{
+  display:flex;
+  align-items:center;
+
+  font-family:"Archivo Black",Impact,sans-serif;
+  font-size:22px;
+  line-height:1;
+
+  letter-spacing:-1.5px;
+}
+
+.logo sup{
+  font-family:Inter,Arial,sans-serif;
+  color:var(--yellow);
+
+  font-size:.42em;
+  vertical-align:top;
+
+  margin-left:2px;
+  position:relative;
+  top:-1px;
+}
+
+nav{
+  display:flex;
+  gap:34px;
+}
+
+nav a{
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  transition:.2s;
+}
+
+nav a:hover{
+  color:var(--yellow);
+}
+
+.menu-btn{
+  display:none;
+
+  background:none;
+  border:0;
+
+  color:var(--black);
+
+  font-size:25px;
+}
+
+/* ---------- HERO ---------- */
+
+.hero{
+  min-height:100vh;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  position:relative;
+
+  padding:70px 20px 40px;
+
+  overflow:hidden;
+}
+
+.hero:before{
+  content:"";
+
+  position:absolute;
+
+  width:75vw;
+  height:75vw;
+
+  max-width:1000px;
+  max-height:1000px;
+
+  border-radius:50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255,255,255,.55) 0%,
+      rgba(255,255,255,0) 68%
+    );
+
+  pointer-events:none;
+}
+
+.hero-content{
+  width:min(1100px,92vw);
+
+  display:flex;
+  flex-direction:column;
+
+  align-items:center;
+  justify-content:center;
+
+  text-align:center;
+
+  position:relative;
+}
+
+/* ---------- HERO LOGO ---------- */
+
+.hero-logo{
+  width:min(900px,90vw);
+  height:auto;
+  display:block;
+  overflow:visible;
+}
+
+/* ---------- HERO TEXT ---------- */
+
+.hero-copy{
+  margin:24px 20px 32px;
+
+  color:#777;
+
+  font-size:11px;
+
+  line-height:1.5;
+
+  letter-spacing:.16em;
+
+  text-transform:uppercase;
+
+  position:relative;
+}
+
+/* ---------- BUTTON ---------- */
+
+.cta-row{
+  display:flex;
+
+  gap:10px;
+
+  position:relative;
+}
+
+.btn{
+  border:1px solid var(--black);
+
+  padding:14px 30px;
+
+  text-transform:uppercase;
+
+  letter-spacing:.12em;
+
+  font-size:10px;
+
+  font-weight:900;
+
+  transition:.2s;
+}
+
+.btn:hover{
+  background:var(--black);
+  color:var(--white);
+}
+
+/* ---------- SCROLL ---------- */
+
+.scroll{
+  position:absolute;
+
+  bottom:26px;
+
+  left:50%;
+
+  transform:translateX(-50%);
+
+  font-size:9px;
+
+  letter-spacing:.3em;
+
+  color:#888;
+
+  text-transform:uppercase;
+}
+
+/* ---------- SECTIONS ---------- */
+
+section{
+  padding:120px 0;
+}
+
+.section-head{
+  display:flex;
+
+  align-items:flex-end;
+
+  justify-content:space-between;
+
+  gap:30px;
+
+  margin-bottom:70px;
+}
+
+h2{
+  font-family:"Archivo Black",Impact,sans-serif;
+
+  font-size:clamp(42px,7vw,88px);
+
+  line-height:.9;
+
+  letter-spacing:-.06em;
+}
+
+.section-note{
+  max-width:360px;
+
+  color:#777;
+
+  font-size:13px;
+
+  line-height:1.8;
+}
+
+/* ---------- ABOUT ---------- */
+
+.about-grid{
+  display:grid;
+
+  grid-template-columns:1.1fr .9fr;
+
+  gap:80px;
+
+  align-items:center;
+}
+
+.about-big{
+  font-family:"Archivo Black",Impact,sans-serif;
+
+  font-size:clamp(30px,4vw,58px);
+
+  line-height:1.02;
+
+  letter-spacing:-.045em;
+}
+
+.about-big span{
+  color:var(--yellow);
+}
+
+.about-text{
+  color:#777;
+
+  font-size:14px;
+
+  line-height:1.9;
+
+  margin-top:28px;
+
+  max-width:680px;
+}
+
+/* ---------- MOB CHARACTER ---------- */
+
+.side-box{
+  min-height:430px;
+
+  background:transparent;
+
+  border:0;
+
+  display:flex;
+
+  flex-direction:column;
+
+  align-items:center;
+
+  justify-content:center;
+
+  position:relative;
+}
+
+.side-box .m-letter{
+  position:absolute;
+
+  font-family:"Archivo Black",Impact,sans-serif;
+
+  font-size:330px;
+
+  line-height:1;
+
+  color:#d9d9d4;
+
+  z-index:0;
+}
+
+/* MOB FACE */
+
+.mob{
+  width:170px;
+
+  height:170px;
+
+  border-radius:50%;
+
+  background:#ffffff;
+
+  border:3px solid var(--black);
+
+  position:relative;
+
+  z-index:2;
+}
+
+/* EYES */
+
+.mob:before,
+.mob:after{
+  content:"";
+
+  position:absolute;
+
+  top:62px;
+
+  width:16px;
+
+  height:16px;
+
+  background:var(--black);
+
+  border-radius:50%;
+}
+
+.mob:before{
+  left:48px;
+}
+
+.mob:after{
+  right:48px;
+}
+
+/* MOUTH */
+
+.mob-mouth{
+  position:absolute;
+
+  left:50%;
+
+  top:94px;
+
+  width:48px;
+
+  height:5px;
+
+  transform:translateX(-50%);
+
+  background:var(--black);
+
+  border-radius:5px;
+}
+
+/* CHARACTER CAPTION */
+
+.mob-caption{
+  z-index:3;
+
+  margin-top:30px;
+
+  font-size:10px;
+
+  letter-spacing:.3em;
+
+  font-weight:800;
+
+  text-transform:uppercase;
+
+  color:#666;
+}
+
+/* ---------- MOBS WORLD ---------- */
+
+.world-section{
+  background:var(--bg);
+}
+
+.world-grid{
+  display:grid;
+
+  grid-template-columns:repeat(2,1fr);
+
+  gap:0;
+}
+
+.world-item{
+  min-height:350px;
+
+  padding:34px;
+
+  border:0;
+
+  border-bottom:1px solid #cfcfca;
+
+  position:relative;
+
+  display:flex;
+
+  flex-direction:column;
+
+  justify-content:space-between;
+
+  transition:.25s;
+
+  overflow:hidden;
+}
+
+.world-item:nth-child(odd){
+  border-right:1px solid #cfcfca;
+}
+
+.world-item:hover{
+  background:rgba(255,255,255,.32);
+}
+
+/* ---------- FOOD CARD ---------- */
+
+.world-item.world-featured{
+  background:var(--food-dark);
+
+  color:var(--white);
+}
+
+.world-item.world-featured:hover{
+  background:#333333;
+}
+
+/* ---------- CARD NUMBER ---------- */
+
+.world-no{
+  font-size:10px;
+
+  color:#777;
+
+  font-weight:800;
+
+  letter-spacing:.08em;
+}
+
+.world-featured .world-no{
+  color:#999;
+}
+
+/* ---------- CARD CONTENT ---------- */
+
+.world-content{
+  position:relative;
+
+  z-index:2;
+}
+
+.world-item h3{
+  font-family:"Archivo Black",Impact,sans-serif;
+
+  font-size:clamp(36px,5vw,64px);
+
+  letter-spacing:-.055em;
+
+  line-height:.9;
+}
+
+.world-item p{
+  font-size:12px;
+
+  color:#777;
+
+  line-height:1.7;
+
+  margin-top:16px;
+
+  max-width:430px;
+}
+
+.world-featured p{
+  color:#c4c4c4;
+}
+
+/* ---------- CARD ARROW ---------- */
+
+.world-arrow{
+  position:absolute;
+
+  right:30px;
+
+  bottom:25px;
+
+  color:var(--yellow);
+
+  font-size:28px;
+
+  z-index:2;
+}
+
+/* ---------- MANIFESTO ---------- */
+
+.manifesto{
+  border-top:1px solid #cfcfca;
+
+  border-bottom:1px solid #cfcfca;
+
+  text-align:center;
+
+  padding:150px 20px;
+}
+
+.manifesto p{
+  font-family:"Archivo Black",Impact,sans-serif;
+
+  font-size:clamp(38px,7vw,90px);
+
+  line-height:.94;
+
+  letter-spacing:-.06em;
+
+  max-width:1100px;
+
+  margin:auto;
+}
+
+.manifesto span{
+  color:var(--yellow);
+}
+
+/* ---------- FOOTER ---------- */
+
+footer{
+  padding:38px 34px;
+
+  width:min(1400px,100%);
+
+  margin:auto;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  gap:30px;
+
+  color:#888;
+
+  font-size:10px;
+
+  letter-spacing:.12em;
+
+  text-transform:uppercase;
+}
+
+footer strong{
+  color:var(--black);
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media(max-width:850px){
+
+  .page{
+    padding:0 18px;
+  }
+
+  .nav{
+    padding:20px 18px;
+  }
+
+  nav{
+    display:none;
+  }
+
+  .menu-btn{
+    display:block;
+  }
+
+  .logo{
+    font-size:19px;
+  }
+
+  .hero{
+    padding:60px 18px 40px;
+  }
+
+  .hero-content{
+    width:100%;
+  }
+
+  .hero-logo{
+    width:min(800px,94vw);
+  }
+
+  .about-grid{
+    grid-template-columns:1fr;
+    gap:35px;
+  }
+
+  .world-grid{
+    grid-template-columns:1fr;
+  }
+
+  .world-item:nth-child(odd){
+    border-right:0;
+  }
+
+  .section-head{
+    display:block;
+  }
+
+  .section-note{
+    margin-top:20px;
+  }
+
+}
+
+@media(max-width:520px){
+
+  .hero{
+    padding:50px 12px 35px;
+  }
+
+  .hero-content{
+    width:100%;
+  }
+
+  .hero-logo{
+    width:94vw;
+  }
+
+  .hero-copy{
+    font-size:9px;
+
+    margin:20px 18px 28px;
+
+    letter-spacing:.12em;
+  }
+
+  .cta-row{
+    width:auto;
+  }
+
+  .btn{
+    text-align:center;
+
+    padding:14px 22px;
+  }
+
+  section{
+    padding:80px 0;
+  }
+
+  .world-item{
+    min-height:300px;
+  }
+
+  .side-box{
+    min-height:350px;
+  }
+
+  footer{
+    padding:30px 18px;
+
+    flex-direction:column;
+  }
+
+}
+
+/* ---------- MOBILE MENU ---------- */
+
+@media(max-width:850px){
+
+  nav.mobile-open{
+    display:flex;
+
+    position:absolute;
+
+    top:65px;
+
+    right:18px;
+
+    flex-direction:column;
+
+    gap:18px;
+
+    background:var(--bg);
+
+    padding:22px;
+
+    border:1px solid #d0d0cb;
+  }
+
+}
+

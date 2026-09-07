@@ -1,0 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+:root{
+  --mobs-black:#101010;
+  --mobs-cream:#f5f1e8;
+  --mobs-yellow:#f4b000;
+  --mobs-gray:#686b6b;
+  --mobs-line:#ddd9cf;
+}
+body{font-family:Montserrat,Arial,sans-serif}
