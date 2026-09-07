@@ -1,0 +1,28 @@
+{
+  "rewrites": [
+    {
+      "source": "/customer",
+      "destination": "/customer/index.html"
+    },
+    {
+      "source": "/customer/",
+      "destination": "/customer/index.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/admin/",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/delivery",
+      "destination": "/delivery/index.html"
+    },
+    {
+      "source": "/delivery/",
+      "destination": "/delivery/index.html"
+    }
+  ]
+}
