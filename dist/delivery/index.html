@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>THE MOBS | Delivery</title>
+<style>
+:root{
+  --black:#101010;
+  --cream:#f5f1e8;
+  --yellow:#f4b000;
+  --white:#fff;
+  --gray:#77746d;
+  --line:#ded9ce;
+  --soft:#efede6;
+  --green:#159957;
+  --red:#d9363e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--cream);color:var(--black);font-family:Arial,Tahoma,sans-serif}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+button:disabled{opacity:.55;cursor:not-allowed}
+.app-shell{width:min(100%,520px);min-height:100vh;margin:auto;background:var(--cream);position:relative}
+.screen{min-height:100vh;padding-bottom:86px}
+.topbar{position:sticky;top:0;z-index:30;background:var(--cream);border-bottom:1px solid var(--line);padding:15px 18px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-size:25px;font-weight:950;letter-spacing:-1.8px}
+.brand small{display:block;font-size:9px;letter-spacing:1.5px;margin-top:2px;color:var(--gray)}
+.icon-btn{width:40px;height:40px;border:1px solid var(--line);background:#fff;border-radius:50%;font-size:18px}
+.content{padding:18px}
+.eyebrow{font-size:10px;font-weight:900;letter-spacing:1.4px;color:var(--gray);text-transform:uppercase}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:30px;line-height:1.02;letter-spacing:-1.5px;margin-bottom:7px}
+h2{font-size:21px;letter-spacing:-.7px;margin-bottom:12px}
+.sub{color:var(--gray);font-size:12px;line-height:1.5}
+.hero{
+  background:var(--black);color:var(--cream);border-radius:18px;padding:20px;margin-bottom:16px;
+  position:relative;overflow:hidden
+}
+.hero h1{font-size:29px;max-width:300px}
+.hero .sub{color:#c7c2b8}
+.hero-face{position:absolute;right:-15px;bottom:-35px;width:125px;height:125px;border:4px solid var(--cream);border-radius:50%;opacity:.95}
+.hero-face:before,.hero-face:after{content:"";position:absolute;top:35px;width:18px;height:34px;background:var(--cream);border-radius:50%}
+.hero-face:before{left:27px}.hero-face:after{right:27px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:17px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px}
+.stat b{font-size:22px;display:block}
+.stat span{font-size:9px;color:var(--gray);display:block;margin-top:3px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:12px}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.section-head h2{margin:0}
+.link{font-size:10px;font-weight:900;text-decoration:underline;cursor:pointer}
+.order-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
+.order-top{display:flex;justify-content:space-between;gap:10px}
+.order-no{font-size:15px;font-weight:950}
+.order-name{font-size:12px;font-weight:800;margin-top:4px}
+.status{display:inline-flex;align-items:center;border-radius:99px;padding:6px 9px;background:#f1eee7;font-size:9px;font-weight:900;white-space:nowrap}
+.status.yellow{background:#fff1c7}.status.green{background:#e7f7ee;color:#117447}.status.gray{background:#eceae5}
+.order-meta{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:11px}
+.meta{background:var(--soft);border-radius:9px;padding:9px;font-size:10px}
+.meta span{display:block;color:var(--gray);font-size:8px;margin-bottom:3px}
+.address{margin-top:8px;background:var(--soft);border-radius:10px;padding:10px;font-size:10px;line-height:1.45}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}
+.btn{border:0;border-radius:11px;padding:12px;font-size:10px;font-weight:950}
+.btn.black{background:var(--black);color:var(--cream)}
+.btn.yellow{background:var(--yellow);color:var(--black)}
+.btn.white{background:#fff;border:1px solid var(--line)}
+.btn.green{background:var(--green);color:#fff}
+.btn.red{background:#fff0f0;color:var(--red);border:1px solid #ffd0d0}
+.btn.full{grid-column:1/-1}
+.tabs{display:flex;gap:7px;margin-bottom:13px}
+.tabs button{flex:1;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px;font-size:10px;font-weight:900}
+.tabs button.active{background:var(--black);color:var(--cream);border-color:var(--black)}
+.empty{background:#fff;border:1px dashed #cfc8ba;border-radius:15px;padding:35px 18px;text-align:center;color:var(--gray);font-size:11px}
+.detail-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.back{width:38px;height:38px;border:1px solid var(--line);background:#fff;border-radius:50%;font-size:18px}
+.detail-header h1{font-size:23px;margin:0}
+.restaurant{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.restaurant b{font-size:13px}.restaurant span{font-size:9px;color:var(--gray)}
+.info-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #eeeae1;font-size:10px}
+.info-row:last-child{border-bottom:0}.info-row span{color:var(--gray)}
+.items{margin-top:4px}.item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #e4dfd4;font-size:10px}
+.item:last-child{border-bottom:0}
+.map{height:260px;border-radius:15px;overflow:hidden;background:#ddd8ce;position:relative}
+.map iframe{width:100%;height:100%;border:0}
+.map-fallback{height:100%;display:grid;place-items:center;text-align:center;color:var(--gray);padding:20px}
+.map-fallback b{display:block;color:var(--black);margin-bottom:6px}
+.progress{margin-top:16px}.step{display:flex;gap:11px;position:relative;min-height:57px}.step:not(:last-child):before{content:"";position:absolute;left:8px;top:17px;width:2px;height:45px;background:#ddd8ce}
+.dot{width:17px;height:17px;border-radius:50%;background:#ddd8ce;border:4px solid #ddd8ce;flex:none;z-index:2}
+.step.done .dot{background:#fff;border-color:var(--green)}.step.active .dot{background:var(--yellow);border-color:var(--yellow)}
+.step b{font-size:10px;display:block}.step span{font-size:8px;color:var(--gray)}
+.timer{background:var(--black);color:var(--cream);border-radius:14px;padding:14px;text-align:center;margin-top:12px}
+.timer small{display:block;color:#aaa69d;font-size:8px}.timer b{font-size:27px;letter-spacing:1px}
+.upload{border:2px dashed #cec7b8;border-radius:13px;padding:15px;text-align:center;background:#faf8f3}
+.upload strong{font-size:11px;display:block}.upload span{font-size:9px;color:var(--gray);display:block;margin:5px 0 12px}
+.upload label{display:block;background:var(--black);color:var(--cream);border-radius:9px;padding:11px;font-size:9px;font-weight:900;cursor:pointer}
+.upload input{display:none}.previews{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.previews img{width:70px;height:70px;object-fit:cover;border-radius:8px}
+.success{text-align:center;padding:30px 15px}.success-face{width:95px;height:95px;border:5px solid var(--black);border-radius:50%;margin:0 auto 18px;position:relative}.success-face:before,.success-face:after{content:"";position:absolute;top:28px;width:14px;height:26px;background:var(--black);border-radius:50%}.success-face:before{left:21px}.success-face:after{right:21px}
+.history-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 0;border-bottom:1px solid #eeeae1}.history-row:last-child{border-bottom:0}.history-row b{font-size:11px}.history-row span{font-size:9px;color:var(--gray)}
+.earn-big{font-size:42px;font-weight:950;letter-spacing:-2px}.earn-line{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eeeae1;font-size:10px}.earn-line:last-child{border-bottom:0}
+.bar-chart{height:120px;display:flex;align-items:flex-end;gap:8px;padding:12px 3px 0}.bar{flex:1;background:var(--black);border-radius:5px 5px 0 0;min-height:10px}.bar:nth-child(2),.bar:nth-child(5){background:var(--yellow)}.days{display:flex;gap:8px;margin-top:5px}.days span{flex:1;text-align:center;font-size:7px;color:var(--gray)}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,520px);height:72px;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);z-index:40;padding-bottom:env(safe-area-inset-bottom)}
+.bottom-nav button{border:0;background:transparent;color:#888;font-size:8px;font-weight:800}.bottom-nav button strong{display:block;font-size:18px;margin-bottom:3px;color:#777}.bottom-nav button.active,.bottom-nav button.active strong{color:var(--black)}
+.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:var(--cream)}
+.login-box{width:min(430px,100%);background:#fff;border-radius:20px;padding:28px;box-shadow:0 15px 45px #00000010}
+.login-logo{text-align:center;font-size:39px;font-weight:950;letter-spacing:-3px}
+.login-face{width:86px;height:86px;border-radius:50%;background:var(--black);margin:18px auto;position:relative}
+.login-face:before,.login-face:after{content:"";position:absolute;top:27px;width:13px;height:28px;background:var(--cream);border-radius:50%}.login-face:before{left:20px}.login-face:after{right:20px}
+.login-box h1{text-align:center;font-size:22px;margin:0 0 4px}.login-sub{text-align:center;color:var(--gray);font-size:10px;margin-bottom:20px}
+.field{width:100%;height:48px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 13px;outline:none;margin-top:9px}.field:focus{border-color:var(--yellow)}
+.login-btn{width:100%;margin-top:13px}.error{margin-top:11px;padding:10px;border-radius:9px;background:#fff0f0;color:var(--red);font-size:10px;text-align:center}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid #ffffff66;border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:var(--black);color:var(--cream);padding:10px 14px;border-radius:9px;font-size:10px;z-index:80;box-shadow:0 8px 25px #0002}
+@media(min-width:800px){body{background:#ddd9d0}.app-shell{box-shadow:0 0 45px #0001}.login-box{box-shadow:0 15px 45px #0002}}
+.registration{margin-top:18px;text-align:left;max-height:70vh;overflow:auto;padding-right:3px}.registration h2{font-size:24px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.form-grid .field:nth-child(10),.form-grid .field:nth-child(11){grid-column:1/-1}.upload-docs{display:grid;gap:9px;margin-top:12px}.upload-docs label{display:block;border:1px dashed #b8b4aa;padding:12px;border-radius:12px;font-size:10px;font-weight:800;letter-spacing:.08em}.upload-docs input{display:block;margin-top:8px;width:100%;font-size:12px}.registration .field{width:100%;box-sizing:border-box}.registration .error{margin-top:10px}@media(max-width:520px){.form-grid{grid-template-columns:1fr}.form-grid .field{grid-column:auto!important}}
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- LOGIN -->
+<section id="loginView" class="login">
+  <div class="login-box">
+    <div class="login-logo">THE MOBS</div>
+    <div class="login-face"></div>
+    <h1>Welcome Back, Driver.</h1>
+    <div class="login-sub">LET'S GET YOU ON THE ROAD.</div>
+
+    <input id="username" class="field" autocomplete="username" placeholder="Username">
+    <input id="password" class="field" type="password" autocomplete="current-password" placeholder="Password">
+
+    <button id="loginBtn" class="btn black login-btn" onclick="login()">Log In →</button>
+    <button class="btn white full" style="margin-top:8px" onclick="showRegistration()">BECOME A MOBS DRIVER →</button>
+
+    <div id="registrationView" class="registration hidden">
+      <div class="eyebrow">DRIVER APPLICATION</div>
+      <h2 style="margin-top:6px">Join THE MOBS.</h2>
+      <p class="sub">Create your account and submit your documents. Your account stays pending until Admin approves it.</p>
+      <div class="form-grid">
+        <input id="regUsername" class="field" autocomplete="username" placeholder="Choose username *">
+        <input id="regPassword" class="field" type="password" autocomplete="new-password" placeholder="Choose password *">
+        <input id="regPassword2" class="field" type="password" autocomplete="new-password" placeholder="Confirm password *">
+        <input id="regName" class="field" placeholder="Full name *">
+      <input id="regPhone" class="field" type="tel" inputmode="numeric" maxlength="10" pattern="[0-9]{10}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" placeholder="Phone">
+        <input id="regEmail" class="field" type="email" placeholder="Email *">
+        <input id="regCity" class="field" placeholder="City *">
+        <input id="regDob" class="field" type="date" aria-label="Date of birth">
+        <input id="regNationality" class="field" placeholder="Nationality">
+        <textarea id="regNationalAddress" class="field" rows="3" placeholder="National address *"></textarea>
+        <input id="regIdNumber" class="field" placeholder="National ID / Iqama number *">
+        <input id="regVehicleType" class="field" placeholder="Vehicle type *">
+        <input id="regVehicleMake" class="field" placeholder="Vehicle make *">
+        <input id="regVehicleModel" class="field" placeholder="Vehicle model *">
+        <input id="regVehicleYear" class="field" inputmode="numeric" placeholder="Vehicle year *">
+        <input id="regPlate" class="field" placeholder="Plate number *">
+      </div>
+      <div class="upload-docs">
+        <label>IDENTITY IMAGE *<input id="regIdentity" type="file" accept="image/*" capture="environment"></label>
+        <label>VEHICLE IMAGE *<input id="regVehicleImage" type="file" accept="image/*" capture="environment"></label>
+        <label>DRIVER LICENSE (optional)<input id="regLicense" type="file" accept="image/*,application/pdf"></label>
+        <label>VEHICLE REGISTRATION (optional)<input id="regRegistration" type="file" accept="image/*,application/pdf"></label>
+      </div>
+      <button class="btn black full" style="margin-top:10px" onclick="registerDriver()">SUBMIT APPLICATION →</button>
+      <button class="btn white full" style="margin-top:8px" onclick="hideRegistration()">BACK TO LOGIN</button>
+      <div id="registrationError" class="error hidden"></div>
+    </div>
+    <div id="loginError" class="error hidden"></div>
+  </div>
+</section>
+
+<!-- APP -->
+<div id="appView" class="app-shell hidden">
+
+  <!-- HOME -->
+  <section id="homeScreen" class="screen">
+    <header class="topbar">
+      <div class="brand">THE MOBS<small>DELIVERY</small></div>
+      <button class="icon-btn" onclick="showScreen('profile')" aria-label="Profile">●</button>
+    </header>
+
+    <main class="content">
+      <div class="eyebrow">Good morning,</div>
+      <h1 id="homeDriver">Background Character.</h1>
+      <p class="sub">Ready for today's deliveries?</p>
+
+      <section class="hero">
+        <div class="eyebrow" style="color:#aaa69d">TODAY</div>
+        <h1 style="margin-top:7px">Different Stories.<br>Same Good Food.</h1>
+        <p class="sub">Keep the story moving.</p>
+        <div class="hero-face"></div>
+      </section>
+
+      <div class="stats">
+        <div class="stat"><b id="assignedCount">0</b><span>ASSIGNED</span></div>
+        <div class="stat"><b id="completedCount">0</b><span>COMPLETED</span></div>
+        <div class="stat"><b id="onlineTime">—</b><span>ONLINE</span></div>
+      </div>
+
+      <div class="section-head">
+        <h2>Today's Orders</h2>
+        <span class="link" onclick="showScreen('orders')">SEE ALL</span>
+      </div>
+      <div id="homeOrders"></div>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="active" onclick="showScreen('home')"><strong>⌂</strong>Home</button>
+      <button onclick="showScreen('orders')"><strong>☰</strong>Orders</button>
+      <button onclick="showScreen('map')"><strong>⌖</strong>Map</button>
+      <button onclick="showScreen('earnings')"><strong>◇</strong>Wallet</button>
+      <button onclick="showScreen('profile')"><strong>○</strong>Profile</button>
+    </nav>
+  </section>
+
+  <!-- ORDERS -->
+  <section id="ordersScreen" class="screen hidden">
+    <header class="topbar">
+      <div class="brand">Orders<small>YOUR DELIVERY QUEUE</small></div>
+      <button class="icon-btn" onclick="loadOrders()">↻</button>
+    </header>
+    <main class="content">
+      <div class="tabs">
+        <button id="ordersActiveTab" class="active" onclick="setOrderTab('active')">Active</button>
+        <button id="ordersDoneTab" onclick="setOrderTab('done')">Completed</button>
+      </div>
+      <div id="ordersList"></div>
+    </main>
+    <nav class="bottom-nav">
+      <button onclick="showScreen('home')"><strong>⌂</strong>Home</button>
+      <button class="active" onclick="showScreen('orders')"><strong>☰</strong>Orders</button>
+      <button onclick="showScreen('map')"><strong>⌖</strong>Map</button>
+      <button onclick="showScreen('earnings')"><strong>◇</strong>Wallet</button>
+      <button onclick="showScreen('profile')"><strong>○</strong>Profile</button>
+    </nav>
+  </section>
+
+  <!-- MAP -->
+  <section id="mapScreen" class="screen hidden">
+    <header class="topbar">
+      <div class="brand">Map<small>CURRENT DELIVERY</small></div>
+      <button class="icon-btn" onclick="openSelectedMaps()">↗</button>
+    </header>
+    <main class="content">
+      <div id="mainMap" class="map"></div>
+      <div class="card">
+        <div class="eyebrow">SELECTED ORDER</div>
+        <h2 id="mapOrderNo" style="margin-top:5px">No active order</h2>
+        <p id="mapAddress" class="sub">Select an active order to navigate.</p>
+        <div class="actions">
+          <button class="btn black full" onclick="openSelectedMaps()">OPEN IN MAPS →</button>
+        </div>
+      </div>
+    </main>
+    <nav class="bottom-nav">
+      <button onclick="showScreen('home')"><strong>⌂</strong>Home</button>
+      <button onclick="showScreen('orders')"><strong>☰</strong>Orders</button>
+      <button class="active" onclick="showScreen('map')"><strong>⌖</strong>Map</button>
+      <button onclick="showScreen('earnings')"><strong>◇</strong>Wallet</button>
+      <button onclick="showScreen('profile')"><strong>○</strong>Profile</button>
+    </nav>
+  </section>
+
+  <!-- EARNINGS -->
+  <section id="earningsScreen" class="screen hidden">
+    <header class="topbar">
+      <div class="brand">Your Earnings<small>THIS WEEK</small></div>
+    </header>
+    <main class="content">
+      <div class="card">
+        <div class="eyebrow">THIS WEEK</div>
+        <div class="earn-big" id="earnTotal">0 SAR</div>
+        <p class="sub">Delivery earnings overview.</p>
+        <div class="bar-chart">
+          <div class="bar" style="height:42%"></div><div class="bar" style="height:65%"></div>
+          <div class="bar" style="height:50%"></div><div class="bar" style="height:78%"></div>
+          <div class="bar" style="height:58%"></div><div class="bar" style="height:88%"></div>
+          <div class="bar" style="height:34%"></div>
+        </div>
+        <div class="days"><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span></div>
+      </div>
+      <div class="card">
+        <div class="earn-line"><span>Completed Orders</span><b id="earnOrders">0</b></div>
+        <div class="earn-line"><span>Online Time</span><b id="earnOnline">—</b></div>
+        <div class="earn-line"><span>Average / Order</span><b id="earnAverage">0 SAR</b></div>
+      </div>
+    </main>
+    <nav class="bottom-nav">
+      <button onclick="showScreen('home')"><strong>⌂</strong>Home</button>
+      <button onclick="showScreen('orders')"><strong>☰</strong>Orders</button>
+      <button onclick="showScreen('map')"><strong>⌖</strong>Map</button>
+      <button class="active" onclick="showScreen('earnings')"><strong>◇</strong>Wallet</button>
+      <button onclick="showScreen('profile')"><strong>○</strong>Profile</button>
+    </nav>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="profileScreen" class="screen hidden">
+    <header class="topbar">
+      <div class="brand">Profile<small>DRIVER ACCOUNT</small></div>
+    </header>
+    <main class="content">
+      <div class="card">
+        <div class="eyebrow">DRIVER</div>
+        <h2 id="profileName" style="margin-top:6px">—</h2>
+        <div class="info-row"><span>Status</span><b id="profileStatus">Offline</b></div>
+        <div class="info-row"><span>Availability</span><b id="profileAvailability">—</b></div>
+        <div class="info-row"><span>Current Orders</span><b id="profileOrders">0</b></div>
+      </div>
+      <div class="card">
+        <div class="section-head"><h2 style="font-size:15px">Availability</h2></div>
+        <div class="actions">
+          <button id="availableBtn" class="btn black" onclick="setAvailable(true)">AVAILABLE</button>
+          <button id="unavailableBtn" class="btn white" onclick="setAvailable(false)">OFFLINE</button>
+        </div>
+      </div>
+      <button class="btn red full" style="width:100%" onclick="logout()">LOG OUT</button>
+    </main>
+    <nav class="bottom-nav">
+      <button onclick="showScreen('home')"><strong>⌂</strong>Home</button>
+      <button onclick="showScreen('orders')"><strong>☰</strong>Orders</button>
+      <button onclick="showScreen('map')"><strong>⌖</strong>Map</button>
+      <button onclick="showScreen('earnings')"><strong>◇</strong>Wallet</button>
+      <button class="active" onclick="showScreen('profile')"><strong>○</strong>Profile</button>
+    </nav>
+  </section>
+
+  <!-- DETAIL -->
+  <section id="detailScreen" class="screen hidden">
+    <main class="content">
+      <div class="detail-header">
+        <button class="back" onclick="backFromDetail()">←</button>
+        <div><div class="eyebrow">ORDER DETAILS</div><h1 id="detailOrderNo">#MOBS-0000</h1></div>
+      </div>
+      <div id="detailBody"></div>
+    </main>
+  </section>
+
+  <!-- SUCCESS -->
+  <section id="successScreen" class="screen hidden">
+    <main class="content">
+      <div class="success">
+        <div class="success-face"></div>
+        <div class="eyebrow">ANOTHER STORY DELIVERED</div>
+        <h1 style="margin-top:8px">Delivery Completed!</h1>
+        <p class="sub">Good job, <b id="successDriver">Driver</b>.</p>
+        <div class="card" style="text-align:left;margin-top:20px">
+          <div class="info-row"><span>Order</span><b id="successOrder">—</b></div>
+          <div class="info-row"><span>Delivery time</span><b id="successDuration">—</b></div>
+        </div>
+        <button class="btn black full" style="width:100%;margin-top:8px" onclick="showScreen('home')">BACK TO HOME</button>
+      </div>
+    </main>
+  </section>
+
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="../shared/config.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="app.js" defer></script>
+
+</body>
+</html>
