@@ -1,0 +1,4 @@
+# Supabase CLI project configuration
+
+[functions.create-driver]
+verify_jwt = false

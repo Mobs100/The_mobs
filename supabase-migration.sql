@@ -3,6 +3,8 @@
 -- This migration only adds delivery fields if they do not exist.
 alter table if exists public.orders add column if not exists customer_name text;
 alter table if exists public.orders add column if not exists phone text;
+alter table if exists public.orders add column if not exists delivery_address text;
+alter table if exists public.orders add column if not exists delivery_instructions text;
 alter table if exists public.orders add column if not exists latitude double precision;
 alter table if exists public.orders add column if not exists longitude double precision;
 alter table if exists public.orders add column if not exists delivery_started_at timestamptz;
@@ -379,3 +381,6 @@ with check (
       and d.status='approved'
   )
 );
+
+-- Refresh PostgREST schema cache after applying the new order columns.
+notify pgrst, 'reload schema';
