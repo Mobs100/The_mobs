@@ -520,20 +520,6 @@ async function placeOrder(){
   }
 }
 
-function getCustomerToken(){
-  let token = localStorage.getItem('mobs_customer_token');
-
-  if(!token){
-    token = (window.crypto && crypto.randomUUID)
-      ? crypto.randomUUID()
-      : 'mobs-' + Date.now() + '-' + Math.random().toString(36).slice(2,12);
-
-    localStorage.setItem('mobs_customer_token', token);
-  }
-
-  return token;
-}
-
 function getSavedCustomerOrders(){
   try {
     const orders = JSON.parse(localStorage.getItem('mobs_customer_orders') || '[]');
@@ -796,6 +782,14 @@ function toggleFavorite(id, button){
   else { favorites.push(id); button.textContent='♥'; }
   localStorage.setItem(key, JSON.stringify(favorites));
 }
+
+// Inline HTML handlers must be exposed because this file is loaded as an ES module.
+Object.assign(window, {
+  go, addToCart, addSame, changeQty, clearDeliveryLocation,
+  continueCheckout, filterCategory, loadOrders, openCheckout,
+  openProduct, openProductById, openTracking, openTrackingByToken,
+  placeOrder, removeItem, toggleFavorite, useMyLocation
+});
 
 // Initial load
 loadCustomerInfo();

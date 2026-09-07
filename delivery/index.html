@@ -116,7 +116,6 @@ h2{font-size:21px;letter-spacing:-.7px;margin-bottom:12px}
 .registration{margin-top:18px;text-align:left;max-height:70vh;overflow:auto;padding-right:3px}.registration h2{font-size:24px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.form-grid .field:nth-child(10),.form-grid .field:nth-child(11){grid-column:1/-1}.upload-docs{display:grid;gap:9px;margin-top:12px}.upload-docs label{display:block;border:1px dashed #b8b4aa;padding:12px;border-radius:12px;font-size:10px;font-weight:800;letter-spacing:.08em}.upload-docs input{display:block;margin-top:8px;width:100%;font-size:12px}.registration .field{width:100%;box-sizing:border-box}.registration .error{margin-top:10px}@media(max-width:520px){.form-grid{grid-template-columns:1fr}.form-grid .field{grid-column:auto!important}}
 
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -358,9 +357,9 @@ h2{font-size:21px;letter-spacing:-.7px;margin-bottom:12px}
 
 <div id="toast" class="toast hidden"></div>
 
-<script src="../shared/config.js"></script>
-<script src="../shared/supabase.js"></script>
-<script src="app.js" defer></script>
+<script type="module" src="../shared/config.js"></script>
+<script type="module" src="../shared/supabase.js"></script>
+<script type="module" src="./app.js"></script>
 
 </body>
 </html>

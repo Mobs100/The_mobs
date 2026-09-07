@@ -651,6 +651,13 @@ window.saveSettings = async function(){
   }
 };
 
+// Inline HTML handlers must be exposed because this file is loaded as an ES module.
+Object.assign(window, {
+  backToLogin, closeModal, exportCSV, exportReport, globalSearch, go,
+  openModal, saveSettings, showForgotPassword, showToast, signIn, toggle,
+  toggleKdsSound, updateAdminPassword
+});
+
 window.loadPage = loadPage;
 
 /* Refresh live data automatically while the Admin is open. */

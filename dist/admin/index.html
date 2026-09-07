@@ -16,6 +16,8 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:fle
 @media(max-width:900px){.side{display:none}.main{margin-left:0;width:100%}.grid4{grid-template-columns:1fr 1fr}.layout2,.detail{grid-template-columns:1fr}.top{padding:0 15px}.search{width:180px}.content{padding:16px}.mobilebar{display:flex;position:fixed;bottom:0;left:0;right:0;height:60px;background:#111;z-index:10;justify-content:space-around;align-items:center}.mobilebar button{background:none;border:0;color:#ddd;font-size:10px}.mobilebar b{display:block;font-size:18px}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}}
 .driver-table{width:100%;border-collapse:collapse}.driver-table th,.driver-table td{padding:11px 8px;border-bottom:1px solid #eee;text-align:left;font-size:12px}.driver-status{font-size:10px;font-weight:900;text-transform:uppercase}.driver-status.pending{color:#9a7200}.driver-status.approved{color:#16713a}.driver-status.rejected,.driver-status.suspended{color:#b33}.doc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.doc-card{border:1px solid #e5e2da;border-radius:12px;padding:10px}.doc-card img{width:100%;height:180px;object-fit:cover;border-radius:8px}.driver-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.nav-count{float:right;background:#f4b000;color:#111;border-radius:8px;padding:2px 5px;font-size:9px}@media(max-width:760px){.doc-grid{grid-template-columns:1fr}.driver-table{min-width:760px}}
 </style>
+  <script type="module" crossorigin src="/assets/admin-ChuRfx9E.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/supabase-CjkXVilc.js">
 </head>
 <body>
 <div id="login" class="login">
@@ -159,10 +161,6 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:fle
 <div class="mobilebar"><button onclick="go('dashboard')"><b>⌂</b>Home</button><button onclick="go('orders')"><b>◫</b>Orders</button><button onclick="go('kitchen')"><b>◉</b>Kitchen</button><button onclick="go('menu')"><b>☰</b>Menu</button><button onclick="go('settings')"><b>⚙</b>More</button></div>
 <div id="modal" class="modal" onclick="if(event.target===this)closeModal()"><div class="modalbox" id="modalbox"></div></div><div id="toast" class="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../shared/config.js"></script>
-<script src="../shared/supabase.js"></script>
-<script src="app.js" defer></script>
 
 </body>
 </html>

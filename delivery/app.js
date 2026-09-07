@@ -920,6 +920,7 @@ window.callCustomer=callCustomer;
 window.messageCustomer=messageCustomer;
 window.callRestaurant=callRestaurant;
 window.openSelectedMaps=openSelectedMaps;
+window.backFromDetail=backFromDetail;
 window.setOrderTab=setOrderTab;
 window.showRegistration=showRegistration;
 window.hideRegistration=hideRegistration;
