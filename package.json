@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 3000",
-    "build": "node ./node_modules/vite/bin/vite.js build",
-    "preview": "vite preview --host 0.0.0.0 --port 3000"
+   "build": "vite build",
+    "preview": "node ./node_modules/vite/bin/vite.js preview --host 0.0.0.0 --port 3000"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.115.0"
@@ -15,6 +15,6 @@
     "vite": "^7.1.0"
   },
   "allowScripts": {
-    "esbuild@0.28.2": true
+    "esbuild": true
   }
 }
