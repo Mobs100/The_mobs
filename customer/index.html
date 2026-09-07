@@ -612,6 +612,8 @@ button{cursor:pointer}
   bottom:16px
 }
 
+.product-db-image{width:100%;height:100%;object-fit:cover;border-radius:7px;display:block}.food-db-image{width:100%;height:100%;object-fit:cover;border-radius:7px;display:block}.db-empty{padding:28px;text-align:center;color:var(--gray);font-size:12px;background:#fff;border-radius:9px}.loading{opacity:.65}
+
 .row-info{flex:1}
 
 .row-info b{font-size:12px}
@@ -1684,37 +1686,8 @@ button{cursor:pointer}
     <span class="see" onclick="go('menu')">See All</span>
   </div>
 
-  <div class="cards">
-
-    <div
-      class="food-card"
-      onclick="openProduct('Classic Burger')"
-    >
-      <button class="fav">♡</button>
-
-      <div class="food-thumb">
-        <div class="burger"></div>
-      </div>
-
-      <div class="food-name">Classic Burger</div>
-      <div class="food-price">28 SAR</div>
-      <span class="badge">HOT</span>
-    </div>
-
-    <div
-      class="food-card"
-      onclick="openProduct('Mushroom Burger')"
-    >
-      <button class="fav">♡</button>
-
-      <div class="food-thumb">
-        <div class="burger"></div>
-      </div>
-
-      <div class="food-name">Mushroom Burger</div>
-      <div class="food-price">34 SAR</div>
-    </div>
-
+  <div id="homePopular" class="cards">
+    <div class="choice" style="grid-column:1/-1;text-align:center">Loading menu…</div>
   </div>
 
   <nav class="bottom-nav">
@@ -1774,95 +1747,12 @@ button{cursor:pointer}
 
   </div>
 
-  <div class="categories">
-    <button class="cat active">All</button>
-    <button class="cat">Burgers</button>
-    <button class="cat">Sides</button>
-    <button class="cat">Drinks</button>
-    <button class="cat">MOBS Choice</button>
+  <div id="menuCategories" class="categories">
+    <button class="cat active" data-category="all" onclick="filterMenu('all',this)">All</button>
   </div>
 
-  <div class="list">
-
-    <div
-      class="row-card"
-      onclick="openProduct('Classic Burger')"
-    >
-      <div class="row-thumb">
-        <div class="burger"></div>
-      </div>
-
-      <div class="row-info">
-        <b>Classic Burger</b>
-        <p>
-          Grilled beef, fresh lettuce, tomato & MOBS sauce.
-        </p>
-        <span class="row-price">28 SAR</span>
-      </div>
-
-      <span class="row-arrow">›</span>
-    </div>
-
-
-    <div
-      class="row-card"
-      onclick="openProduct('Cheese Burger')"
-    >
-      <div class="row-thumb">
-        <div class="burger"></div>
-      </div>
-
-      <div class="row-info">
-        <b>Cheese Burger</b>
-        <p>
-          Beef, melted cheese and signature sauce.
-        </p>
-        <span class="row-price">32 SAR</span>
-      </div>
-
-      <span class="row-arrow">›</span>
-    </div>
-
-
-    <div
-      class="row-card"
-      onclick="openProduct('Mushroom Burger')"
-    >
-      <div class="row-thumb">
-        <div class="burger"></div>
-      </div>
-
-      <div class="row-info">
-        <b>Mushroom Burger</b>
-        <p>
-          Beef, mushrooms, cheese and creamy sauce.
-        </p>
-        <span class="row-price">34 SAR</span>
-      </div>
-
-      <span class="row-arrow">›</span>
-    </div>
-
-
-    <div
-      class="row-card"
-      onclick="openProduct('MOBS Special')"
-    >
-      <div class="row-thumb">
-        <div class="burger"></div>
-      </div>
-
-      <div class="row-info">
-        <b>MOBS Special</b>
-        <p>
-          The one that does not need an introduction.
-        </p>
-        <span class="row-price">36 SAR</span>
-      </div>
-
-      <span class="row-arrow">›</span>
-    </div>
-
+  <div id="menuList" class="list">
+    <div class="choice" style="text-align:center;padding:35px">Loading menu…</div>
   </div>
 
 </section>
@@ -2425,115 +2315,286 @@ button{cursor:pointer}
 </div>
 
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 
-const screens=[
-  'splash',
-  'welcome',
-  'location',
-  'home',
-  'menu',
-  'product',
-  'cart',
-  'checkout',
-  'payment',
-  'review',
-  'success',
-  'tracking',
-  'orders',
-  'profile'
+const SUPABASE_URL = "https://pcundfmldniuemtbjnop.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_hQy6k4JCxvq6UVf7Lzf_ow_a45kiq_O";
+const RESTAURANT_ID = "81561a5d-c8e6-41b8-b6fd-5f582bc7e97a";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+const screens = [
+  'splash','welcome','location','home','menu','product','cart',
+  'checkout','payment','review','success','tracking','orders','profile'
 ];
 
-let cart=[];
-
-let currentProduct={
-  name:'Classic Burger',
-  price:28
+let cart = [];
+let dbProducts = [];
+let currentProduct = {
+  name: 'Classic Burger',
+  price: 28,
+  productId: null
 };
+
+let lastOrder = null;
+
+const staticProducts = {
+  'Classic Burger': 28,
+  'Cheese Burger': 32,
+  'Mushroom Burger': 34,
+  'MOBS Special': 36
+};
+
+/* ---------------------------------------------------------
+   CUSTOMER TOKEN
+   The same token is reused so Admin can group this
+   customer's orders together.
+--------------------------------------------------------- */
+
+let customerToken = localStorage.getItem('mobs_customer_token');
+
+if(!customerToken){
+  customerToken = crypto.randomUUID();
+  localStorage.setItem('mobs_customer_token', customerToken);
+}
+
+/* ---------------------------------------------------------
+   NAVIGATION
+--------------------------------------------------------- */
 
 function go(id){
 
-  screens.forEach(s=>{
-    document
-      .getElementById(s)
-      .classList
-      .remove('active');
+  screens.forEach(s => {
+    const el = document.getElementById(s);
+    if(el) el.classList.remove('active');
   });
 
-  document
-    .getElementById(id)
-    .classList
-    .add('active');
+  const target = document.getElementById(id);
 
-  if(id==='cart') renderCart();
+  if(!target) return;
 
-  if(id==='review') renderReview();
+  target.classList.add('active');
+
+  if(id === 'cart') renderCart();
+  if(id === 'review') renderReview();
+  if(id === 'orders') loadCustomerOrders();
+  if(id === 'menu') { if(dbProducts.length) renderCustomerMenu(); else initializeCustomerMenu(); }
+  if(id === 'home') { if(dbProducts.length) renderHomePopular(); else initializeCustomerMenu(); }
 
   window.scrollTo(0,0);
 }
 
-setTimeout(()=>{
+setTimeout(() => {
   go('welcome');
 },1400);
 
+/* ---------------------------------------------------------
+   CUSTOMER MENU — READS DIRECTLY FROM ADMIN'S SUPABASE MENU
+--------------------------------------------------------- */
 
-function openProduct(name){
+async function loadDbProducts(){
+  const {data,error}=await supabaseClient
+    .from('products')
+    .select('id,name,price,description,image_url,is_available,is_featured,sort_order,menu_category_id,menu_categories(id,name,sort_order,is_active)')
+    .eq('restaurant_id',RESTAURANT_ID)
+    .eq('is_available',true)
+    .order('sort_order',{ascending:true})
+    .order('id',{ascending:true});
 
-  const prices={
-    'Classic Burger':28,
-    'Cheese Burger':32,
-    'Mushroom Burger':34,
-    'MOBS Special':36
-  };
+  if(error) throw error;
+  dbProducts = data || [];
+  renderCustomerMenu();
+  renderHomePopular();
+  return dbProducts;
+}
 
+function productImage(p, cls){
+  if(p?.image_url){
+    return `<img class="${cls}" src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" onerror="this.style.display='none'">`;
+  }
+  return `<div class="burger"></div>`;
+}
+
+function renderHomePopular(){
+  const el=document.getElementById('homePopular');
+  if(!el)return;
+  const list=dbProducts.filter(p=>p.is_featured).slice(0,4);
+  const items=(list.length?list:dbProducts.slice(0,4));
+  if(!items.length){
+    el.innerHTML='<div class="db-empty" style="grid-column:1/-1">No products are published yet. Add products from Admin → Menu / Products.</div>';
+    return;
+  }
+  el.innerHTML=items.map(p=>`<div class="food-card" onclick="openProductById('${p.id}')">
+    <button class="fav" onclick="event.stopPropagation();toggleFavorite('${p.id}',this)">♡</button>
+    <div class="food-thumb">${productImage(p,'food-db-image')}</div>
+    <div class="food-name">${escapeHtml(p.name)}</div>
+    <div class="food-price">${Number(p.price).toFixed(2)} SAR</div>
+  </div>`).join('');
+}
+
+function renderCustomerMenu(categoryId='all'){
+  const catEl=document.getElementById('menuCategories');
+  const listEl=document.getElementById('menuList');
+  if(!catEl||!listEl)return;
+
+  const cats=[];
+  dbProducts.forEach(p=>{
+    const c=p.menu_categories;
+    if(c && !cats.some(x=>x.id===c.id)) cats.push(c);
+  });
+  catEl.innerHTML=`<button class="cat ${categoryId==='all'?'active':''}" data-category="all" onclick="filterMenu('all',this)">All</button>`+
+    cats.map(c=>`<button class="cat ${String(categoryId)===String(c.id)?'active':''}" data-category="${c.id}" onclick="filterMenu('${c.id}',this)">${escapeHtml(c.name)}</button>`).join('');
+
+  const items=categoryId==='all'?dbProducts:dbProducts.filter(p=>String(p.menu_category_id)===String(categoryId));
+  if(!items.length){listEl.innerHTML='<div class="db-empty">No products available in this category.</div>';return;}
+  listEl.innerHTML=items.map(p=>`<div class="row-card" onclick="openProductById('${p.id}')">
+    <div class="row-thumb">${productImage(p,'product-db-image')}</div>
+    <div class="row-info">
+      <b>${escapeHtml(p.name)}</b>
+      <p>${escapeHtml(p.description||'Freshly prepared at THE MOBS.')}</p>
+      <span class="row-price">${Number(p.price).toFixed(2)} SAR</span>
+    </div>
+    <span class="row-arrow">›</span>
+  </div>`).join('');
+}
+
+function filterMenu(categoryId,button){
+  document.querySelectorAll('#menuCategories .cat').forEach(x=>x.classList.remove('active'));
+  if(button)button.classList.add('active');
+  renderCustomerMenu(categoryId);
+}
+
+function openProductById(id){
+  const p=dbProducts.find(x=>String(x.id)===String(id));
+  if(!p)return;
   currentProduct={
-    name,
-    price:prices[name]||28
+    id:p.id,
+    name:p.name,
+    price:Number(p.price),
+    productId:p.id,
+    description:p.description||'',
+    image_url:p.image_url||null
   };
-
-  document
-    .getElementById('productName')
-    .textContent=name;
-
-  document
-    .getElementById('productPrice')
-    .textContent=currentProduct.price+' SAR';
-
+  document.getElementById('productName').textContent=p.name;
+  document.getElementById('productPrice').textContent=Number(p.price).toFixed(2)+' SAR';
+  const desc=document.querySelector('#product .description');
+  if(desc)desc.textContent=p.description||'Freshly prepared at THE MOBS.';
+  const art=document.querySelector('#product .product-art');
+  if(art)art.innerHTML=productImage(p,'product-db-image');
   go('product');
 }
 
+function openProduct(name){
+  const p=dbProducts.find(x=>String(x.name).toLowerCase()===String(name).toLowerCase());
+  if(p)return openProductById(p.id);
+  loadDbProducts().then(()=>{
+    const fresh=dbProducts.find(x=>String(x.name).toLowerCase()===String(name).toLowerCase());
+    if(fresh)openProductById(fresh.id); else alert('This product is not published in the Admin menu.');
+  }).catch(e=>alert('Could not load the restaurant menu.\n\n'+e.message));
+}
+
+function toggleFavorite(id,button){
+  const key='mobs_favorites';
+  const arr=JSON.parse(localStorage.getItem(key)||'[]');
+  const i=arr.indexOf(id);
+  if(i>=0){arr.splice(i,1);button.textContent='♡';}else{arr.push(id);button.textContent='♥';}
+  localStorage.setItem(key,JSON.stringify(arr));
+}
+
+async function initializeCustomerMenu(){
+  try{
+    await loadDbProducts();
+  }catch(error){
+    console.error('Customer menu load error:',error);
+    const list=document.getElementById('menuList');
+    if(list)list.innerHTML=`<div class="db-empty">Could not load the restaurant menu.<br><small>${escapeHtml(error.message||'Database error')}</small></div>`;
+    const home=document.getElementById('homePopular');
+    if(home)home.innerHTML='<div class="db-empty" style="grid-column:1/-1">Could not load the restaurant menu. Check Supabase RLS policies for public SELECT on products and menu_categories.</div>';
+  }
+}
+
+initializeCustomerMenu();
+
+/* ---------------------------------------------------------
+   CART
+--------------------------------------------------------- */
 
 function addToCart(){
 
   cart.push({
-    ...currentProduct
+    name: currentProduct.name,
+    price: Number(currentProduct.price),
+    productId: currentProduct.productId || null
   });
 
   updateCount();
-
   go('cart');
 }
-
 
 function updateCount(){
 
   document
     .querySelectorAll('#navCount,#count')
-    .forEach(x=>{
-      if(x){
-        x.textContent=cart.length;
-      }
+    .forEach(x => {
+      if(x) x.textContent = cart.length;
     });
 }
 
+function removeItem(i){
+
+  cart.splice(i,1);
+
+  updateCount();
+  renderCart();
+}
+
+function addSame(i){
+
+  cart.push({
+    ...cart[i]
+  });
+
+  updateCount();
+  renderCart();
+}
+
+function calculateTotals(){
+
+  const subtotal = cart.reduce(
+    (sum,item) => sum + Number(item.price || 0),
+    0
+  );
+
+  const deliveryFee = 8;
+
+  const tax = Math.round(
+    subtotal * 0.15 * 100
+  ) / 100;
+
+  const total =
+    Math.round(
+      (subtotal + deliveryFee + tax) * 100
+    ) / 100;
+
+  return {
+    subtotal,
+    deliveryFee,
+    tax,
+    total
+  };
+}
 
 function renderCart(){
 
-  const el=document.getElementById('cartItems');
+  const el = document.getElementById('cartItems');
 
   if(!cart.length){
 
-    el.innerHTML=`
+    el.innerHTML = `
       <div
         class="choice"
         style="text-align:center;padding:35px"
@@ -2547,13 +2608,12 @@ function renderCart(){
         >
           BROWSE MENU
         </button>
-
       </div>
     `;
 
   }else{
 
-    el.innerHTML=cart.map((x,i)=>`
+    el.innerHTML = cart.map((x,i) => `
 
       <div class="cart-item">
 
@@ -2563,14 +2623,14 @@ function renderCart(){
 
         <div class="row-info">
 
-          <b>${x.name}</b>
+          <b>${escapeHtml(x.name)}</b>
 
           <p>
             Freshly prepared for your story.
           </p>
 
           <span class="row-price">
-            ${x.price} SAR
+            ${Number(x.price).toFixed(2)} SAR
           </span>
 
           <div class="qty">
@@ -2589,111 +2649,381 @@ function renderCart(){
 
         </div>
 
-        <b>${x.price} SAR</b>
+        <b>
+          ${Number(x.price).toFixed(2)} SAR
+        </b>
 
       </div>
 
     `).join('');
   }
 
-  const sub=cart.reduce(
-    (a,x)=>a+x.price,
-    0
-  );
+  const totals = calculateTotals();
 
-  const tax=Math.round(sub*.15);
+  document.getElementById('subtotal').textContent =
+    totals.subtotal.toFixed(2) + ' SAR';
 
-  document.getElementById('subtotal')
-    .textContent=sub+' SAR';
+  document.getElementById('tax').textContent =
+    totals.tax.toFixed(2) + ' SAR';
 
-  document.getElementById('tax')
-    .textContent=tax+' SAR';
-
-  document.getElementById('total')
-    .textContent=(sub+8+tax)+' SAR';
-}
-
-
-function removeItem(i){
-
-  cart.splice(i,1);
+  document.getElementById('total').textContent =
+    totals.total.toFixed(2) + ' SAR';
 
   updateCount();
-
-  renderCart();
 }
 
-
-function addSame(i){
-
-  cart.push({
-    ...cart[i]
-  });
-
-  updateCount();
-
-  renderCart();
-}
-
+/* ---------------------------------------------------------
+   REVIEW
+--------------------------------------------------------- */
 
 function renderReview(){
 
-  const sub=cart.reduce(
-    (a,x)=>a+x.price,
-    0
-  );
+  const totals = calculateTotals();
 
-  const tax=Math.round(sub*.15);
-
-  const total=sub+8+tax;
-
-  document.getElementById('reviewItems').innerHTML=`
+  document.getElementById('reviewItems').innerHTML = `
 
     <b>Order Summary</b>
 
-    ${cart.map(x=>`
+    ${cart.map(x => `
 
       <div class="sumline">
-        <span>${x.name}</span>
-        <b>${x.price} SAR</b>
+
+        <span>
+          ${escapeHtml(x.name)}
+        </span>
+
+        <b>
+          ${Number(x.price).toFixed(2)} SAR
+        </b>
+
       </div>
 
     `).join('')}
 
     <div class="sumline">
       <span>Subtotal</span>
-      <b>${sub} SAR</b>
+      <b>${totals.subtotal.toFixed(2)} SAR</b>
     </div>
 
     <div class="sumline">
       <span>Delivery Fee</span>
-      <b>8 SAR</b>
+      <b>${totals.deliveryFee.toFixed(2)} SAR</b>
     </div>
 
     <div class="sumline">
       <span>Tax (15%)</span>
-      <b>${tax} SAR</b>
+      <b>${totals.tax.toFixed(2)} SAR</b>
     </div>
 
     <div class="sumline total">
       <span>Total</span>
-      <b>${total} SAR</b>
+      <b>${totals.total.toFixed(2)} SAR</b>
     </div>
 
   `;
 }
 
+/* ---------------------------------------------------------
+   ORDER CREATION
+   This is the important part:
+   1. Creates a row in orders.
+   2. Gets the generated order ID/number.
+   3. Creates all rows in order_items.
+   4. Only then shows success.
+--------------------------------------------------------- */
 
-function placeOrder(){
+async function placeOrder(){
+  if(!cart.length){go('menu');return;}
+  const button=document.querySelector('#review .btn.yellow');
+  if(button){button.disabled=true;button.style.opacity='.6';button.textContent='PLACING ORDER...';}
+  try{
+    await loadDbProducts();
+    const normalized=[];
+    for(const item of cart){
+      const p=dbProducts.find(x=>String(x.id)===String(item.productId));
+      if(!p)throw new Error(`Product "${item.name}" is no longer available. Please return to Menu and choose an available product.`);
+      const existing=normalized.find(x=>String(x.product_id)===String(p.id));
+      if(existing){existing.quantity+=1;existing.line_total=Math.round(existing.unit_price*existing.quantity*100)/100;}
+      else normalized.push({product_id:p.id,product_name:p.name,unit_price:Number(p.price),quantity:1,line_total:Number(p.price)});
+    }
+    const subtotal=Math.round(normalized.reduce((sum,x)=>sum+x.line_total,0)*100)/100;
+    const deliveryFee=8;
+    const tax=Math.round(subtotal*.15*100)/100;
+    const total=Math.round((subtotal+deliveryFee+tax)*100)/100;
+    const addressChoice=document.querySelector('#checkout .choice.selected .muted');
+    const deliveryAddress=addressChoice?.textContent?.trim()||'King Fahd Road, Dammam';
+    const instructionsInput=document.querySelector('#checkout .field input');
+    const deliveryInstructions=instructionsInput?.value?.trim()||null;
+    const paymentMethod='cash_on_delivery';
 
-  if(!cart.length){
+    const {data:order,error:orderError}=await supabaseClient.from('orders').insert({
+      restaurant_id:RESTAURANT_ID,
+      customer_token:customerToken,
+      status:'pending',
+      payment_method:paymentMethod,
+      subtotal,
+      delivery_fee:deliveryFee,
+      tax,
+      total,
+      delivery_address:deliveryAddress,
+      delivery_instructions:deliveryInstructions
+    }).select('*').single();
+    if(orderError)throw orderError;
+    if(!order?.id)throw new Error('The order was not returned by the database.');
 
-    go('menu');
+    const {error:itemsError}=await supabaseClient.from('order_items').insert(normalized.map(x=>({...x,order_id:order.id})));
+    if(itemsError){
+      await supabaseClient.from('orders').delete().eq('id',order.id).eq('restaurant_id',RESTAURANT_ID);
+      throw itemsError;
+    }
 
-    return;
+    lastOrder={...order,items:normalized.map(x=>({...x,order_id:order.id}))};
+    localStorage.setItem('mobs_last_order_id',order.id);
+    if(order.order_number!=null)localStorage.setItem('mobs_last_order_number',order.order_number);
+    cart=[];updateCount();updateSuccessScreen(order);go('success');
+  }catch(error){
+    console.error('PLACE ORDER ERROR:',error);
+    alert('Could not place the order.\n\n'+(error?.message||'Unknown database error'));
+  }finally{
+    if(button){button.disabled=false;button.style.opacity='';button.textContent='PLACE ORDER →';}
+  }
+}
+
+/* ---------------------------------------------------------
+   SUCCESS SCREEN
+--------------------------------------------------------- */
+
+function updateSuccessScreen(order){
+
+  const code =
+    order?.order_number != null
+      ? `#MOBS-${order.order_number}`
+      : `#MOBS-${String(order?.id || '').slice(0,8).toUpperCase()}`;
+
+  const codeEl =
+    document.querySelector('#success .order-code');
+
+  if(codeEl){
+    codeEl.textContent = code;
   }
 
-  go('success');
+  const totalChoice =
+    document.querySelector('#success .choice b');
+
+  if(totalChoice){
+    totalChoice.textContent = '20 – 30 min';
+  }
+}
+
+/* ---------------------------------------------------------
+   CUSTOMER ORDERS
+   Pulls real orders created by this browser/customer token.
+--------------------------------------------------------- */
+
+async function loadCustomerOrders(){
+
+  const section =
+    document.getElementById('orders');
+
+  if(!section) return;
+
+  try{
+
+    const { data, error } =
+      await supabaseClient
+        .from('orders')
+        .select('*')
+        .eq('restaurant_id',RESTAURANT_ID)
+        .eq('customer_token',customerToken)
+        .order('created_at',{ascending:false});
+
+    if(error) throw error;
+
+    const existing =
+      section.querySelectorAll('.customer-real-order');
+
+    existing.forEach(x => x.remove());
+
+    const staticOrders =
+      section.querySelectorAll('.row-card');
+
+    staticOrders.forEach(x => x.style.display='none');
+
+    if(!data?.length){
+
+      const empty =
+        document.createElement('div');
+
+      empty.className='choice customer-real-order';
+
+      empty.style.textAlign='center';
+      empty.style.padding='30px';
+
+      empty.innerHTML=`
+        No orders yet.
+        <br><br>
+        <button class="btn yellow" onclick="go('menu')">
+          BROWSE MENU
+        </button>
+      `;
+
+      section.appendChild(empty);
+      return;
+    }
+
+    data.forEach(order => {
+
+      const card =
+        document.createElement('div');
+
+      card.className =
+        'row-card customer-real-order';
+
+      card.onclick = () => {
+        lastOrder = order;
+        updateTrackingScreen(order);
+        go('tracking');
+      };
+
+      const status =
+        formatStatus(order.status);
+
+      card.innerHTML = `
+
+        <div class="row-thumb">
+          <div class="burger"></div>
+        </div>
+
+        <div class="row-info">
+
+          <b>
+            ${escapeHtml(formatOrderNumber(order))}
+          </b>
+
+          <p>
+            ${money(order.total)}
+          </p>
+
+          <span class="row-price">
+            ${escapeHtml(status)}
+          </span>
+
+        </div>
+
+        <span class="row-arrow">›</span>
+
+      `;
+
+      section.appendChild(card);
+
+    });
+
+  }catch(error){
+
+    console.error('Customer orders error:',error);
+
+  }
+}
+
+/* ---------------------------------------------------------
+   TRACKING
+--------------------------------------------------------- */
+
+function formatOrderNumber(order){
+
+  if(order?.order_number != null){
+    return `#MOBS-${order.order_number}`;
+  }
+
+  return `#MOBS-${String(order?.id || '').slice(0,8).toUpperCase()}`;
+}
+
+function formatStatus(status){
+
+  const labels = {
+    pending:'Order received',
+    confirmed:'Confirmed',
+    preparing:'Preparing',
+    ready:'Ready',
+    out_for_delivery:'Out for delivery',
+    delivered:'Delivered',
+    cancelled:'Cancelled'
+  };
+
+  return labels[status] || status || 'Order received';
+}
+
+function money(value){
+
+  return `${Number(value || 0).toFixed(2)} SAR`;
+}
+
+function updateTrackingScreen(order){
+
+  const code =
+    document.querySelector('#tracking .track .muted');
+
+  const statusTitle =
+    document.querySelector(
+      '#tracking .track > b'
+    );
+
+  const statusChoice =
+    document.querySelector(
+      '#tracking .track .choice b'
+    );
+
+  const statusTime =
+    document.querySelector(
+      '#tracking .track .choice .muted'
+    );
+
+  if(code){
+    code.textContent =
+      formatOrderNumber(order);
+  }
+
+  if(statusTitle){
+    statusTitle.textContent =
+      formatStatus(order.status);
+  }
+
+  if(statusChoice){
+    statusChoice.textContent =
+      formatStatus(order.status);
+  }
+
+  if(statusTime){
+
+    if(order.status === 'delivered'){
+      statusTime.textContent =
+        'Order delivered';
+    }else if(order.status === 'cancelled'){
+      statusTime.textContent =
+        'Order cancelled';
+    }else{
+      statusTime.textContent =
+        'Estimated time · 20 – 30 min';
+    }
+
+  }
+}
+
+/* ---------------------------------------------------------
+   SECURITY / HTML ESCAPING
+--------------------------------------------------------- */
+
+function escapeHtml(value){
+
+  return String(value ?? '')
+    .replace(/[&<>"']/g,char => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#039;'
+    }[char]));
+
 }
 
 </script>
