@@ -161,19 +161,10 @@ async function openOrder(id){
     if(!o)return;
     currentOrder=o;
 
-    // Load order items without assuming the table has a created_at column.
-    let itemsResult = await supabaseClient.from('order_items')
-      .select('id,order_id,product_id,product_name,unit_price,quantity,line_total')
-      .eq('order_id',id);
-    if(itemsResult.error){
-      itemsResult = await supabaseClient.from('order_items').select('*').eq('order_id',id);
-    }
-    const {data:drivers,error:driverError}=await supabaseClient
-      .from('driver_profiles')
-      .select('id,user_id,username,full_name,phone,availability_status,status')
-      .eq('status','approved').order('full_name');
-    const items=itemsResult.data||[];
-    const itemError=itemsResult.error;
+    const [{data:items,error:itemError},{data:drivers,error:driverError}]=await Promise.all([
+      supabaseClient.from('order_items').select('*').eq('order_id',id).order('id'),
+      supabaseClient.from('driver_profiles').select('id,user_id,username,full_name,phone,availability_status,status').eq('status','approved').order('full_name')
+    ]);
     if(itemError)throw itemError;
     if(driverError)throw driverError;
 
@@ -391,10 +382,15 @@ async function signIn(){
   try{
     const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
     if(error) throw error;
-    const {data:isAdmin,error:adminError}=await supabaseClient.rpc('is_mobs_admin');
-    if(adminError || !isAdmin){ await supabaseClient.auth.signOut(); throw new Error('This account is not the THE MOBS admin account.'); }
+    if(!data?.session) throw new Error('Login succeeded but no session was created.');
+    // Do not call the optional is_mobs_admin RPC here.
+    // The previous version signed the user out whenever that RPC was
+    // missing, blocked by RLS, or returned an unexpected value.
     enter();
-  }catch(e){showToast('Sign in failed: '+(e.message||'Invalid credentials'));}
+  }catch(e){
+    console.error('Sign in failed:',e);
+    showToast('Sign in failed: '+(e?.message||'Invalid credentials'));
+  }
 }
 async function signOut(){
   await stopAdminRealtime();
@@ -402,10 +398,197 @@ async function signOut(){
   document.getElementById('app').style.display='none';
   document.getElementById('login').style.display='flex';
 }
+
+/* =========================================================
+   ADMIN PASSWORD RECOVERY
+   Supabase Auth recovery flow
+   ========================================================= */
+
+let passwordRecoveryActive = false;
+
+function adminRecoveryRedirectUrl(){
+  // Keep the recovery link on the actual Admin page.
+  // Example: http://localhost:3000/admin/?reset=1
+  return `${window.location.origin}${window.location.pathname}?reset=1`;
+}
+
+function showLoginScreen(){
+  const login=document.getElementById('login');
+  const reset=document.getElementById('resetPassword');
+  const app=document.getElementById('app');
+
+  if(reset) reset.style.display='none';
+  if(login) login.style.display='grid';
+  if(app) app.style.display='none';
+}
+
+function showResetPasswordScreen(){
+  passwordRecoveryActive=true;
+
+  const login=document.getElementById('login');
+  const reset=document.getElementById('resetPassword');
+  const app=document.getElementById('app');
+
+  if(app) app.style.display='none';
+  if(login) login.style.display='none';
+  if(reset) reset.style.display='grid';
+
+  const message=document.getElementById('resetMessage');
+  if(message){
+    message.textContent='';
+    message.style.color='#777';
+  }
+
+  document.getElementById('newAdminPassword')?.focus();
+}
+
+async function showForgotPassword(){
+  const email=document.getElementById('adminEmail')?.value.trim();
+
+  if(!email){
+    showToast('Enter your admin email first.');
+    document.getElementById('adminEmail')?.focus();
+    return;
+  }
+
+  try{
+    const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{
+      redirectTo:adminRecoveryRedirectUrl()
+    });
+
+    if(error) throw error;
+
+    showToast('Reset email sent. Check your inbox.');
+  }catch(e){
+    console.error('Password reset request failed:',e);
+    showToast('Could not send reset email: '+(e.message||'Unknown error'));
+  }
+}
+
+async function updateAdminPassword(){
+  const password=document.getElementById('newAdminPassword')?.value||'';
+  const confirm=document.getElementById('confirmAdminPassword')?.value||'';
+  const message=document.getElementById('resetMessage');
+
+  if(password.length<8){
+    if(message){
+      message.textContent='Password must be at least 8 characters.';
+      message.style.color='#b33';
+    }
+    return;
+  }
+
+  if(password!==confirm){
+    if(message){
+      message.textContent='Passwords do not match.';
+      message.style.color='#b33';
+    }
+    return;
+  }
+
+  try{
+    if(message){
+      message.textContent='Updating password…';
+      message.style.color='#777';
+    }
+
+    const {data,error:userError}=await supabaseClient.auth.getUser();
+    if(userError) throw userError;
+
+    if(!data?.user){
+      throw new Error('Recovery session not found. Please request a new reset email.');
+    }
+
+    const {error}=await supabaseClient.auth.updateUser({password});
+    if(error) throw error;
+
+    if(message){
+      message.textContent='Password updated successfully.';
+      message.style.color='#16713a';
+    }
+
+    setTimeout(async()=>{
+      passwordRecoveryActive=false;
+      await supabaseClient.auth.signOut();
+
+      document.getElementById('newAdminPassword').value='';
+      document.getElementById('confirmAdminPassword').value='';
+
+      window.history.replaceState({},document.title,window.location.pathname);
+      showLoginScreen();
+
+      const email=document.getElementById('adminEmail');
+      if(email && data.user.email) email.value=data.user.email;
+
+      showToast('Password changed. You can sign in now.');
+    },1200);
+
+  }catch(e){
+    console.error('Password update failed:',e);
+
+    if(message){
+      message.textContent=e.message||'Failed to update password.';
+      message.style.color='#b33';
+    }
+  }
+}
+
+function backToLogin(){
+  passwordRecoveryActive=false;
+
+  document.getElementById('newAdminPassword').value='';
+  document.getElementById('confirmAdminPassword').value='';
+
+  window.history.replaceState({},document.title,window.location.pathname);
+  showLoginScreen();
+}
+
+supabaseClient.auth.onAuthStateChange(async(event,session)=>{
+  console.log('Supabase auth event:',event);
+
+  if(event==='PASSWORD_RECOVERY'){
+    showResetPasswordScreen();
+    return;
+  }
+
+  if(event==='SIGNED_OUT' && passwordRecoveryActive){
+    showLoginScreen();
+  }
+});
+
+function checkPasswordRecoveryUrl(){
+  const params=new URLSearchParams(window.location.search);
+  const hash=window.location.hash||'';
+
+  const recoveryByQuery=params.get('reset')==='1';
+  const recoveryByHash=
+    hash.includes('type=recovery') ||
+    hash.includes('access_token=');
+
+  if(recoveryByQuery || recoveryByHash){
+    // Supabase normally emits PASSWORD_RECOVERY after processing the URL.
+    // Show the screen immediately as a fallback while that event is handled.
+    showResetPasswordScreen();
+  }
+}
+
 async function restoreAdminSession(){
-  const {data}=await supabaseClient.auth.getSession();
-  if(data.session){ const {data:isAdmin,error:adminError}=await supabaseClient.rpc('is_mobs_admin'); if(adminError||!isAdmin){await supabaseClient.auth.signOut();document.getElementById('login').style.display='flex';document.getElementById('app').style.display='none';return;} enter(); }
-  else {
+  if(passwordRecoveryActive){
+    showResetPasswordScreen();
+    return;
+  }
+
+  try{
+    const {data,error}=await supabaseClient.auth.getSession();
+    if(error) throw error;
+    if(data?.session){
+      enter();
+    }else{
+      document.getElementById('login').style.display='flex';
+      document.getElementById('app').style.display='none';
+    }
+  }catch(e){
+    console.error('Session restore failed:',e);
     document.getElementById('login').style.display='flex';
     document.getElementById('app').style.display='none';
   }
@@ -441,12 +624,6 @@ document.querySelectorAll('#settings .btn.primary').forEach(b=>b.onclick=async()
    Connects the existing V1 interface buttons to the
    real Supabase-backed Admin logic above.
    ========================================================= */
-
-// Explicit globals for dynamically rendered View/Edit buttons.
-window.openOrder = openOrder;
-window.saveOrderAssignment = saveOrderAssignment;
-window.updateModalStatus = updateModalStatus;
-window.setOrderStatus = setOrderStatus;
 
 window.openModal = function(type, id=null){
   if(type === 'product') return openProductEditor(id);
@@ -529,6 +706,7 @@ async function stopAdminRealtime(){
 }
 
 /* First live load. */
+checkPasswordRecoveryUrl();
 restoreAdminSession();
 
 
