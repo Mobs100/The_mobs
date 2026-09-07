@@ -1969,7 +1969,7 @@ button{cursor:pointer}
   <div class="field">
     <label>MOBILE NUMBER</label>
     <input
-      id="customerPhone" maxlength="10" inputmode="numeric" pattern="05[0-9]{8}"
+      id="customerPhone"
       type="tel"
       inputmode="numeric"
       autocomplete="tel"
@@ -2020,7 +2020,9 @@ button{cursor:pointer}
     </label>
 
     <input
+      id="deliveryInstructions"
       placeholder="e.g. Ring the door bell."
+      maxlength="250"
     >
   </div>
 
@@ -2374,6 +2376,7 @@ button{cursor:pointer}
 const SUPABASE_URL = "https://pcundfmldniuemtbjnop.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_hQy6k4JCxvq6UVf7Lzf_ow_a45kiq_O";
 const RESTAURANT_ID = "81561a5d-c8e6-41b8-b6fd-5f582bc7e97a";
+const ORDER_API = "https://mobnew.mojahed-babiker9.workers.dev";
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
@@ -2419,7 +2422,7 @@ function go(id){
   if(id === 'cart') renderCart();
   if(id === 'review') renderReview();
   if(id === 'orders') loadOrders('active');
-  if(id === 'tracking' && currentOrder) loadTracking(currentOrder.id);
+  if(id === 'tracking' && currentOrder?.tracking_token) loadTracking(currentOrder.tracking_token);
   if(id === 'checkout') setTimeout(initDeliveryMap, 50);
 
   window.scrollTo(0,0);
@@ -2794,12 +2797,6 @@ function validateCustomerInfo(showMessage=true){
   return true;
 }
 
-document.addEventListener('input', (e) => {
-  if(e.target && e.target.id === 'customerPhone'){
-    e.target.value = e.target.value.replace(/\D/g,'').slice(0,10);
-  }
-});
-
 function loadCustomerInfo(){
   const nameEl = document.getElementById('customerName');
   const phoneEl = document.getElementById('customerPhone');
@@ -2825,161 +2822,373 @@ function continueCheckout(){
 async function placeOrder(){
   if(!cart.length){ go('menu'); return; }
 
-  // Customer name, phone and delivery location are mandatory before an order can be created.
   if(!validateCustomerInfo(true)){
     go('checkout');
     return;
   }
 
   const { name: customerName, phone: customerPhone } = getCustomerInfo();
+  const delivery = getDeliveryLocation();
+  const instructions = String(delivery.instructions || document.getElementById('deliveryInstructions')?.value || '').trim();
   const button = document.querySelector('#review > .btn');
-  if(button){ button.disabled = true; button.textContent = 'PLACING ORDER...'; }
+
+  if(button){
+    button.disabled = true;
+    button.textContent = 'PLACING ORDER...';
+  }
 
   try {
-    // Customer checkout does not require Supabase Auth.
-    // The customer is identified by the browser token + name + phone.
-    // This avoids Anonymous Auth, which is disabled in this project.
-
-    // Always use the current products loaded from Admin/Supabase.
+    // Orders are created through the existing MOBS Worker/D1 API.
+    // This avoids Supabase Auth and the old orders-table schema mismatch.
     await loadData();
 
     const normalized = cart.map(x => {
       const product = products.find(p => String(p.id) === String(x.product_id));
+
       if(!product || product.is_available === false){
         throw new Error(`Product "${x.name}" is no longer available in the Admin menu.`);
       }
+
       return {
         product_id: product.id,
         product_name: product.name,
+        name: product.name,
         unit_price: Number(product.price),
+        price: Number(product.price),
         quantity: Number(x.quantity || 1),
+        qty: Number(x.quantity || 1),
         line_total: Number(product.price) * Number(x.quantity || 1)
       };
     });
 
-    const subtotal = Math.round(normalized.reduce((sum,x)=>sum+x.line_total,0)*100)/100;
+    const subtotal = Math.round(
+      normalized.reduce((sum,x) => sum + x.line_total, 0) * 100
+    ) / 100;
+
     const deliveryFee = 8;
     const tax = Math.round(subtotal * 0.15 * 100) / 100;
     const total = Math.round((subtotal + deliveryFee + tax) * 100) / 100;
 
-    const { data: order, error: orderError } = await supabaseClient
-      .from('orders')
-      .insert({
-        restaurant_id: RESTAURANT_ID,
-        customer_token: getCustomerToken(),
-        status: 'pending',
-        payment_method: 'cash_on_delivery',
-        subtotal,
-        delivery_fee: deliveryFee,
-        tax,
-        total,
-      })
-      .select('id, order_number, status, total, created_at')
-      .single();
+    const address = delivery.address ||
+      `Customer map location: ${delivery.latitude},${delivery.longitude}`;
 
-    if(orderError) throw orderError;
-    if(!order?.id) throw new Error('The order was not returned by the database.');
+    const payload = {
+      customer_name: customerName,
+      phone: customerPhone,
+      branch: 'Dammam',
+      order_type: 'توصيل',
+      address,
+      latitude: Number(delivery.latitude),
+      longitude: Number(delivery.longitude),
+      payment_method: 'الدفع عند الاستلام',
+      items: normalized,
+      total,
+      notes: [
+        instructions,
+        `Subtotal: ${subtotal} SAR`,
+        `Delivery Fee: ${deliveryFee} SAR`,
+        `Tax: ${tax} SAR`,
+        `Customer Token: ${getCustomerToken()}`
+      ].filter(Boolean).join(' | ')
+    };
 
-    const items = normalized.map(x => ({
-      order_id: order.id,
-      product_id: x.product_id,
-      product_name: x.product_name,
-      product_price: x.unit_price,
-      quantity: x.quantity
-    }));
+    let response;
 
-    const { error: itemError } = await supabaseClient
-      .from('order_items')
-      .insert(items);
-
-    if(itemError){
-      await supabaseClient.from('orders').delete().eq('id', order.id);
-      throw itemError;
+    try {
+      response = await fetch(`${ORDER_API}/api/orders`, {
+        method: 'POST',
+        mode: 'cors',
+        credentials: 'omit',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+    } catch(firstError) {
+      // Retry as a CORS-simple request if the browser rejects the preflight.
+      response = await fetch(`${ORDER_API}/api/orders`, {
+        method: 'POST',
+        mode: 'cors',
+        credentials: 'omit',
+        headers: {
+          'Content-Type': 'text/plain;charset=UTF-8',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
     }
 
-    currentOrder = order;
+    const responseText = await response.text();
+    let result = {};
+    try { result = JSON.parse(responseText); } catch {}
+
+    if(!response.ok || result.success === false){
+      throw new Error(
+        result.error ||
+        result.message ||
+        responseText ||
+        `Order API error (${response.status})`
+      );
+    }
+
+    const order = result.order || result.data || result;
+    if(!order || !order.id){
+      throw new Error('The order was created but the server did not return an order ID.');
+    }
+
+    const trackingToken =
+      order.tracking_token ||
+      result.tracking_token ||
+      '';
+
+    if(!trackingToken){
+      throw new Error('The order was created but no tracking token was returned.');
+    }
+
+    currentOrder = {
+      ...order,
+      order_number: order.order_number || order.order_no,
+      status: order.status || 'جديد',
+      total,
+      customer_name: customerName,
+      phone: customerPhone,
+      address,
+      latitude: delivery.latitude,
+      longitude: delivery.longitude,
+      tracking_token: trackingToken,
+      items: normalized
+    };
+
+    saveCustomerOrder(currentOrder);
+
     cart = [];
     saveCart();
 
-    document.getElementById('orderCode').textContent = '#' + order.order_number;
+    document.getElementById('orderCode').textContent =
+      '#' + (currentOrder.order_number || currentOrder.order_no || currentOrder.id);
+
     const successTotal = document.querySelector('#success .choice b');
-    if(successTotal) successTotal.textContent = money(order.total);
+    if(successTotal) successTotal.textContent = money(total);
+
     go('success');
+
   } catch(error) {
     console.error('Place order error:', error);
-    alert('Could not place the order.\n\n' + (error.message || 'Check Supabase permissions/tables.'));
+
+    const message = String(error?.message || error || 'Unknown order error');
+    alert(
+      message.includes('Failed to fetch')
+        ? 'Could not connect to the MOBS order server. Please check the Worker /api/orders endpoint.'
+        : 'Could not place the order.\n\n' + message
+    );
   } finally {
-    if(button){ button.disabled = false; button.textContent = 'PLACE ORDER →'; }
+    if(button){
+      button.disabled = false;
+      button.textContent = 'PLACE ORDER →';
+    }
   }
 }
+
+function getCustomerToken(){
+  let token = localStorage.getItem('mobs_customer_token');
+
+  if(!token){
+    token = (window.crypto && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : 'mobs-' + Date.now() + '-' + Math.random().toString(36).slice(2,12);
+
+    localStorage.setItem('mobs_customer_token', token);
+  }
+
+  return token;
+}
+
+function getSavedCustomerOrders(){
+  try {
+    const orders = JSON.parse(localStorage.getItem('mobs_customer_orders') || '[]');
+    return Array.isArray(orders) ? orders : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCustomerOrder(order){
+  if(!order?.tracking_token) return;
+
+  const orders = getSavedCustomerOrders();
+  const key = String(order.tracking_token);
+  const index = orders.findIndex(x => String(x.tracking_token) === key);
+
+  if(index >= 0) orders[index] = {...orders[index], ...order};
+  else orders.unshift(order);
+
+  localStorage.setItem('mobs_customer_orders', JSON.stringify(orders.slice(0,30)));
+  localStorage.setItem('mobs_last_tracking_token', key);
+}
+
+async function fetchOrderByTrackingToken(token){
+  if(!token) throw new Error('Tracking token is missing.');
+
+  const response = await fetch(
+    `${ORDER_API}/api/orders/track?token=${encodeURIComponent(token)}&ts=${Date.now()}`,
+    {
+      method:'GET',
+      mode:'cors',
+      credentials:'omit',
+      cache:'no-store',
+      headers:{'Accept':'application/json'}
+    }
+  );
+
+  const text = await response.text();
+  let result = {};
+  try { result = JSON.parse(text); } catch {}
+
+  if(!response.ok || result.success === false){
+    throw new Error(result.error || result.message || text || `Tracking error (${response.status})`);
+  }
+
+  return result.order || result.data || result;
+}
+
 async function loadOrders(filter='active', button){
   document.querySelectorAll('#orderTabs .cat').forEach(x => x.classList.remove('active'));
   if(button) button.classList.add('active');
 
   const el = document.getElementById('ordersList');
   if(!el) return;
+
   el.innerHTML = '<div class="choice" style="text-align:center">Loading orders...</div>';
 
-  try {
-    let query = supabaseClient
-      .from('orders')
-      .select('id, order_number, status, total, created_at')
-      .eq('restaurant_id', RESTAURANT_ID)
-      .eq('customer_token', getCustomerToken())
-      .order('created_at', { ascending:false });
+  const saved = getSavedCustomerOrders();
 
-    const { data, error } = await query;
-    if(error) throw error;
-
-    const activeStatuses = ['pending','confirmed','preparing','ready','out_for_delivery'];
-    const orders = (data || []).filter(o => filter === 'active' ? activeStatuses.includes(o.status) : !activeStatuses.includes(o.status));
-
-    if(!orders.length){
-      el.innerHTML = `<div class="choice" style="text-align:center">No ${filter} orders yet.</div>`;
-      return;
-    }
-
-    el.innerHTML = orders.map(o => `
-      <div class="row-card" onclick="openTracking('${o.id}')">
-        <div class="row-thumb"><div class="burger"></div></div>
-        <div class="row-info">
-          <b>#${escapeHTML(o.order_number)}</b>
-          <p>${money(o.total)} · ${new Date(o.created_at).toLocaleDateString()}</p>
-          <span class="row-price">${escapeHTML(formatStatus(o.status))}</span>
-        </div>
-        <span class="row-arrow">›</span>
+  if(!saved.length){
+    el.innerHTML = `
+      <div class="choice" style="text-align:center">
+        No orders yet.<br><br>
+        <button class="btn yellow" onclick="go('menu')">BROWSE MENU</button>
       </div>
-    `).join('');
-  } catch(error) {
-    console.error('Orders load error:', error);
-    el.innerHTML = `<div class="choice" style="text-align:center">Orders are not configured yet. Run supabase_setup.sql first.</div>`;
+    `;
+    return;
   }
+
+  const refreshed = [];
+
+  for(const savedOrder of saved){
+    try {
+      const live = await fetchOrderByTrackingToken(savedOrder.tracking_token);
+      const merged = {...savedOrder, ...live};
+      saveCustomerOrder(merged);
+      refreshed.push(merged);
+    } catch(error){
+      // Keep the locally saved order visible if the API is temporarily unavailable.
+      refreshed.push(savedOrder);
+      console.warn('Order refresh failed:', error);
+    }
+  }
+
+  const activeStatuses = [
+    'جديد',
+    'جاري التجهيز',
+    'خرج للتوصيل',
+    'pending',
+    'confirmed',
+    'preparing',
+    'ready',
+    'out_for_delivery'
+  ];
+
+  const visible = refreshed.filter(o =>
+    filter === 'active'
+      ? activeStatuses.includes(String(o.status))
+      : !activeStatuses.includes(String(o.status))
+  );
+
+  if(!visible.length){
+    el.innerHTML = `<div class="choice" style="text-align:center">No ${filter} orders yet.</div>`;
+    return;
+  }
+
+  el.innerHTML = visible.map(o => `
+    <div class="row-card" onclick="openTrackingByToken('${escapeHTML(o.tracking_token)}')">
+      <div class="row-thumb"><div class="burger"></div></div>
+      <div class="row-info">
+        <b>${escapeHTML(formatOrderNumber(o))}</b>
+        <p>${money(o.total)}${o.created_at ? ' · ' + new Date(o.created_at).toLocaleDateString() : ''}</p>
+        <span class="row-price">${escapeHTML(formatStatus(o.status))}</span>
+      </div>
+      <span class="row-arrow">›</span>
+    </div>
+  `).join('');
 }
 
 function formatStatus(status){
-  return String(status || '').replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());
+  const labels = {
+    'جديد':'Order received',
+    'جاري التجهيز':'Preparing your order',
+    'خرج للتوصيل':'Out for delivery',
+    'مكتمل':'Delivered',
+    'ملغي':'Cancelled',
+    pending:'Order received',
+    confirmed:'Confirmed',
+    preparing:'Preparing',
+    ready:'Ready',
+    out_for_delivery:'Out for delivery',
+    delivered:'Delivered',
+    cancelled:'Cancelled'
+  };
+
+  return labels[status] || status || 'Order received';
 }
 
 async function openTracking(orderId){
-  currentOrder = { id: orderId };
-  await loadTracking(orderId);
-  go('tracking');
+  const saved = getSavedCustomerOrders().find(x => String(x.id) === String(orderId));
+  if(saved?.tracking_token){
+    await openTrackingByToken(saved.tracking_token);
+    return;
+  }
+
+  if(currentOrder?.tracking_token){
+    await openTrackingByToken(currentOrder.tracking_token);
+    return;
+  }
+
+  alert('Tracking information is not available for this order.');
 }
 
-async function loadTracking(orderId){
+async function openTrackingByToken(token){
   try {
-    const { data, error } = await supabaseClient
-      .from('orders')
-      .select('id, order_number, status, total, created_at')
-      .eq('id', orderId)
-      .eq('customer_token', getCustomerToken())
-      .single();
-    if(error) throw error;
-    currentOrder = data;
-    document.getElementById('trackingOrderCode').textContent = '#' + data.order_number;
-    document.getElementById('trackingStatus').textContent = formatStatus(data.status);
-    document.getElementById('trackingMessage').textContent = statusMessage(data.status);
-    document.getElementById('trackingEta').textContent = data.status === 'out_for_delivery' ? 'Estimated time · 15–30 min' : 'Estimated time · updating';
+    const order = await fetchOrderByTrackingToken(token);
+    currentOrder = {
+      ...currentOrder,
+      ...order,
+      tracking_token: token,
+      order_number: order.order_number || order.order_no
+    };
+    saveCustomerOrder(currentOrder);
+    updateTrackingScreen(currentOrder);
+    go('tracking');
+  } catch(error){
+    console.error('Tracking error:', error);
+    alert('Could not load order tracking.\n\n' + (error.message || 'Unknown tracking error'));
+  }
+}
+
+async function loadTracking(token){
+  const trackingToken = token || currentOrder?.tracking_token;
+  if(!trackingToken) return;
+
+  try {
+    const order = await fetchOrderByTrackingToken(trackingToken);
+    currentOrder = {
+      ...currentOrder,
+      ...order,
+      tracking_token: trackingToken,
+      order_number: order.order_number || order.order_no
+    };
+    saveCustomerOrder(currentOrder);
+    updateTrackingScreen(currentOrder);
   } catch(error){
     console.error('Tracking error:', error);
   }
@@ -2987,15 +3196,48 @@ async function loadTracking(orderId){
 
 function statusMessage(status){
   const map = {
+    'جديد':'We received your order.',
+    'جاري التجهيز':'The kitchen is preparing your order.',
+    'خرج للتوصيل':'Your order is on the way!',
+    'مكتمل':'Your order has been delivered.',
+    'ملغي':'This order was cancelled.',
     pending:'We received your order.',
     confirmed:'Your order has been confirmed.',
     preparing:'The kitchen is preparing your order.',
-    ready:'Your order is ready for pickup.',
+    ready:'Your order is ready.',
     out_for_delivery:'Your order is on the way!',
     delivered:'Your order has been delivered.',
     cancelled:'This order was cancelled.'
   };
   return map[status] || 'Your order status is being updated.';
+}
+
+function formatOrderNumber(order){
+  const value = order?.order_number || order?.order_no || order?.id || '';
+  return String(value).startsWith('#') ? String(value) : `#${value}`;
+}
+
+function updateTrackingScreen(order){
+  const code = document.getElementById('trackingOrderCode');
+  const status = document.getElementById('trackingStatus');
+  const message = document.getElementById('trackingMessage');
+  const eta = document.getElementById('trackingEta');
+
+  if(code) code.textContent = formatOrderNumber(order);
+  if(status) status.textContent = formatStatus(order.status);
+  if(message) message.textContent = statusMessage(order.status);
+
+  if(eta){
+    if(order.status === 'مكتمل' || order.status === 'delivered'){
+      eta.textContent = 'Order delivered';
+    }else if(order.status === 'ملغي' || order.status === 'cancelled'){
+      eta.textContent = 'Order cancelled';
+    }else if(order.status === 'خرج للتوصيل' || order.status === 'out_for_delivery'){
+      eta.textContent = 'Estimated time · 15–30 min';
+    }else{
+      eta.textContent = 'Estimated time · 20–30 min';
+    }
+  }
 }
 
 function toggleFavorite(id, button){
@@ -3009,6 +3251,8 @@ function toggleFavorite(id, button){
 
 // Initial load
 loadCustomerInfo();
+const savedTrackingToken = localStorage.getItem('mobs_last_tracking_token');
+if(savedTrackingToken){ currentOrder = { tracking_token: savedTrackingToken }; }
 loadData();
 updateCount();
 </script>
