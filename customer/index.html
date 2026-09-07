@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>THE MOBS — Customer</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3m7kP7N6j6J7JY1pQ7pM2x8mYJ4w=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Montserrat:wght@400;500;600;700;800&display=swap');
@@ -612,8 +615,6 @@ button{cursor:pointer}
   bottom:16px
 }
 
-.product-db-image{width:100%;height:100%;object-fit:cover;border-radius:7px;display:block}.food-db-image{width:100%;height:100%;object-fit:cover;border-radius:7px;display:block}.db-empty{padding:28px;text-align:center;color:var(--gray);font-size:12px;background:#fff;border-radius:9px}.loading{opacity:.65}
-
 .row-info{flex:1}
 
 .row-info b{font-size:12px}
@@ -814,6 +815,53 @@ button{cursor:pointer}
 
 .choice.selected{
   border:2px solid var(--yellow)
+}
+
+/* =========================================================
+   DELIVERY LOCATION MAP
+========================================================= */
+
+.delivery-map-wrap{
+  margin-top:10px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:10px;
+}
+
+#deliveryMap{
+  width:100%;
+  height:280px;
+  border-radius:8px;
+  overflow:hidden;
+  background:#e4e0d7;
+}
+
+.map-actions{
+  display:flex;
+  gap:8px;
+  margin-top:9px;
+}
+
+.map-actions .btn{
+  margin:0;
+  flex:1;
+  padding:12px 10px;
+  font-size:10px;
+}
+
+.location-status{
+  margin-top:8px;
+  font-size:10px;
+  color:var(--gray);
+  line-height:1.5;
+}
+
+.location-status.ok{color:#237a45;font-weight:700}
+.location-status.error{color:var(--danger);font-weight:700}
+
+@media(min-width:800px){
+  #deliveryMap{height:360px}
 }
 
 /* =========================================================
@@ -1529,11 +1577,11 @@ button{cursor:pointer}
     <span class="underline">for Every Background.</span>
   </div>
 
-  <button class="btn yellow" onclick="go('location')">
+  <button class="btn yellow" onclick="go('menu')">
     LET'S GET STARTED →
   </button>
 
-  <button class="btn outline" onclick="go('location')">
+  <button class="btn outline" onclick="go('menu')">
     I ALREADY HAVE AN ACCOUNT
   </button>
 
@@ -1686,8 +1734,8 @@ button{cursor:pointer}
     <span class="see" onclick="go('menu')">See All</span>
   </div>
 
-  <div id="homePopular" class="cards">
-    <div class="choice" style="grid-column:1/-1;text-align:center">Loading menu…</div>
+  <div id="popularCards" class="cards">
+    <div class="choice" style="grid-column:1/-1;text-align:center">Loading menu...</div>
   </div>
 
   <nav class="bottom-nav">
@@ -1736,23 +1784,17 @@ button{cursor:pointer}
 <section id="menu" class="screen">
 
   <div class="top">
-
     <button class="back" onclick="go('home')">←</button>
-
     <div class="header-title">Our Menu</div>
-
-    <button class="icon-btn" onclick="go('cart')">
-      🛒
-    </button>
-
+    <button class="icon-btn" onclick="go('cart')">🛒</button>
   </div>
 
-  <div id="menuCategories" class="categories">
-    <button class="cat active" data-category="all" onclick="filterMenu('all',this)">All</button>
+  <div id="categories" class="categories">
+    <button class="cat active" data-category="all" onclick="filterCategory('all', this)">All</button>
   </div>
 
   <div id="menuList" class="list">
-    <div class="choice" style="text-align:center;padding:35px">Loading menu…</div>
+    <div class="choice" style="text-align:center">Loading menu...</div>
   </div>
 
 </section>
@@ -1787,15 +1829,9 @@ button{cursor:pointer}
 
   <h1 id="productName">Classic Burger</h1>
 
-  <div class="rating">
-    ★ 4.9
-    <span class="muted"> · 120 reviews</span>
-  </div>
+  <div id="productRating" class="rating">★ 4.9 <span class="muted"> · 120 reviews</span></div>
 
-  <p class="description">
-    Grilled beef patty, fresh lettuce, tomato, cheese and our special sauce.
-    Not the main character. Still important to the story.
-  </p>
+  <p id="productDescription" class="description">Loading product...</p>
 
   <div class="extras">
 
@@ -1875,7 +1911,7 @@ button{cursor:pointer}
 
   </div>
 
-  <button class="btn black" onclick="go('checkout')">
+  <button class="btn black" onclick="openCheckout()">
     CHECKOUT →
   </button>
 
@@ -1917,19 +1953,66 @@ button{cursor:pointer}
 
   </div>
 
-  <div class="section-title">Delivery Address</div>
+  <div class="section-title">Customer Information</div>
 
-  <div class="choice selected">
-    <b>Home</b>
-    <br>
-    <span class="muted">
-      King Fahd Road, Dammam
-    </span>
+  <div class="field">
+    <label>FULL NAME</label>
+    <input
+      id="customerName"
+      type="text"
+      autocomplete="name"
+      maxlength="80"
+      placeholder="Enter your full name"
+    >
   </div>
 
-  <div class="choice">
-    ＋ Add New Address
+  <div class="field">
+    <label>MOBILE NUMBER</label>
+    <input
+      id="customerPhone" maxlength="10" inputmode="numeric" pattern="05[0-9]{8}"
+      type="tel"
+      inputmode="numeric"
+      autocomplete="tel"
+      maxlength="10"
+      minlength="10"
+      pattern="05[0-9]{8}"
+      placeholder="05XXXXXXXX"
+      oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)" onkeydown="if(this.value.length>=10 && !['Backspace','Delete','ArrowLeft','ArrowRight','Tab'].includes(event.key)) event.preventDefault()"
+    >
+    <small class="muted">10 digits · Example: 05XXXXXXXX</small>
   </div>
+
+  <div class="section-title">Delivery Location</div>
+
+  <div class="delivery-map-wrap">
+    <div id="deliveryMap"></div>
+
+    <div class="map-actions">
+      <button type="button" class="btn black" onclick="useMyLocation()">
+        USE MY LOCATION
+      </button>
+      <button type="button" class="btn outline" onclick="clearDeliveryLocation()">
+        CLEAR
+      </button>
+    </div>
+
+    <div id="locationStatus" class="location-status">
+      Tap the map to choose your delivery location.
+    </div>
+  </div>
+
+  <div class="field">
+    <label>DELIVERY ADDRESS / NOTES</label>
+    <input
+      id="deliveryAddress"
+      type="text"
+      maxlength="180"
+      placeholder="Building, street, apartment..."
+    >
+  </div>
+
+  <input type="hidden" id="deliveryLatitude">
+  <input type="hidden" id="deliveryLongitude">
 
   <div class="field">
     <label>
@@ -1943,7 +2026,7 @@ button{cursor:pointer}
 
   <button
     class="btn yellow"
-    onclick="go('payment')"
+    onclick="continueCheckout()"
   >
     CONTINUE →
   </button>
@@ -2079,8 +2162,8 @@ button{cursor:pointer}
     Your order has been placed successfully.
   </p>
 
-  <div class="order-code">
-    #MOBS-1024
+  <div id="orderCode" class="order-code">
+    #MOBS-----
   </div>
 
   <div class="choice">
@@ -2126,12 +2209,12 @@ button{cursor:pointer}
 
   <div class="track">
 
-    <div class="muted">
-      #MOBS-1024
+    <div id="trackingOrderCode" class="muted">
+      #MOBS-----
     </div>
 
-    <b style="font-size:18px">
-      Out for delivery
+    <b id="trackingStatus" style="font-size:18px">
+      Order status
     </b>
 
     <div class="map">
@@ -2145,11 +2228,9 @@ button{cursor:pointer}
     </div>
 
     <div class="choice selected">
-      <b>✓ Your order is on the way!</b>
+      <b id="trackingMessage">Your order is being prepared.</b>
       <br>
-      <span class="muted">
-        Estimated time · 15 min
-      </span>
+      <span id="trackingEta" class="muted">Estimated time · —</span>
     </div>
 
     <div class="driver">
@@ -2194,43 +2275,13 @@ button{cursor:pointer}
 
   </div>
 
-  <div class="categories">
-    <button class="cat active">Active</button>
-    <button class="cat">Past</button>
+  <div id="orderTabs" class="categories">
+    <button class="cat active" onclick="loadOrders('active', this)">Active</button>
+    <button class="cat" onclick="loadOrders('past', this)">Past</button>
   </div>
 
-  <div class="row-card" onclick="go('tracking')">
-
-    <div class="row-thumb">
-      <div class="burger"></div>
-    </div>
-
-    <div class="row-info">
-      <b>#MOBS-1024</b>
-      <p>2 items · 68 SAR</p>
-      <span class="row-price">
-        Out for delivery
-      </span>
-    </div>
-
-    <span class="row-arrow">›</span>
-
-  </div>
-
-  <div class="row-card">
-
-    <div class="row-thumb">
-      <div class="burger"></div>
-    </div>
-
-    <div class="row-info">
-      <b>#MOBS-1023</b>
-      <p>3 items · 84 SAR</p>
-      <span class="muted">
-        Delivered · Yesterday
-      </span>
-    </div>
-
+  <div id="ordersList" class="list">
+    <div class="choice" style="text-align:center">Loading orders...</div>
   </div>
 
 </section>
@@ -2315,8 +2366,10 @@ button{cursor:pointer}
 </div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// =========================================================
+// THE MOBS CUSTOMER — SUPABASE
+// =========================================================
 
 const SUPABASE_URL = "https://pcundfmldniuemtbjnop.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_hQy6k4JCxvq6UVf7Lzf_ow_a45kiq_O";
@@ -2332,700 +2385,632 @@ const screens = [
   'checkout','payment','review','success','tracking','orders','profile'
 ];
 
-let cart = [];
-let dbProducts = [];
-let currentProduct = {
-  name: 'Classic Burger',
-  price: 28,
-  productId: null
-};
+let products = [];
+let categories = [];
+let cart = JSON.parse(localStorage.getItem('mobs_cart') || '[]');
+let currentProduct = null;
+let selectedCategory = 'all';
+let currentOrder = null;
+let deliveryMap = null;
+let deliveryMarker = null;
+let deliveryMapReady = false;
 
-let lastOrder = null;
+const money = value => `${Number(value || 0).toFixed(2).replace(/\.00$/, '')} SAR`;
+const escapeHTML = value => String(value ?? '')
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 
-const staticProducts = {
-  'Classic Burger': 28,
-  'Cheese Burger': 32,
-  'Mushroom Burger': 34,
-  'MOBS Special': 36
-};
-
-/* ---------------------------------------------------------
-   CUSTOMER TOKEN
-   The same token is reused so Admin can group this
-   customer's orders together.
---------------------------------------------------------- */
-
-let customerToken = localStorage.getItem('mobs_customer_token');
-
-if(!customerToken){
-  customerToken = crypto.randomUUID();
-  localStorage.setItem('mobs_customer_token', customerToken);
+function saveCart(){
+  localStorage.setItem('mobs_cart', JSON.stringify(cart));
+  updateCount();
 }
 
-/* ---------------------------------------------------------
-   NAVIGATION
---------------------------------------------------------- */
+function updateCount(){
+  const count = cart.reduce((sum,item) => sum + Number(item.quantity || 1), 0);
+  document.querySelectorAll('#navCount,#count').forEach(el => el.textContent = count);
+}
 
 function go(id){
+  screens.forEach(s => document.getElementById(s)?.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
 
-  screens.forEach(s => {
-    const el = document.getElementById(s);
-    if(el) el.classList.remove('active');
-  });
-
-  const target = document.getElementById(id);
-
-  if(!target) return;
-
-  target.classList.add('active');
-
+  if(id === 'home') renderHome();
+  if(id === 'menu') renderMenu();
   if(id === 'cart') renderCart();
   if(id === 'review') renderReview();
-  if(id === 'orders') loadCustomerOrders();
-  if(id === 'menu') { if(dbProducts.length) renderCustomerMenu(); else initializeCustomerMenu(); }
-  if(id === 'home') { if(dbProducts.length) renderHomePopular(); else initializeCustomerMenu(); }
+  if(id === 'orders') loadOrders('active');
+  if(id === 'tracking' && currentOrder) loadTracking(currentOrder.id);
+  if(id === 'checkout') setTimeout(initDeliveryMap, 50);
 
   window.scrollTo(0,0);
 }
 
-setTimeout(() => {
-  go('welcome');
-},1400);
+setTimeout(() => go('menu'), 1400);
 
-/* ---------------------------------------------------------
-   CUSTOMER MENU — READS DIRECTLY FROM ADMIN'S SUPABASE MENU
---------------------------------------------------------- */
+async function loadData(){
+  try {
+    const [{ data: categoryData, error: categoryError }, { data: productData, error: productError }] = await Promise.all([
+      supabaseClient
+        .from('menu_categories')
+        .select('id, name, sort_order, is_active')
+        .eq('restaurant_id', RESTAURANT_ID)
+        .order('sort_order', { ascending:true }),
+      supabaseClient
+        .from('products')
+        .select('id, restaurant_id, name, description, image_url, price, category_id, is_available, is_featured, sort_order')
+        .eq('restaurant_id', RESTAURANT_ID)
+        .eq('is_available', true)
+        .order('sort_order', { ascending:true })
+        .order('created_at', { ascending:true })
+    ]);
 
-async function loadDbProducts(){
-  const {data,error}=await supabaseClient
-    .from('products')
-    .select('id,name,price,description,image_url,is_available,is_featured,sort_order,menu_category_id,menu_categories(id,name,sort_order,is_active)')
-    .eq('restaurant_id',RESTAURANT_ID)
-    .eq('is_available',true)
-    .order('sort_order',{ascending:true})
-    .order('id',{ascending:true});
+    if(categoryError) throw categoryError;
+    if(productError) throw productError;
 
-  if(error) throw error;
-  dbProducts = data || [];
-  renderCustomerMenu();
-  renderHomePopular();
-  return dbProducts;
+    categories = (categoryData || []).filter(c => c.is_active !== false);
+    products = productData || [];
+
+    renderCategories();
+    renderHome();
+    renderMenu();
+    updateCount();
+  } catch(error) {
+    console.error('MOBS menu load error:', error);
+    const message = 'Could not load the menu. Check Supabase table permissions.';
+    ['popularCards','menuList'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.innerHTML = `<div class="choice" style="grid-column:1/-1;text-align:center">${message}</div>`;
+    });
+  }
 }
 
-function productImage(p, cls){
-  if(p?.image_url){
-    return `<img class="${cls}" src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" onerror="this.style.display='none'">`;
+function productImage(product, className=''){
+  if(product.image_url){
+    return `<img src="${escapeHTML(product.image_url)}" alt="${escapeHTML(product.name)}" class="${className}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`;
   }
   return `<div class="burger"></div>`;
 }
 
-function renderHomePopular(){
-  const el=document.getElementById('homePopular');
-  if(!el)return;
-  const list=dbProducts.filter(p=>p.is_featured).slice(0,4);
-  const items=(list.length?list:dbProducts.slice(0,4));
-  if(!items.length){
-    el.innerHTML='<div class="db-empty" style="grid-column:1/-1">No products are published yet. Add products from Admin → Menu / Products.</div>';
-    return;
-  }
-  el.innerHTML=items.map(p=>`<div class="food-card" onclick="openProductById('${p.id}')">
-    <button class="fav" onclick="event.stopPropagation();toggleFavorite('${p.id}',this)">♡</button>
-    <div class="food-thumb">${productImage(p,'food-db-image')}</div>
-    <div class="food-name">${escapeHtml(p.name)}</div>
-    <div class="food-price">${Number(p.price).toFixed(2)} SAR</div>
-  </div>`).join('');
+function renderCategories(){
+  const el = document.getElementById('categories');
+  if(!el) return;
+  el.innerHTML = `<button class="cat ${selectedCategory==='all'?'active':''}" data-category="all" onclick="filterCategory('all', this)">All</button>` +
+    categories.map(c => `<button class="cat ${selectedCategory===c.id?'active':''}" data-category="${escapeHTML(c.id)}" onclick="filterCategory('${String(c.id).replace(/'/g,"\\'")}', this)">${escapeHTML(c.name)}</button>`).join('');
 }
 
-function renderCustomerMenu(categoryId='all'){
-  const catEl=document.getElementById('menuCategories');
-  const listEl=document.getElementById('menuList');
-  if(!catEl||!listEl)return;
-
-  const cats=[];
-  dbProducts.forEach(p=>{
-    const c=p.menu_categories;
-    if(c && !cats.some(x=>x.id===c.id)) cats.push(c);
-  });
-  catEl.innerHTML=`<button class="cat ${categoryId==='all'?'active':''}" data-category="all" onclick="filterMenu('all',this)">All</button>`+
-    cats.map(c=>`<button class="cat ${String(categoryId)===String(c.id)?'active':''}" data-category="${c.id}" onclick="filterMenu('${c.id}',this)">${escapeHtml(c.name)}</button>`).join('');
-
-  const items=categoryId==='all'?dbProducts:dbProducts.filter(p=>String(p.menu_category_id)===String(categoryId));
-  if(!items.length){listEl.innerHTML='<div class="db-empty">No products available in this category.</div>';return;}
-  listEl.innerHTML=items.map(p=>`<div class="row-card" onclick="openProductById('${p.id}')">
-    <div class="row-thumb">${productImage(p,'product-db-image')}</div>
-    <div class="row-info">
-      <b>${escapeHtml(p.name)}</b>
-      <p>${escapeHtml(p.description||'Freshly prepared at THE MOBS.')}</p>
-      <span class="row-price">${Number(p.price).toFixed(2)} SAR</span>
+function renderHome(){
+  const el = document.getElementById('popularCards');
+  if(!el) return;
+  const featured = products.filter(p => p.is_featured).slice(0,4);
+  const list = featured.length ? featured : products.slice(0,4);
+  if(!list.length){ el.innerHTML = `<div class="choice" style="grid-column:1/-1;text-align:center">No products available.</div>`; return; }
+  el.innerHTML = list.map(p => `
+    <div class="food-card" onclick="openProductById('${p.id}')">
+      <button class="fav" onclick="event.stopPropagation();toggleFavorite('${p.id}', this)">♡</button>
+      <div class="food-thumb">${productImage(p)}</div>
+      <div class="food-name">${escapeHTML(p.name)}</div>
+      <div class="food-price">${money(p.price)}</div>
+      ${p.is_featured ? '<span class="badge">HOT</span>' : ''}
     </div>
-    <span class="row-arrow">›</span>
-  </div>`).join('');
+  `).join('');
 }
 
-function filterMenu(categoryId,button){
-  document.querySelectorAll('#menuCategories .cat').forEach(x=>x.classList.remove('active'));
-  if(button)button.classList.add('active');
-  renderCustomerMenu(categoryId);
+function renderMenu(){
+  const el = document.getElementById('menuList');
+  if(!el) return;
+  const filtered = selectedCategory === 'all' ? products : products.filter(p => p.category_id === selectedCategory);
+  if(!filtered.length){ el.innerHTML = `<div class="choice" style="text-align:center">No products in this category.</div>`; return; }
+  el.innerHTML = filtered.map(p => `
+    <div class="row-card" onclick="openProductById('${p.id}')">
+      <div class="row-thumb">${productImage(p)}</div>
+      <div class="row-info">
+        <b>${escapeHTML(p.name)}</b>
+        <p>${escapeHTML(p.description || 'Freshly prepared for your story.')}</p>
+        <span class="row-price">${money(p.price)}</span>
+      </div>
+      <span class="row-arrow">›</span>
+    </div>
+  `).join('');
+}
+
+function filterCategory(id, button){
+  selectedCategory = id;
+  document.querySelectorAll('#categories .cat').forEach(x => x.classList.remove('active'));
+  button?.classList.add('active');
+  renderMenu();
 }
 
 function openProductById(id){
-  const p=dbProducts.find(x=>String(x.id)===String(id));
-  if(!p)return;
-  currentProduct={
-    id:p.id,
-    name:p.name,
-    price:Number(p.price),
-    productId:p.id,
-    description:p.description||'',
-    image_url:p.image_url||null
-  };
-  document.getElementById('productName').textContent=p.name;
-  document.getElementById('productPrice').textContent=Number(p.price).toFixed(2)+' SAR';
-  const desc=document.querySelector('#product .description');
-  if(desc)desc.textContent=p.description||'Freshly prepared at THE MOBS.';
-  const art=document.querySelector('#product .product-art');
-  if(art)art.innerHTML=productImage(p,'product-db-image');
+  const product = products.find(p => p.id === id);
+  if(product) openProduct(product);
+}
+
+function openProduct(productOrName){
+  const product = typeof productOrName === 'string'
+    ? products.find(p => p.name === productOrName)
+    : productOrName;
+
+  if(!product){
+    alert('This product is not available.');
+    return;
+  }
+
+  currentProduct = product;
+  document.getElementById('productName').textContent = product.name;
+  document.getElementById('productPrice').textContent = money(product.price);
+  document.getElementById('productDescription').textContent = product.description || 'Freshly prepared for your story.';
+
+  const art = document.querySelector('#product .product-art');
+  if(art) art.innerHTML = product.image_url
+    ? `<img src="${escapeHTML(product.image_url)}" alt="${escapeHTML(product.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:12px">`
+    : `<div class="burger"></div>`;
+
   go('product');
 }
 
-function openProduct(name){
-  const p=dbProducts.find(x=>String(x.name).toLowerCase()===String(name).toLowerCase());
-  if(p)return openProductById(p.id);
-  loadDbProducts().then(()=>{
-    const fresh=dbProducts.find(x=>String(x.name).toLowerCase()===String(name).toLowerCase());
-    if(fresh)openProductById(fresh.id); else alert('This product is not published in the Admin menu.');
-  }).catch(e=>alert('Could not load the restaurant menu.\n\n'+e.message));
-}
-
-function toggleFavorite(id,button){
-  const key='mobs_favorites';
-  const arr=JSON.parse(localStorage.getItem(key)||'[]');
-  const i=arr.indexOf(id);
-  if(i>=0){arr.splice(i,1);button.textContent='♡';}else{arr.push(id);button.textContent='♥';}
-  localStorage.setItem(key,JSON.stringify(arr));
-}
-
-async function initializeCustomerMenu(){
-  try{
-    await loadDbProducts();
-  }catch(error){
-    console.error('Customer menu load error:',error);
-    const list=document.getElementById('menuList');
-    if(list)list.innerHTML=`<div class="db-empty">Could not load the restaurant menu.<br><small>${escapeHtml(error.message||'Database error')}</small></div>`;
-    const home=document.getElementById('homePopular');
-    if(home)home.innerHTML='<div class="db-empty" style="grid-column:1/-1">Could not load the restaurant menu. Check Supabase RLS policies for public SELECT on products and menu_categories.</div>';
-  }
-}
-
-initializeCustomerMenu();
-
-/* ---------------------------------------------------------
-   CART
---------------------------------------------------------- */
-
 function addToCart(){
-
-  cart.push({
+  if(!currentProduct) return;
+  const existing = cart.find(x => x.product_id === currentProduct.id);
+  if(existing) existing.quantity = Number(existing.quantity || 1) + 1;
+  else cart.push({
+    product_id: currentProduct.id,
     name: currentProduct.name,
     price: Number(currentProduct.price),
-    productId: currentProduct.productId || null
+    image_url: currentProduct.image_url || null,
+    quantity: 1
   });
-
-  updateCount();
+  saveCart();
   go('cart');
 }
 
-function updateCount(){
-
-  document
-    .querySelectorAll('#navCount,#count')
-    .forEach(x => {
-      if(x) x.textContent = cart.length;
-    });
-}
-
-function removeItem(i){
-
-  cart.splice(i,1);
-
-  updateCount();
+function changeQty(index, delta){
+  const item = cart[index];
+  if(!item) return;
+  item.quantity = Number(item.quantity || 1) + delta;
+  if(item.quantity <= 0) cart.splice(index,1);
+  saveCart();
   renderCart();
 }
 
-function addSame(i){
+function removeItem(i){ cart.splice(i,1); saveCart(); renderCart(); }
+function addSame(i){ changeQty(i,1); }
 
-  cart.push({
-    ...cart[i]
-  });
-
-  updateCount();
-  renderCart();
+function cartSubtotal(){
+  return cart.reduce((sum,x) => sum + Number(x.price) * Number(x.quantity || 1), 0);
 }
-
-function calculateTotals(){
-
-  const subtotal = cart.reduce(
-    (sum,item) => sum + Number(item.price || 0),
-    0
-  );
-
-  const deliveryFee = 8;
-
-  const tax = Math.round(
-    subtotal * 0.15 * 100
-  ) / 100;
-
-  const total =
-    Math.round(
-      (subtotal + deliveryFee + tax) * 100
-    ) / 100;
-
-  return {
-    subtotal,
-    deliveryFee,
-    tax,
-    total
-  };
-}
+function cartTax(){ return Math.round(cartSubtotal() * 0.15 * 100) / 100; }
+function cartTotal(){ return cartSubtotal() + (cart.length ? 8 : 0) + cartTax(); }
 
 function renderCart(){
-
   const el = document.getElementById('cartItems');
-
+  if(!el) return;
   if(!cart.length){
-
-    el.innerHTML = `
-      <div
-        class="choice"
-        style="text-align:center;padding:35px"
-      >
-        Your cart is empty.
-        <br><br>
-
-        <button
-          class="btn yellow"
-          onclick="go('menu')"
-        >
-          BROWSE MENU
-        </button>
-      </div>
-    `;
-
-  }else{
-
+    el.innerHTML = `<div class="choice" style="text-align:center;padding:35px">Your cart is empty.<br><br><button class="btn yellow" onclick="go('menu')">BROWSE MENU</button></div>`;
+  } else {
     el.innerHTML = cart.map((x,i) => `
-
       <div class="cart-item">
-
-        <div class="row-thumb">
-          <div class="burger"></div>
-        </div>
-
+        <div class="row-thumb">${x.image_url ? `<img src="${escapeHTML(x.image_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:7px">` : '<div class="burger"></div>'}</div>
         <div class="row-info">
-
-          <b>${escapeHtml(x.name)}</b>
-
-          <p>
-            Freshly prepared for your story.
-          </p>
-
-          <span class="row-price">
-            ${Number(x.price).toFixed(2)} SAR
-          </span>
-
+          <b>${escapeHTML(x.name)}</b>
+          <p>Freshly prepared for your story.</p>
+          <span class="row-price">${money(x.price)}</span>
           <div class="qty">
-
-            <button onclick="removeItem(${i})">
-              −
-            </button>
-
-            <b>1</b>
-
-            <button onclick="addSame(${i})">
-              ＋
-            </button>
-
+            <button onclick="changeQty(${i},-1)">−</button>
+            <b>${Number(x.quantity || 1)}</b>
+            <button onclick="changeQty(${i},1)">＋</button>
           </div>
-
         </div>
-
-        <b>
-          ${Number(x.price).toFixed(2)} SAR
-        </b>
-
+        <b>${money(Number(x.price)*Number(x.quantity || 1))}</b>
       </div>
-
     `).join('');
   }
-
-  const totals = calculateTotals();
-
-  document.getElementById('subtotal').textContent =
-    totals.subtotal.toFixed(2) + ' SAR';
-
-  document.getElementById('tax').textContent =
-    totals.tax.toFixed(2) + ' SAR';
-
-  document.getElementById('total').textContent =
-    totals.total.toFixed(2) + ' SAR';
-
-  updateCount();
+  document.getElementById('subtotal').textContent = money(cartSubtotal());
+  document.getElementById('tax').textContent = money(cartTax());
+  document.getElementById('total').textContent = money(cartTotal());
 }
 
-/* ---------------------------------------------------------
-   REVIEW
---------------------------------------------------------- */
-
 function renderReview(){
-
-  const totals = calculateTotals();
-
-  document.getElementById('reviewItems').innerHTML = `
-
-    <b>Order Summary</b>
-
-    ${cart.map(x => `
-
-      <div class="sumline">
-
-        <span>
-          ${escapeHtml(x.name)}
-        </span>
-
-        <b>
-          ${Number(x.price).toFixed(2)} SAR
-        </b>
-
-      </div>
-
-    `).join('')}
-
-    <div class="sumline">
-      <span>Subtotal</span>
-      <b>${totals.subtotal.toFixed(2)} SAR</b>
-    </div>
-
-    <div class="sumline">
-      <span>Delivery Fee</span>
-      <b>${totals.deliveryFee.toFixed(2)} SAR</b>
-    </div>
-
-    <div class="sumline">
-      <span>Tax (15%)</span>
-      <b>${totals.tax.toFixed(2)} SAR</b>
-    </div>
-
-    <div class="sumline total">
-      <span>Total</span>
-      <b>${totals.total.toFixed(2)} SAR</b>
-    </div>
-
+  const el = document.getElementById('reviewItems');
+  if(!el) return;
+  if(!cart.length){ el.innerHTML = '<b>Your cart is empty.</b>'; return; }
+  const customer = getCustomerInfo();
+  el.innerHTML = `<b>Customer</b>
+    <div class="sumline"><span>Name</span><b>${escapeHTML(customer.name || '—')}</b></div>
+    <div class="sumline"><span>Mobile</span><b>${escapeHTML(customer.phone || '—')}</b></div>
+    <br>
+    <b>Order Summary</b>` + cart.map(x => `
+    <div class="sumline"><span>${escapeHTML(x.name)} × ${Number(x.quantity||1)}</span><b>${money(Number(x.price)*Number(x.quantity||1))}</b></div>
+  `).join('') + `
+    <div class="sumline"><span>Subtotal</span><b>${money(cartSubtotal())}</b></div>
+    <div class="sumline"><span>Delivery Fee</span><b>${money(8)}</b></div>
+    <div class="sumline"><span>Tax (15%)</span><b>${money(cartTax())}</b></div>
+    <div class="sumline total"><span>Total</span><b>${money(cartTotal())}</b></div>
   `;
 }
 
 /* ---------------------------------------------------------
-   ORDER CREATION
-   This is the important part:
-   1. Creates a row in orders.
-   2. Gets the generated order ID/number.
-   3. Creates all rows in order_items.
-   4. Only then shows success.
+   DELIVERY MAP
+   Leaflet + OpenStreetMap. Customer can tap the map or use
+   browser geolocation. Coordinates are stored locally and
+   sent with the order when the schema supports the fields.
 --------------------------------------------------------- */
+function setLocationStatus(message, type=''){
+  const el = document.getElementById('locationStatus');
+  if(!el) return;
+  el.className = 'location-status' + (type ? ' ' + type : '');
+  el.textContent = message;
+}
+
+function initDeliveryMap(){
+  const el = document.getElementById('deliveryMap');
+  if(!el || typeof L === 'undefined') return;
+
+  if(!deliveryMap){
+    // Default: Dammam. The user can immediately move the pin.
+    deliveryMap = L.map(el, { zoomControl:true }).setView([26.4207, 50.0888], 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom:19,
+      attribution:'&copy; OpenStreetMap contributors'
+    }).addTo(deliveryMap);
+
+    deliveryMap.on('click', e => setDeliveryLocation(e.latlng.lat, e.latlng.lng, true));
+    deliveryMapReady = true;
+  }
+
+  setTimeout(() => deliveryMap.invalidateSize(), 100);
+
+  const savedLat = Number(localStorage.getItem('mobs_delivery_latitude'));
+  const savedLng = Number(localStorage.getItem('mobs_delivery_longitude'));
+  if(Number.isFinite(savedLat) && Number.isFinite(savedLng)){
+    setDeliveryLocation(savedLat, savedLng, false);
+  }
+}
+
+function setDeliveryLocation(lat, lng, moveMap=true){
+  lat = Number(lat);
+  lng = Number(lng);
+  if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+  const latEl = document.getElementById('deliveryLatitude');
+  const lngEl = document.getElementById('deliveryLongitude');
+  if(latEl) latEl.value = lat.toFixed(7);
+  if(lngEl) lngEl.value = lng.toFixed(7);
+
+  localStorage.setItem('mobs_delivery_latitude', String(lat));
+  localStorage.setItem('mobs_delivery_longitude', String(lng));
+
+  if(deliveryMapReady && deliveryMap){
+    if(!deliveryMarker){
+      deliveryMarker = L.marker([lat,lng], {draggable:true}).addTo(deliveryMap);
+      deliveryMarker.on('dragend', e => {
+        const pos = e.target.getLatLng();
+        setDeliveryLocation(pos.lat, pos.lng, false);
+      });
+    }else{
+      deliveryMarker.setLatLng([lat,lng]);
+    }
+    if(moveMap) deliveryMap.setView([lat,lng], 16);
+  }
+
+  setLocationStatus(`Location selected: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, 'ok');
+}
+
+function useMyLocation(){
+  if(!navigator.geolocation){
+    setLocationStatus('Location is not supported by this browser.', 'error');
+    return;
+  }
+
+  setLocationStatus('Finding your location...');
+
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      setDeliveryLocation(position.coords.latitude, position.coords.longitude, true);
+    },
+    error => {
+      console.error('Geolocation error:', error);
+      const msg = error.code === 1
+        ? 'Location permission was denied. You can tap the map instead.'
+        : 'Could not get your location. You can tap the map instead.';
+      setLocationStatus(msg, 'error');
+    },
+    { enableHighAccuracy:true, timeout:10000, maximumAge:30000 }
+  );
+}
+
+function clearDeliveryLocation(){
+  const latEl = document.getElementById('deliveryLatitude');
+  const lngEl = document.getElementById('deliveryLongitude');
+  if(latEl) latEl.value = '';
+  if(lngEl) lngEl.value = '';
+  localStorage.removeItem('mobs_delivery_latitude');
+  localStorage.removeItem('mobs_delivery_longitude');
+  if(deliveryMarker && deliveryMap){
+    deliveryMap.removeLayer(deliveryMarker);
+    deliveryMarker = null;
+  }
+  setLocationStatus('Tap the map to choose your delivery location.');
+}
+
+function getDeliveryLocation(){
+  const lat = Number(document.getElementById('deliveryLatitude')?.value);
+  const lng = Number(document.getElementById('deliveryLongitude')?.value);
+  return {
+    latitude: Number.isFinite(lat) ? lat : null,
+    longitude: Number.isFinite(lng) ? lng : null,
+    address: (document.getElementById('deliveryAddress')?.value || '').trim()
+  };
+}
+
+function getCustomerToken(){
+  let token = localStorage.getItem('mobs_customer_token');
+  if(!token){
+    token = (window.crypto && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : 'mobs-' + Date.now() + '-' + Math.random().toString(36).slice(2, 12);
+    localStorage.setItem('mobs_customer_token', token);
+  }
+  return token;
+}
+
+function getCustomerInfo(){
+  const nameEl = document.getElementById('customerName');
+  const phoneEl = document.getElementById('customerPhone');
+
+  const name = (nameEl?.value || '').trim();
+  const phone = (phoneEl?.value || '').replace(/\D/g,'').slice(0,10);
+
+  return { name, phone };
+}
+
+function validateCustomerInfo(showMessage=true){
+  const { name, phone } = getCustomerInfo();
+
+  if(!name){
+    if(showMessage) alert('Please enter your full name.');
+    document.getElementById('customerName')?.focus();
+    return false;
+  }
+
+  if(!/^05\d{8}$/.test(phone)){
+    if(showMessage) alert('Please enter a valid Saudi mobile number with exactly 10 digits, starting with 05.');
+    document.getElementById('customerPhone')?.focus();
+    return false;
+  }
+
+  const delivery = getDeliveryLocation();
+  if(delivery.latitude === null || delivery.longitude === null){
+    if(showMessage) alert('Please choose your delivery location on the map or use My Location.');
+    initDeliveryMap();
+    document.getElementById('deliveryMap')?.scrollIntoView({behavior:'smooth',block:'center'});
+    return false;
+  }
+
+  localStorage.setItem('mobs_customer_name', name);
+  localStorage.setItem('mobs_customer_phone', phone);
+  localStorage.setItem('mobs_delivery_address', delivery.address);
+
+  return true;
+}
+
+document.addEventListener('input', (e) => {
+  if(e.target && e.target.id === 'customerPhone'){
+    e.target.value = e.target.value.replace(/\D/g,'').slice(0,10);
+  }
+});
+
+function loadCustomerInfo(){
+  const nameEl = document.getElementById('customerName');
+  const phoneEl = document.getElementById('customerPhone');
+  if(nameEl) nameEl.value = '';
+  if(phoneEl) phoneEl.value = '';
+}
+
+function openCheckout(){
+  if(!cart.length){
+    go('menu');
+    return;
+  }
+  loadCustomerInfo();
+  go('checkout');
+  setTimeout(() => document.getElementById('customerName')?.focus(), 50);
+}
+
+function continueCheckout(){
+  if(!validateCustomerInfo(true)) return;
+  go('payment');
+}
 
 async function placeOrder(){
-  if(!cart.length){go('menu');return;}
-  const button=document.querySelector('#review .btn.yellow');
-  if(button){button.disabled=true;button.style.opacity='.6';button.textContent='PLACING ORDER...';}
-  try{
-    await loadDbProducts();
-    const normalized=[];
-    for(const item of cart){
-      const p=dbProducts.find(x=>String(x.id)===String(item.productId));
-      if(!p)throw new Error(`Product "${item.name}" is no longer available. Please return to Menu and choose an available product.`);
-      const existing=normalized.find(x=>String(x.product_id)===String(p.id));
-      if(existing){existing.quantity+=1;existing.line_total=Math.round(existing.unit_price*existing.quantity*100)/100;}
-      else normalized.push({product_id:p.id,product_name:p.name,unit_price:Number(p.price),quantity:1,line_total:Number(p.price)});
+  if(!cart.length){ go('menu'); return; }
+
+  // Customer name, phone and delivery location are mandatory before an order can be created.
+  if(!validateCustomerInfo(true)){
+    go('checkout');
+    return;
+  }
+
+  const { name: customerName, phone: customerPhone } = getCustomerInfo();
+  const button = document.querySelector('#review > .btn');
+  if(button){ button.disabled = true; button.textContent = 'PLACING ORDER...'; }
+
+  try {
+    // Customer checkout does not require Supabase Auth.
+    // The customer is identified by the browser token + name + phone.
+    // This avoids Anonymous Auth, which is disabled in this project.
+
+    // Always use the current products loaded from Admin/Supabase.
+    await loadData();
+
+    const normalized = cart.map(x => {
+      const product = products.find(p => String(p.id) === String(x.product_id));
+      if(!product || product.is_available === false){
+        throw new Error(`Product "${x.name}" is no longer available in the Admin menu.`);
+      }
+      return {
+        product_id: product.id,
+        product_name: product.name,
+        unit_price: Number(product.price),
+        quantity: Number(x.quantity || 1),
+        line_total: Number(product.price) * Number(x.quantity || 1)
+      };
+    });
+
+    const subtotal = Math.round(normalized.reduce((sum,x)=>sum+x.line_total,0)*100)/100;
+    const deliveryFee = 8;
+    const tax = Math.round(subtotal * 0.15 * 100) / 100;
+    const total = Math.round((subtotal + deliveryFee + tax) * 100) / 100;
+
+    const { data: order, error: orderError } = await supabaseClient
+      .from('orders')
+      .insert({
+        restaurant_id: RESTAURANT_ID,
+        customer_token: getCustomerToken(),
+        status: 'pending',
+        payment_method: 'cash_on_delivery',
+        subtotal,
+        delivery_fee: deliveryFee,
+        tax,
+        total,
+      })
+      .select('id, order_number, status, total, created_at')
+      .single();
+
+    if(orderError) throw orderError;
+    if(!order?.id) throw new Error('The order was not returned by the database.');
+
+    const items = normalized.map(x => ({
+      order_id: order.id,
+      product_id: x.product_id,
+      product_name: x.product_name,
+      product_price: x.unit_price,
+      quantity: x.quantity
+    }));
+
+    const { error: itemError } = await supabaseClient
+      .from('order_items')
+      .insert(items);
+
+    if(itemError){
+      await supabaseClient.from('orders').delete().eq('id', order.id);
+      throw itemError;
     }
-    const subtotal=Math.round(normalized.reduce((sum,x)=>sum+x.line_total,0)*100)/100;
-    const deliveryFee=8;
-    const tax=Math.round(subtotal*.15*100)/100;
-    const total=Math.round((subtotal+deliveryFee+tax)*100)/100;
-    const addressChoice=document.querySelector('#checkout .choice.selected .muted');
-    const deliveryAddress=addressChoice?.textContent?.trim()||'King Fahd Road, Dammam';
-    const instructionsInput=document.querySelector('#checkout .field input');
-    const deliveryInstructions=instructionsInput?.value?.trim()||null;
-    const paymentMethod='cash_on_delivery';
 
-    const {data:order,error:orderError}=await supabaseClient.from('orders').insert({
-      restaurant_id:RESTAURANT_ID,
-      customer_token:customerToken,
-      status:'pending',
-      payment_method:paymentMethod,
-      subtotal,
-      delivery_fee:deliveryFee,
-      tax,
-      total,
-      delivery_address:deliveryAddress,
-      delivery_instructions:deliveryInstructions
-    }).select('*').single();
-    if(orderError)throw orderError;
-    if(!order?.id)throw new Error('The order was not returned by the database.');
+    currentOrder = order;
+    cart = [];
+    saveCart();
 
-    const {error:itemsError}=await supabaseClient.from('order_items').insert(normalized.map(x=>({...x,order_id:order.id})));
-    if(itemsError){
-      await supabaseClient.from('orders').delete().eq('id',order.id).eq('restaurant_id',RESTAURANT_ID);
-      throw itemsError;
-    }
-
-    lastOrder={...order,items:normalized.map(x=>({...x,order_id:order.id}))};
-    localStorage.setItem('mobs_last_order_id',order.id);
-    if(order.order_number!=null)localStorage.setItem('mobs_last_order_number',order.order_number);
-    cart=[];updateCount();updateSuccessScreen(order);go('success');
-  }catch(error){
-    console.error('PLACE ORDER ERROR:',error);
-    alert('Could not place the order.\n\n'+(error?.message||'Unknown database error'));
-  }finally{
-    if(button){button.disabled=false;button.style.opacity='';button.textContent='PLACE ORDER →';}
+    document.getElementById('orderCode').textContent = '#' + order.order_number;
+    const successTotal = document.querySelector('#success .choice b');
+    if(successTotal) successTotal.textContent = money(order.total);
+    go('success');
+  } catch(error) {
+    console.error('Place order error:', error);
+    alert('Could not place the order.\n\n' + (error.message || 'Check Supabase permissions/tables.'));
+  } finally {
+    if(button){ button.disabled = false; button.textContent = 'PLACE ORDER →'; }
   }
 }
+async function loadOrders(filter='active', button){
+  document.querySelectorAll('#orderTabs .cat').forEach(x => x.classList.remove('active'));
+  if(button) button.classList.add('active');
 
-/* ---------------------------------------------------------
-   SUCCESS SCREEN
---------------------------------------------------------- */
+  const el = document.getElementById('ordersList');
+  if(!el) return;
+  el.innerHTML = '<div class="choice" style="text-align:center">Loading orders...</div>';
 
-function updateSuccessScreen(order){
+  try {
+    let query = supabaseClient
+      .from('orders')
+      .select('id, order_number, status, total, created_at')
+      .eq('restaurant_id', RESTAURANT_ID)
+      .eq('customer_token', getCustomerToken())
+      .order('created_at', { ascending:false });
 
-  const code =
-    order?.order_number != null
-      ? `#MOBS-${order.order_number}`
-      : `#MOBS-${String(order?.id || '').slice(0,8).toUpperCase()}`;
-
-  const codeEl =
-    document.querySelector('#success .order-code');
-
-  if(codeEl){
-    codeEl.textContent = code;
-  }
-
-  const totalChoice =
-    document.querySelector('#success .choice b');
-
-  if(totalChoice){
-    totalChoice.textContent = '20 – 30 min';
-  }
-}
-
-/* ---------------------------------------------------------
-   CUSTOMER ORDERS
-   Pulls real orders created by this browser/customer token.
---------------------------------------------------------- */
-
-async function loadCustomerOrders(){
-
-  const section =
-    document.getElementById('orders');
-
-  if(!section) return;
-
-  try{
-
-    const { data, error } =
-      await supabaseClient
-        .from('orders')
-        .select('*')
-        .eq('restaurant_id',RESTAURANT_ID)
-        .eq('customer_token',customerToken)
-        .order('created_at',{ascending:false});
-
+    const { data, error } = await query;
     if(error) throw error;
 
-    const existing =
-      section.querySelectorAll('.customer-real-order');
+    const activeStatuses = ['pending','confirmed','preparing','ready','out_for_delivery'];
+    const orders = (data || []).filter(o => filter === 'active' ? activeStatuses.includes(o.status) : !activeStatuses.includes(o.status));
 
-    existing.forEach(x => x.remove());
-
-    const staticOrders =
-      section.querySelectorAll('.row-card');
-
-    staticOrders.forEach(x => x.style.display='none');
-
-    if(!data?.length){
-
-      const empty =
-        document.createElement('div');
-
-      empty.className='choice customer-real-order';
-
-      empty.style.textAlign='center';
-      empty.style.padding='30px';
-
-      empty.innerHTML=`
-        No orders yet.
-        <br><br>
-        <button class="btn yellow" onclick="go('menu')">
-          BROWSE MENU
-        </button>
-      `;
-
-      section.appendChild(empty);
+    if(!orders.length){
+      el.innerHTML = `<div class="choice" style="text-align:center">No ${filter} orders yet.</div>`;
       return;
     }
 
-    data.forEach(order => {
-
-      const card =
-        document.createElement('div');
-
-      card.className =
-        'row-card customer-real-order';
-
-      card.onclick = () => {
-        lastOrder = order;
-        updateTrackingScreen(order);
-        go('tracking');
-      };
-
-      const status =
-        formatStatus(order.status);
-
-      card.innerHTML = `
-
-        <div class="row-thumb">
-          <div class="burger"></div>
-        </div>
-
+    el.innerHTML = orders.map(o => `
+      <div class="row-card" onclick="openTracking('${o.id}')">
+        <div class="row-thumb"><div class="burger"></div></div>
         <div class="row-info">
-
-          <b>
-            ${escapeHtml(formatOrderNumber(order))}
-          </b>
-
-          <p>
-            ${money(order.total)}
-          </p>
-
-          <span class="row-price">
-            ${escapeHtml(status)}
-          </span>
-
+          <b>#${escapeHTML(o.order_number)}</b>
+          <p>${money(o.total)} · ${new Date(o.created_at).toLocaleDateString()}</p>
+          <span class="row-price">${escapeHTML(formatStatus(o.status))}</span>
         </div>
-
         <span class="row-arrow">›</span>
-
-      `;
-
-      section.appendChild(card);
-
-    });
-
-  }catch(error){
-
-    console.error('Customer orders error:',error);
-
+      </div>
+    `).join('');
+  } catch(error) {
+    console.error('Orders load error:', error);
+    el.innerHTML = `<div class="choice" style="text-align:center">Orders are not configured yet. Run supabase_setup.sql first.</div>`;
   }
-}
-
-/* ---------------------------------------------------------
-   TRACKING
---------------------------------------------------------- */
-
-function formatOrderNumber(order){
-
-  if(order?.order_number != null){
-    return `#MOBS-${order.order_number}`;
-  }
-
-  return `#MOBS-${String(order?.id || '').slice(0,8).toUpperCase()}`;
 }
 
 function formatStatus(status){
+  return String(status || '').replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());
+}
 
-  const labels = {
-    pending:'Order received',
-    confirmed:'Confirmed',
-    preparing:'Preparing',
-    ready:'Ready',
-    out_for_delivery:'Out for delivery',
-    delivered:'Delivered',
-    cancelled:'Cancelled'
+async function openTracking(orderId){
+  currentOrder = { id: orderId };
+  await loadTracking(orderId);
+  go('tracking');
+}
+
+async function loadTracking(orderId){
+  try {
+    const { data, error } = await supabaseClient
+      .from('orders')
+      .select('id, order_number, status, total, created_at')
+      .eq('id', orderId)
+      .eq('customer_token', getCustomerToken())
+      .single();
+    if(error) throw error;
+    currentOrder = data;
+    document.getElementById('trackingOrderCode').textContent = '#' + data.order_number;
+    document.getElementById('trackingStatus').textContent = formatStatus(data.status);
+    document.getElementById('trackingMessage').textContent = statusMessage(data.status);
+    document.getElementById('trackingEta').textContent = data.status === 'out_for_delivery' ? 'Estimated time · 15–30 min' : 'Estimated time · updating';
+  } catch(error){
+    console.error('Tracking error:', error);
+  }
+}
+
+function statusMessage(status){
+  const map = {
+    pending:'We received your order.',
+    confirmed:'Your order has been confirmed.',
+    preparing:'The kitchen is preparing your order.',
+    ready:'Your order is ready for pickup.',
+    out_for_delivery:'Your order is on the way!',
+    delivered:'Your order has been delivered.',
+    cancelled:'This order was cancelled.'
   };
-
-  return labels[status] || status || 'Order received';
+  return map[status] || 'Your order status is being updated.';
 }
 
-function money(value){
-
-  return `${Number(value || 0).toFixed(2)} SAR`;
+function toggleFavorite(id, button){
+  const key = 'mobs_favorites';
+  const favorites = JSON.parse(localStorage.getItem(key) || '[]');
+  const index = favorites.indexOf(id);
+  if(index >= 0){ favorites.splice(index,1); button.textContent='♡'; }
+  else { favorites.push(id); button.textContent='♥'; }
+  localStorage.setItem(key, JSON.stringify(favorites));
 }
 
-function updateTrackingScreen(order){
-
-  const code =
-    document.querySelector('#tracking .track .muted');
-
-  const statusTitle =
-    document.querySelector(
-      '#tracking .track > b'
-    );
-
-  const statusChoice =
-    document.querySelector(
-      '#tracking .track .choice b'
-    );
-
-  const statusTime =
-    document.querySelector(
-      '#tracking .track .choice .muted'
-    );
-
-  if(code){
-    code.textContent =
-      formatOrderNumber(order);
-  }
-
-  if(statusTitle){
-    statusTitle.textContent =
-      formatStatus(order.status);
-  }
-
-  if(statusChoice){
-    statusChoice.textContent =
-      formatStatus(order.status);
-  }
-
-  if(statusTime){
-
-    if(order.status === 'delivered'){
-      statusTime.textContent =
-        'Order delivered';
-    }else if(order.status === 'cancelled'){
-      statusTime.textContent =
-        'Order cancelled';
-    }else{
-      statusTime.textContent =
-        'Estimated time · 20 – 30 min';
-    }
-
-  }
-}
-
-/* ---------------------------------------------------------
-   SECURITY / HTML ESCAPING
---------------------------------------------------------- */
-
-function escapeHtml(value){
-
-  return String(value ?? '')
-    .replace(/[&<>"']/g,char => ({
-      '&':'&amp;',
-      '<':'&lt;',
-      '>':'&gt;',
-      '"':'&quot;',
-      "'":'&#039;'
-    }[char]));
-
-}
-
+// Initial load
+loadCustomerInfo();
+loadData();
+updateCount();
 </script>
 
 </body>
