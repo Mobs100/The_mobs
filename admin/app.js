@@ -1,888 +1,905 @@
-async function openOrder(id) {
-  try {
-    const orderId = String(id);
 
-    // ابحث عن الطلب في البيانات المحملة أولاً
-    let order = orders.find(
-      o => String(o.id) === orderId
-    );
+// THE MOBS — Admin Console
+// Real Supabase-backed administration for the new V1 interface.
 
-    // إذا لم يكن موجوداً، اجلبه مباشرة من Supabase
-    if (!order) {
-      const { data, error } = await supabaseClient
-        .from('orders')
-        .select('*')
-        .eq('id', orderId)
-        .eq('restaurant_id', RESTAURANT_ID)
-        .maybeSingle();
+const RESTAURANT_ID = window.MOBS_CONFIG.restaurantId;
 
-      if (error) throw error;
-      order = data;
+const supabaseClient = window.MOBS_SUPABASE;
+
+let orders = [];
+let products = [];
+let categories = [];
+let currentOrder = null;
+let orderFilter = 'all';
+
+const STATUS_LABELS = {
+  pending: 'New', confirmed: 'Confirmed', preparing: 'Preparing', ready: 'Ready',
+  out_for_delivery: 'Out for delivery', delivered: 'Delivered', cancelled: 'Cancelled'
+};
+
+const STATUS_CLASS = {
+  pending:'graypill', confirmed:'blue', preparing:'yellow', ready:'green',
+  out_for_delivery:'blue', arrived:'blue', delivered:'green', cancelled:'red'
+};
+
+function esc(v){return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function money(v){return `${Number(v||0).toFixed(2)} SAR`;}
+function statusLabel(s){return STATUS_LABELS[s]||s||'New';}
+function badge(s){const key=Object.keys(STATUS_LABELS).find(k=>STATUS_LABELS[k]===s)||s; const c=STATUS_CLASS[key]|| (s==='Available'?'green':s==='Low stock'?'yellow':'graypill'); return `<span class="pill ${c}">${esc(s)}</span>`;}
+function showToast(t){const x=document.getElementById('toast'); if(!x)return; x.textContent=t; x.classList.add('show'); setTimeout(()=>x.classList.remove('show'),2200);}
+function toggle(x){x.classList.toggle('on');}
+function openModalRaw(){document.getElementById('modal').classList.add('show');}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+
+function go(id){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('show'));
+  const page=document.getElementById(id); if(page) page.classList.add('show');
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
+  window.scrollTo(0,0);
+  loadPage(id);
+}
+
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
+
+async function loadPage(id){
+  if(id==='dashboard') await loadDashboard();
+  if(id==='orders') await loadOrders();
+  if(id==='kitchen') await loadKitchen();
+  if(id==='menu') await loadMenu();
+  if(id==='products') await loadProducts();
+  if(id==='categories') await loadCategories();
+  if(id==='customers') await loadCustomers();
+  if(id==='payments') await loadPayments();
+  if(id==='reports') await loadReports();
+  if(id==='settings') await loadSettings();
+  if(id==='drivers') await loadDrivers();
+  if(['branches','inventory','promos','notifications','staff','audit','modifiers'].includes(id)) renderStaticModule(id);
+}
+
+async function fetchBaseOrders(limit=1000){
+  const {data,error}=await supabaseClient.from('orders').select('*').eq('restaurant_id',RESTAURANT_ID).order('created_at',{ascending:false}).limit(limit);
+  if(error) throw error;
+  return data||[];
+}
+
+async function fetchOrderItems(orderIds){
+  if(!orderIds.length) return [];
+  const {data,error}=await supabaseClient.from('order_items').select('id,order_id,product_id,product_name,unit_price,quantity,line_total').in('order_id',orderIds);
+  if(error) throw error;
+  return data||[];
+}
+
+async function fetchCategories(){
+  const {data,error}=await supabaseClient.from('menu_categories').select('*').eq('restaurant_id',RESTAURANT_ID).order('sort_order',{ascending:true}).order('id',{ascending:true});
+  if(error) throw error; return data||[];
+}
+
+async function fetchProducts(){
+  const {data,error}=await supabaseClient.from('products').select('*, menu_categories(name)').eq('restaurant_id',RESTAURANT_ID).order('sort_order',{ascending:true}).order('id',{ascending:true});
+  if(error) throw error; return data||[];
+}
+
+function setSidebarOrdersCount(count){
+  const el=document.getElementById('sidebarOrdersCount');
+  if(el) el.textContent=Number(count||0);
+}
+
+function setStat(selector,value){const el=document.querySelector(selector);if(el)el.textContent=value;}
+
+async function loadDashboard(){
+  try{
+    orders=await fetchBaseOrders(); setSidebarOrdersCount(orders.length);
+    const today=new Date(); today.setHours(0,0,0,0);
+    const todayOrders=orders.filter(o=>new Date(o.created_at)>=today);
+    const active=todayOrders.filter(o=>!['delivered','cancelled'].includes(o.status));
+    const sales=todayOrders.filter(o=>o.status!=='cancelled').reduce((a,o)=>a+Number(o.total||0),0);
+    const avg=todayOrders.length?sales/todayOrders.length:0;
+    setStat('.stat:nth-child(1) .num',money(sales));
+    setStat('.stat:nth-child(1) .trend',`${todayOrders.length} orders today`);
+    setStat('.stat:nth-child(2) .num',todayOrders.length);
+    setStat('.stat:nth-child(2) .trend',`${orders.length} total orders`);
+    setStat('.stat:nth-child(3) .num',money(avg));
+    setStat('.stat:nth-child(3) .trend',`Average order value`);
+    setStat('.stat:nth-child(4) .num',active.length);
+    setStat('.stat:nth-child(4) .trend',`${active.filter(o=>o.status==='preparing').length} preparing · ${active.filter(o=>o.status==='out_for_delivery').length} delivery`);
+
+    const statusCounts={pending:0,preparing:0,ready:0,out_for_delivery:0,delivered:0,cancelled:0};
+    todayOrders.forEach(o=>{if(statusCounts[o.status]!==undefined)statusCounts[o.status]++});
+    const statusBox=document.querySelector('#dashboard .layout2 .card:nth-child(2) .mini-list');
+    if(statusBox) statusBox.innerHTML=[['New',statusCounts.pending],['Preparing',statusCounts.preparing],['Ready',statusCounts.ready],['Out for delivery',statusCounts.out_for_delivery],['Delivered',statusCounts.delivered]].map(([a,b])=>`<div class="mini"><span>${a}</span><b>${b}</b></div>`).join('');
+
+    const chart=document.querySelector('#dashboard .chart');
+    if(chart){
+      const days=[]; for(let i=6;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);days.push(d);}
+      const vals=days.map(d=>todayAmountForDay(d,orders)); const max=Math.max(...vals,1);
+      chart.innerHTML=days.map((d,i)=>`<div class="col" style="height:${Math.max(8,Math.round(vals[i]/max*90))}%"><label>${d.toLocaleDateString('en-US',{weekday:'short'})}</label></div>`).join('');
     }
+    const items=await fetchOrderItems(orders.slice(0,5).map(o=>o.id));
+    const itemMap={}; items.forEach(i=>{itemMap[i.order_id]=(itemMap[i.order_id]||0)+Number(i.quantity||0)});
+    document.getElementById('dashOrders').innerHTML=orderTableHTML(orders.slice(0,8),itemMap,true);
+  }catch(e){console.error(e);showToast('Dashboard error: '+e.message);}
+}
+function todayAmountForDay(d,list){const next=new Date(d);next.setDate(next.getDate()+1);return list.filter(o=>{const x=new Date(o.created_at);return x>=d&&x<next&&o.status!=='cancelled'}).reduce((a,o)=>a+Number(o.total||0),0);}
 
-    if (!order) {
-      throw new Error('Order not found.');
+function orderTableHTML(list,itemMap={},withActions=true){
+  if(!list.length)return '<div style="padding:20px;color:#777">No orders found.</div>';
+  return `<table class="table"><thead><tr><th>ORDER</th><th>CUSTOMER</th><th>ITEMS</th><th>TOTAL</th><th>STATUS</th><th>TIME</th>${withActions?'<th></th>':''}</tr></thead><tbody>`+
+  list.map((o,i)=>`<tr><td class="orderid">#MOBS-${o.order_number}</td><td>${customerDisplay(o)}</td><td>${itemMap[o.id]||'—'}</td><td class="money">${money(o.total)}</td><td>${badge(statusLabel(o.status))}</td><td>${new Date(o.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</td>${withActions?`<td><button class="iconbtn" onclick="openOrder('${o.id}')">View →</button></td>`:''}</tr>`).join('')+'</tbody></table>';
+}
+function customerDisplay(o){return o.customer_name||o.customer_phone||('Guest · '+String(o.customer_token||'').slice(0,8));}
+
+async function loadOrders(){
+  try{
+    orders=await fetchBaseOrders(); setSidebarOrdersCount(orders.length);
+    const search=(document.querySelector('#orders .filters input')?.value||'').trim().toLowerCase();
+    const branch=document.querySelector('#orders .filters select')?.value||'All branches';
+    let list=orders.filter(o=>!search||String(o.order_number).includes(search)||String(o.customer_phone||'').toLowerCase().includes(search)||String(o.customer_token||'').toLowerCase().includes(search));
+    if(orderFilter!=='all') list=list.filter(o=>o.status===orderFilter);
+    const items=await fetchOrderItems(list.map(o=>o.id)); const itemMap={};items.forEach(i=>itemMap[i.order_id]=(itemMap[i.order_id]||0)+Number(i.quantity||0));
+    document.getElementById('ordersTable').innerHTML=orderTableHTML(list,itemMap,true);
+    updateOrderTabs();
+  }catch(e){console.error(e);showToast('Orders error: '+e.message);}
+}
+function updateOrderTabs(){
+  const counts={all:orders.length,pending:0,preparing:0,ready:0,out_for_delivery:0,delivered:0,cancelled:0};orders.forEach(o=>{if(counts[o.status]!=null)counts[o.status]++});
+  const names=[['all',`All ${counts.all}`],['pending',`New ${counts.pending}`],['preparing',`Preparing ${counts.preparing}`],['ready',`Ready ${counts.ready}`],['out_for_delivery',`Delivery ${counts.out_for_delivery}`],['delivered',`Completed ${counts.delivered}`],['cancelled',`Cancelled ${counts.cancelled}`]];
+  const tabs=document.querySelectorAll('#orders .tabs button'); tabs.forEach((b,i)=>{if(names[i]){b.textContent=names[i][1];b.classList.toggle('sel',orderFilter===names[i][0]);b.onclick=()=>{orderFilter=names[i][0];loadOrders();}}});
+}
+
+async function loadKitchen(){
+  try{orders=await fetchBaseOrders();
+    for(const [id,status] of [['knew','pending'],['kprep','preparing'],['kready','ready']]){
+      const arr=orders.filter(o=>o.status===status).slice(0,8);const el=document.getElementById(id);
+      el.innerHTML=arr.length?arr.map(o=>`<div class="mini"><div><b>#MOBS-${o.order_number}</b><small style="display:block;color:#777">${esc(customerDisplay(o))} · ${money(o.total)}</small></div>${status==='pending'?`<button class="btn primary" style="padding:7px 9px;font-size:10px" onclick="setOrderStatus('${o.id}','preparing')">Accept</button>`:status==='preparing'?`<button class="btn primary" style="padding:7px 9px;font-size:10px" onclick="setOrderStatus('${o.id}','ready')">Ready</button>`:`<button class="btn dark" style="padding:7px 9px;font-size:10px" onclick="setOrderStatus('${o.id}','out_for_delivery')">Dispatch</button>`}</div>`).join(''):'<div style="color:#777;font-size:12px">No orders.</div>';
     }
+  }catch(e){showToast('Kitchen error: '+e.message)}
+}
 
-    currentOrder = order;
+async function openOrder(id){
+  try{
+    const orderId=String(id);
 
-    // جلب المنتجات والسائقين بالتوازي
-    const [
-      { data: items, error: itemsError },
-      { data: drivers, error: driversError }
-    ] = await Promise.all([
+    // Always load the latest order from Supabase. This avoids stale data
+    // in the Admin list and also makes View work after a realtime refresh.
+    const {data:o,error:orderError}=await supabaseClient
+      .from('orders')
+      .select('*')
+      .eq('id',orderId)
+      .eq('restaurant_id',RESTAURANT_ID)
+      .maybeSingle();
+
+    if(orderError) throw orderError;
+    if(!o) throw new Error('Order not found.');
+
+    currentOrder=o;
+
+    // IMPORTANT: do not order order_items by created_at. Older versions of
+    // the order_items table do not have that column, which made View fail.
+    const [{data:items,error:itemError},{data:drivers,error:driverError}]=await Promise.all([
       supabaseClient
         .from('order_items')
-        .select(`
-          id,
-          order_id,
-          product_id,
-          product_name,
-          unit_price,
-          quantity,
-          line_total
-        `)
-        .eq('order_id', orderId)
-        .order('id', { ascending: true }),
-
+        .select('id,order_id,product_id,product_name,unit_price,quantity,line_total,product_price')
+        .eq('order_id',orderId)
+        .order('id',{ascending:true}),
       supabaseClient
         .from('driver_profiles')
-        .select(`
-          id,
-          user_id,
-          username,
-          full_name,
-          phone,
-          availability_status,
-          status
-        `)
-        .eq('status', 'approved')
-        .order('full_name', { ascending: true })
+        .select('id,user_id,username,full_name,phone,availability_status,status')
+        .eq('status','approved')
+        .order('full_name',{ascending:true})
     ]);
 
-    if (itemsError) throw itemsError;
-    if (driversError) throw driversError;
+    if(itemError) throw itemError;
+    if(driverError) throw driverError;
 
-    const orderItems = items || [];
-    const approvedDrivers = drivers || [];
+    const orderItems=items||[];
+    const approvedDrivers=drivers||[];
 
-    // مراحل الطلب
-    const steps = [
-      'pending',
-      'confirmed',
-      'preparing',
-      'ready',
-      'out_for_delivery',
-      'arrived',
-      'delivered'
-    ];
+    const steps=['pending','confirmed','preparing','ready','out_for_delivery','arrived','delivered'];
+    const idx=steps.indexOf(String(o.status||'pending'));
+    const labels=['Order placed','Accepted by kitchen','Preparing','Ready for pickup','Out for delivery','Arrived','Delivered'];
 
-    const labels = [
-      'Order placed',
-      'Accepted by kitchen',
-      'Preparing',
-      'Ready for pickup',
-      'Out for delivery',
-      'Arrived',
-      'Delivered'
-    ];
+    const driverOptions=approvedDrivers.map(d=>`
+      <option value="${esc(d.user_id)}" ${String(d.user_id)===String(o.driver_id||'')?'selected':''}>
+        ${esc(d.full_name||d.username||'Unnamed Driver')}
+        ${d.username?` · @${esc(d.username)}`:''}
+        · ${esc(d.availability_status||'offline')}
+      </option>`).join('');
 
-    const currentStep = steps.indexOf(order.status);
+    const itemCount=orderItems.reduce((sum,item)=>sum+Number(item.quantity||0),0);
 
-    // السائقين
-    const driverOptions = approvedDrivers.map(driver => {
-      const selected =
-        String(driver.user_id) === String(order.driver_id)
-          ? 'selected'
-          : '';
-
-      const driverName =
-        driver.full_name ||
-        driver.username ||
-        'Unnamed Driver';
-
-      const availability =
-        driver.availability_status || 'offline';
-
-      return `
-        <option
-          value="${esc(driver.user_id)}"
-          ${selected}
-        >
-          ${esc(driverName)}
-          ${driver.username ? ` · @${esc(driver.username)}` : ''}
-          · ${esc(availability)}
-        </option>
-      `;
-    }).join('');
-
-    const totalItems = orderItems.reduce(
-      (sum, item) => sum + Number(item.quantity || 0),
-      0
-    );
-
-    const modal = document.getElementById('modalbox');
-
-    if (!modal) {
-      throw new Error('Order modal was not found in the page.');
-    }
-
-    modal.innerHTML = `
+    document.getElementById('modalbox').innerHTML=`
       <div class="titlebar">
-
         <div class="title">
-          <h1>
-            #MOBS-${esc(order.order_number)}
-          </h1>
+          <h1>#MOBS-${esc(o.order_number)}</h1>
+          <p>${new Date(o.created_at).toLocaleString()}</p>
+        </div>
+        ${badge(statusLabel(o.status))}
+      </div>
 
-          <p>
-            ${new Date(order.created_at).toLocaleString()}
+      <div class="detail">
+        <div class="card">
+          <h3>Order Timeline</h3>
+          <div class="timeline">
+            ${labels.map((label,j)=>`<div class="step ${idx>=j?'done':''}">
+              <div class="dot">${idx>=j?'✓':j+1}</div>
+              <div>
+                <b>${esc(label)}</b>
+                <small style="display:block;color:#777;margin-top:3px">
+                  ${idx>=j
+                    ? (j===0
+                        ? new Date(o.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})
+                        : 'Completed')
+                    : 'Pending'}
+                </small>
+              </div>
+            </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Dispatch</h3>
+          <div class="field">
+            <label>ASSIGN APPROVED DRIVER</label>
+            <select id="modalDriver">
+              <option value="">Unassigned</option>
+              ${driverOptions}
+            </select>
+          </div>
+          <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveOrderAssignment()">
+            SAVE DRIVER
+          </button>
+          <p style="color:#777;font-size:11px;margin-top:9px">
+            Only approved drivers can be assigned.
           </p>
         </div>
 
-        <div>
-          ${badge(statusLabel(order.status))}
+        <div class="card">
+          <h3>Customer</h3>
+          <div class="mini"><span>Name</span><b>${esc(o.customer_name||'—')}</b></div>
+          <div class="mini"><span>Phone</span><b>${esc(o.phone||o.customer_phone||'—')}</b></div>
+          <div class="mini"><span>Address</span><b>${esc(o.delivery_address||'—')}</b></div>
+          <div class="mini"><span>Instructions</span><b>${esc(o.delivery_instructions||'—')}</b></div>
         </div>
 
+        <div class="card">
+          <h3>Edit Order</h3>
+
+          <div class="field">
+            <label>DELIVERY ADDRESS</label>
+            <input id="modalAddress" type="text" value="${esc(o.delivery_address||'')}">
+          </div>
+
+          <div class="field">
+            <label>DELIVERY INSTRUCTIONS</label>
+            <textarea id="modalInstructions" rows="3">${esc(o.delivery_instructions||'')}</textarea>
+          </div>
+
+          <button class="btn ghost" style="width:100%;margin-top:8px" onclick="saveOrderDetails()">
+            SAVE ORDER DETAILS
+          </button>
+        </div>
+
+        <div class="card">
+          <h3>Order Summary</h3>
+          <div class="mini"><span>Items</span><b>${itemCount}</b></div>
+          <div class="mini"><span>Subtotal</span><b>${money(o.subtotal)}</b></div>
+          <div class="mini"><span>Delivery Fee</span><b>${money(o.delivery_fee)}</b></div>
+          <div class="mini"><span>Tax</span><b>${money(o.tax)}</b></div>
+          <div class="mini"><span>Total</span><b>${money(o.total)}</b></div>
+          <div class="mini"><span>Payment</span><b>${esc(o.payment_method||'—')}</b></div>
+
+          <div style="margin-top:15px">
+            <label style="font-size:11px;font-weight:800">UPDATE STATUS</label>
+            <select id="modalStatus" style="width:100%;margin-top:6px;padding:10px;border:1px solid var(--line);border-radius:9px">
+              ${Object.entries(STATUS_LABELS).map(([v,l])=>`
+                <option value="${esc(v)}" ${v===o.status?'selected':''}>${esc(l)}</option>
+              `).join('')}
+            </select>
+            <button class="btn primary" style="margin-top:10px;width:100%" onclick="updateModalStatus()">
+              UPDATE STATUS
+            </button>
+          </div>
+        </div>
       </div>
 
-      <!-- ORDER TIMELINE -->
-      <div class="card">
-
-        <h3>Order Timeline</h3>
-
-        <div class="timeline">
-
-          ${labels.map((label, index) => {
-
-            const done =
-              currentStep >= index &&
-              currentStep !== -1;
-
-            return `
-              <div class="step ${done ? 'done' : ''}">
-
-                <div class="dot">
-                  ${done ? '✓' : index + 1}
-                </div>
-
-                <div>
-                  <b>${esc(label)}</b>
-
-                  <small
-                    style="
-                      display:block;
-                      color:#777;
-                      margin-top:3px;
-                    "
-                  >
-                    ${
-                      done
-                        ? (
-                            index === 0
-                              ? new Date(
-                                  order.created_at
-                                ).toLocaleTimeString([], {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })
-                              : 'Completed'
-                          )
-                        : 'Pending'
-                    }
-                  </small>
-
-                </div>
-
-              </div>
-            `;
-
-          }).join('')}
-
-        </div>
-
-      </div>
-
-
-      <!-- DISPATCH -->
-      <div class="card">
-
-        <h3>Dispatch</h3>
-
-        <div class="field">
-
-          <label>
-            ASSIGN APPROVED DRIVER
-          </label>
-
-          <select id="modalDriver">
-
-            <option value="">
-              Unassigned
-            </option>
-
-            ${driverOptions}
-
-          </select>
-
-        </div>
-
-        <button
-          class="btn primary"
-          style="
-            width:100%;
-            margin-top:10px;
-          "
-          onclick="saveOrderAssignment()"
-        >
-          SAVE DRIVER
-        </button>
-
-        <p
-          style="
-            color:#777;
-            font-size:11px;
-            margin-top:9px;
-          "
-        >
-          Only approved drivers can be assigned.
-        </p>
-
-      </div>
-
-
-      <!-- CUSTOMER / ORDER INFORMATION -->
-      <div class="card">
-
-        <h3>Order Information</h3>
-
-        <div class="mini">
-          <span>Customer</span>
-          <b>
-            ${esc(customerDisplay(order))}
-          </b>
-        </div>
-
-        <div class="mini">
-          <span>Phone</span>
-          <b>
-            ${esc(order.customer_phone || '—')}
-          </b>
-        </div>
-
-        <div class="mini">
-          <span>Items</span>
-          <b>
-            ${totalItems}
-          </b>
-        </div>
-
-        <div class="mini">
-          <span>Subtotal</span>
-          <b>
-            ${money(order.subtotal)}
-          </b>
-        </div>
-
-        <div class="mini">
-          <span>Delivery Fee</span>
-          <b>
-            ${money(order.delivery_fee)}
-          </b>
-        </div>
-
-        <div class="mini">
-          <span>Tax</span>
-          <b>
-            ${money(order.tax)}
-          </b>
-        </div>
-
-        <div class="mini">
-          <span>Total</span>
-          <b>
-            ${money(order.total)}
-          </b>
-        </div>
-
-        <div class="mini">
-          <span>Payment</span>
-          <b>
-            ${esc(order.payment_method || '—')}
-          </b>
-        </div>
-
-      </div>
-
-
-      <!-- ADDRESS / EDIT -->
-      <div class="card">
-
-        <h3>Edit Order</h3>
-
-        <div class="field">
-
-          <label>
-            DELIVERY ADDRESS
-          </label>
-
-          <input
-            id="modalAddress"
-            type="text"
-            value="${esc(order.delivery_address || '')}"
-          >
-
-        </div>
-
-
-        <div class="field">
-
-          <label>
-            DELIVERY INSTRUCTIONS
-          </label>
-
-          <textarea
-            id="modalInstructions"
-            rows="4"
-          >${esc(order.delivery_instructions || '')}</textarea>
-
-        </div>
-
-
-        <button
-          class="btn ghost"
-          style="
-            width:100%;
-            margin-top:8px;
-          "
-          onclick="saveOrderDetails()"
-        >
-          SAVE ORDER DETAILS
-        </button>
-
-      </div>
-
-
-      <!-- STATUS -->
-      <div class="card">
-
-        <h3>Update Status</h3>
-
-        <div class="field">
-
-          <label>
-            ORDER STATUS
-          </label>
-
-          <select
-            id="modalStatus"
-            style="
-              width:100%;
-              margin-top:6px;
-              padding:10px;
-              border:1px solid var(--line);
-              border-radius:9px;
-            "
-          >
-
-            ${Object.entries(STATUS_LABELS)
-              .map(([value, label]) => `
-                <option
-                  value="${esc(value)}"
-                  ${
-                    value === order.status
-                      ? 'selected'
-                      : ''
-                  }
-                >
-                  ${esc(label)}
-                </option>
-              `)
-              .join('')}
-
-          </select>
-
-        </div>
-
-
-        <button
-          class="btn primary"
-          style="
-            margin-top:10px;
-            width:100%;
-          "
-          onclick="updateModalStatus()"
-        >
-          UPDATE STATUS
-        </button>
-
-      </div>
-
-
-      <!-- ITEMS -->
-      <div class="card">
-
+      <div class="card" style="margin-top:16px">
         <h3>Order Items</h3>
-
-        ${
-          orderItems.length
-            ? orderItems.map(item => `
-                <div class="mini">
-
-                  <span>
-                    ${esc(item.product_name)}
-                    ×
-                    ${Number(item.quantity || 0)}
-                  </span>
-
-                  <b>
-                    ${money(item.line_total)}
-                  </b>
-
-                </div>
-              `).join('')
-            : `
-              <div
-                style="
-                  color:#777;
-                  padding:10px 0;
-                "
-              >
-                No item details found.
-              </div>
-            `
-        }
-
+        ${orderItems.length
+          ? orderItems.map(i=>{
+              const price=Number(i.line_total ?? (Number(i.unit_price ?? i.product_price ?? 0)*Number(i.quantity||0)));
+              return `<div class="mini">
+                <span>${esc(i.product_name||'Product')} × ${Number(i.quantity||0)}</span>
+                <b>${money(price)}</b>
+              </div>`;
+            }).join('')
+          : '<div style="color:#777">No item details.</div>'}
       </div>
 
-
-      <!-- CLOSE -->
-      <div
-        style="
-          display:flex;
-          justify-content:flex-end;
-          margin-top:16px;
-        "
-      >
-
-        <button
-          class="btn ghost"
-          onclick="closeModal()"
-        >
-          CLOSE
-        </button>
-
-      </div>
-    `;
+      <div style="display:flex;justify-content:flex-end;margin-top:16px">
+        <button class="btn ghost" onclick="closeModal()">CLOSE</button>
+      </div>`;
 
     openModalRaw();
-
-  } catch (error) {
-
-    console.error(
-      'openOrder error:',
-      error
-    );
-
-    showToast(
-      'Could not open order: ' +
-      (
-        error?.message ||
-        'Unknown error'
-      )
-    );
+  }catch(e){
+    console.error('openOrder error:',e);
+    showToast('Could not open order: '+(e?.message||'Unknown error'));
   }
 }
 
+async function saveOrderAssignment(){
+  if(!currentOrder?.id){showToast('No order selected.');return;}
 
-/* =========================================================
-   SAVE DRIVER
-   ========================================================= */
+  try{
+    const select=document.getElementById('modalDriver');
+    if(!select) throw new Error('Driver selector not found.');
 
-async function saveOrderAssignment() {
+    const driverId=select.value.trim()||null;
 
-  if (!currentOrder?.id) {
-    showToast('No order selected.');
-    return;
-  }
+    const {data,error}=await supabaseClient
+      .from('orders')
+      .update({driver_id:driverId})
+      .eq('id',currentOrder.id)
+      .eq('restaurant_id',RESTAURANT_ID)
+      .select('*')
+      .single();
 
-  try {
+    if(error) throw error;
 
-    const select =
-      document.getElementById('modalDriver');
+    currentOrder={...currentOrder,...data};
+    orders=orders.map(o=>String(o.id)===String(currentOrder.id)?{...o,...data}:o);
 
-    if (!select) {
-      throw new Error(
-        'Driver selector not found.'
-      );
-    }
-
-    const driverId =
-      select.value.trim() || null;
-
-    const { data, error } =
-      await supabaseClient
-        .from('orders')
-        .update({
-          driver_id: driverId
-        })
-        .eq('id', currentOrder.id)
-        .eq('restaurant_id', RESTAURANT_ID)
-        .select('*')
-        .single();
-
-    if (error) {
-      throw error;
-    }
-
-    currentOrder = {
-      ...currentOrder,
-      ...data
-    };
-
-    orders = orders.map(order =>
-      String(order.id) ===
-      String(currentOrder.id)
-        ? currentOrder
-        : order
-    );
-
-    showToast(
-      driverId
-        ? 'Driver assigned successfully.'
-        : 'Driver unassigned.'
-    );
-
-    // تحديث القائمة
-    await loadOrders();
-
-    // إعادة فتح الطلب بعد الحفظ
-    await openOrder(
-      currentOrder.id
-    );
-
-  } catch (error) {
-
-    console.error(
-      'saveOrderAssignment error:',
-      error
-    );
-
-    showToast(
-      'Could not assign driver: ' +
-      (
-        error?.message ||
-        'Unknown error'
-      )
-    );
-  }
-}
-
-
-/* =========================================================
-   SAVE ADDRESS + INSTRUCTIONS
-   ========================================================= */
-
-async function saveOrderDetails() {
-
-  if (!currentOrder?.id) {
-    showToast('No order selected.');
-    return;
-  }
-
-  try {
-
-    const address =
-      document
-        .getElementById('modalAddress')
-        ?.value
-        ?.trim() || null;
-
-    const instructions =
-      document
-        .getElementById('modalInstructions')
-        ?.value
-        ?.trim() || null;
-
-
-    const { data, error } =
-      await supabaseClient
-        .from('orders')
-        .update({
-          delivery_address: address,
-          delivery_instructions: instructions
-        })
-        .eq('id', currentOrder.id)
-        .eq('restaurant_id', RESTAURANT_ID)
-        .select('*')
-        .single();
-
-
-    if (error) {
-      throw error;
-    }
-
-
-    currentOrder = {
-      ...currentOrder,
-      ...data
-    };
-
-
-    orders = orders.map(order =>
-      String(order.id) ===
-      String(currentOrder.id)
-        ? currentOrder
-        : order
-    );
-
-
-    showToast(
-      'Order details saved.'
-    );
-
+    showToast(driverId?'Driver assigned.':'Driver unassigned.');
 
     await loadOrders();
-
-    await openOrder(
-      currentOrder.id
-    );
-
-
-  } catch (error) {
-
-    console.error(
-      'saveOrderDetails error:',
-      error
-    );
-
-    showToast(
-      'Could not save order: ' +
-      (
-        error?.message ||
-        'Unknown error'
-      )
-    );
+    await openOrder(currentOrder.id);
+  }catch(e){
+    console.error('saveOrderAssignment error:',e);
+    showToast('Assignment failed: '+(e?.message||'Unknown error'));
   }
 }
 
+async function saveOrderDetails(){
+  if(!currentOrder?.id){showToast('No order selected.');return;}
 
-/* =========================================================
-   UPDATE STATUS
-   ========================================================= */
+  try{
+    const address=document.getElementById('modalAddress')?.value.trim()||null;
+    const instructions=document.getElementById('modalInstructions')?.value.trim()||null;
 
-async function updateModalStatus() {
+    const {data,error}=await supabaseClient
+      .from('orders')
+      .update({
+        delivery_address:address,
+        delivery_instructions:instructions
+      })
+      .eq('id',currentOrder.id)
+      .eq('restaurant_id',RESTAURANT_ID)
+      .select('*')
+      .single();
 
-  if (!currentOrder?.id) {
-    showToast('No order selected.');
-    return;
+    if(error) throw error;
+
+    currentOrder={...currentOrder,...data};
+    orders=orders.map(o=>String(o.id)===String(currentOrder.id)?{...o,...data}:o);
+
+    showToast('Order details saved.');
+    await loadOrders();
+    await openOrder(currentOrder.id);
+  }catch(e){
+    console.error('saveOrderDetails error:',e);
+    showToast('Could not save order: '+(e?.message||'Unknown error'));
   }
-
-  const select =
-    document.getElementById(
-      'modalStatus'
-    );
-
-  if (!select) {
-    showToast(
-      'Status selector not found.'
-    );
-    return;
-  }
-
-  const newStatus =
-    select.value;
-
-  await setOrderStatus(
-    currentOrder.id,
-    newStatus,
-    true
-  );
 }
 
+async function updateModalStatus(){
+  if(!currentOrder?.id){showToast('No order selected.');return;}
 
-/* =========================================================
-   SET ORDER STATUS
-   ========================================================= */
+  const el=document.getElementById('modalStatus');
+  if(!el){showToast('Status control is unavailable.');return;}
 
-async function setOrderStatus(
-  id,
-  status,
-  close = false
-) {
+  await setOrderStatus(currentOrder.id,el.value,true);
+}
 
-  try {
+async function setOrderStatus(id,status,close=false){
+  try{
+    const orderId=String(id);
 
-    // اجلب أحدث نسخة من الطلب
-    let order =
-      orders.find(
-        o =>
-          String(o.id) ===
-          String(id)
-      );
+    // Get the latest order before validating dispatch requirements.
+    const {data:existing,error:fetchError}=await supabaseClient
+      .from('orders')
+      .select('*')
+      .eq('id',orderId)
+      .eq('restaurant_id',RESTAURANT_ID)
+      .maybeSingle();
 
-    if (!order) {
+    if(fetchError) throw fetchError;
+    if(!existing) throw new Error('Order not found.');
 
-      const { data, error } =
-        await supabaseClient
-          .from('orders')
-          .select('*')
-          .eq('id', id)
-          .eq(
-            'restaurant_id',
-            RESTAURANT_ID
-          )
-          .maybeSingle();
-
-      if (error) {
-        throw error;
-      }
-
-      order = data;
-    }
-
-
-    if (!order) {
-      throw new Error(
-        'Order not found.'
-      );
-    }
-
-
-    /*
-      لا تسمح بإرسال الطلب
-      للتوصيل بدون Driver
-    */
-
-    if (
-      status ===
-        'out_for_delivery' &&
-      !order.driver_id
-    ) {
-
-      showToast(
-        'Assign an approved driver before dispatching.'
-      );
-
+    if(status==='out_for_delivery' && !existing.driver_id){
+      showToast('Assign an approved driver before dispatching.');
       return;
     }
 
+    const {data,error}=await supabaseClient
+      .from('orders')
+      .update({status})
+      .eq('id',orderId)
+      .eq('restaurant_id',RESTAURANT_ID)
+      .select('*')
+      .single();
 
-    const { data, error } =
-      await supabaseClient
-        .from('orders')
-        .update({
-          status: status
-        })
-        .eq('id', id)
-        .eq(
-          'restaurant_id',
-          RESTAURANT_ID
-        )
-        .select('*')
-        .single();
+    if(error) throw error;
 
+    currentOrder={...existing,...data};
+    orders=orders.map(o=>String(o.id)===orderId?{...o,...data}:o);
 
-    if (error) {
-      throw error;
-    }
+    showToast('Order status updated.');
 
+    if(close) closeModal();
 
-    // تحديث النسخة المحلية
-    orders = orders.map(o =>
-      String(o.id) ===
-      String(id)
-        ? {
-            ...o,
-            ...data
-          }
-        : o
-    );
-
-
-    currentOrder = {
-      ...order,
-      ...data
-    };
-
-
-    showToast(
-      'Order status updated.'
-    );
-
-
-    if (close) {
-      closeModal();
-    }
-
-
-    // تحديث الشاشة
-    const activePage =
-      document
-        .querySelector(
-          '.page.show'
-        )
-        ?.id;
-
-
-    if (
-      activePage ===
-      'orders'
-    ) {
-      await loadOrders();
-    }
-
-    if (
-      activePage ===
-      'dashboard'
-    ) {
-      await loadDashboard();
-    }
-
-    if (
-      activePage ===
-      'kitchen'
-    ) {
-      await loadKitchen();
-    }
-
-
-  } catch (error) {
-
-    console.error(
-      'setOrderStatus error:',
-      error
-    );
-
-    showToast(
-      'Could not update order: ' +
-      (
-        error?.message ||
-        'Unknown error'
-      )
-    );
+    // Refresh only the currently visible Admin page.
+    const activePage=document.querySelector('.page.show')?.id;
+    if(activePage==='orders') await loadOrders();
+    else if(activePage==='dashboard') await loadDashboard();
+    else if(activePage==='kitchen') await loadKitchen();
+  }catch(e){
+    console.error('setOrderStatus error:',e);
+    showToast('Could not update order: '+(e?.message||'Unknown error'));
   }
 }
 
+// Inline onclick handlers in the Admin UI need these functions on window.
+window.openOrder=openOrder;
+window.saveOrderAssignment=saveOrderAssignment;
+window.saveOrderDetails=saveOrderDetails;
+window.updateModalStatus=updateModalStatus;
+window.setOrderStatus=setOrderStatus;
+window.closeModal=closeModal;
+
+async function loadMenu(){
+  try{products=await fetchProducts();document.getElementById('menuTable').innerHTML=productTableHTML(products,true);}catch(e){showToast('Menu error: '+e.message)}
+}
+function productTableHTML(list,actions){return `<table class="table"><thead><tr><th>PRODUCT</th><th>CATEGORY</th><th>PRICE</th><th>STATUS</th><th>VISIBILITY</th>${actions?'<th></th>':''}</tr></thead><tbody>${list.map(p=>`<tr><td><div class="product">${p.image_url?`<img src="${esc(p.image_url)}" class="thumb" style="object-fit:cover">`:'<div class="thumb">🍔</div>'}<div><b>${esc(p.name)}</b><small>${esc(p.description||'')}</small></div></div></td><td>${esc(p.menu_categories?.name||'—')}</td><td class="money">${money(p.price)}</td><td>${badge(p.is_available?'Available':'Hidden')}</td><td>${p.is_featured?'<span class="pill yellow">Featured</span>':'Published'}</td>${actions?`<td><button class="iconbtn" onclick="openProductEditor('${p.id}')">Edit</button></td>`:''}</tr>`).join('')}</tbody></table>`;}
+async function loadProducts(){try{products=await fetchProducts();document.getElementById('productTable').innerHTML=productTableHTML(products,true);}catch(e){showToast('Products error: '+e.message)}}
+
+async function loadCategories(){
+  try{categories=await fetchCategories(); if(!products.length) products=await fetchProducts();
+    document.getElementById('catCards').innerHTML=categories.length?categories.map(c=>`<div class="card"><h3>${esc(c.name)}</h3><div style="font-size:28px;font-weight:900">${products.filter(p=>p.category_id===c.id).length}</div><p style="font-size:11px;color:#777">Products · ${c.is_active===false?'Inactive':'Active'}</p><div style="display:flex;gap:8px"><button class="btn ghost" onclick="openCategoryEditor('${c.id}')">Manage →</button><button class="btn danger" onclick="deleteCategory('${c.id}')">Delete</button></div></div>`).join(''):'<div class="card">No categories yet.</div>';
+  }catch(e){showToast('Categories error: '+e.message)}
+}
+
+function openCategoryEditor(id=null){const c=id?categories.find(x=>x.id===id):null;document.getElementById('modalbox').innerHTML=`<h2>${c?'Edit':'New'} Category</h2><div class="formgrid"><div class="field"><label>NAME</label><input id="mCatName" value="${esc(c?.name||'')}"></div><div class="field"><label>SORT ORDER</label><input id="mCatSort" type="number" value="${Number(c?.sort_order||0)}"></div><div class="field full"><label>DESCRIPTION</label><textarea id="mCatDesc" rows="3">${esc(c?.description||'')}</textarea></div><div class="field full"><label>IMAGE URL</label><input id="mCatImage" value="${esc(c?.image_url||'')}"></div></div><div style="display:flex;justify-content:end;gap:8px;margin-top:18px"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveCategory('${id||''}')">Save Category</button></div>`;openModalRaw();}
+async function saveCategory(id){try{const payload={restaurant_id:RESTAURANT_ID,name:document.getElementById('mCatName').value.trim(),description:document.getElementById('mCatDesc').value.trim()||null,image_url:document.getElementById('mCatImage').value.trim()||null,sort_order:Number(document.getElementById('mCatSort').value||0),is_active:true};if(!payload.name)throw new Error('Category name is required');let q=id?supabaseClient.from('menu_categories').update(payload).eq('id',id).eq('restaurant_id',RESTAURANT_ID):supabaseClient.from('menu_categories').insert(payload);const {error}=await q;if(error)throw error;closeModal();showToast('Category saved');await loadCategories();await loadProducts();}catch(e){showToast('Category error: '+e.message)}}
+async function deleteCategory(id){if(!confirm('Delete this category? Products are not deleted automatically.'))return;try{const {error}=await supabaseClient.from('menu_categories').delete().eq('id',id).eq('restaurant_id',RESTAURANT_ID);if(error)throw error;showToast('Category deleted');await loadCategories();}catch(e){showToast('Delete failed: '+e.message)}}
+
+function openProductEditor(id=null){const p=id?products.find(x=>x.id===id):null;const opts=categories.map(c=>`<option value="${c.id}" ${c.id===p?.category_id?'selected':''}>${esc(c.name)}</option>`).join('');document.getElementById('modalbox').innerHTML=`<h2>${p?'Edit':'New'} Product</h2><p style="color:#777;font-size:12px">Manage the customer-facing menu item in Supabase.</p><div class="formgrid"><div class="field"><label>NAME</label><input id="mProdName" value="${esc(p?.name||'')}"></div><div class="field"><label>PRICE (SAR)</label><input id="mProdPrice" type="number" step="0.01" min="0" value="${p?.price??''}"></div><div class="field"><label>CATEGORY</label><select id="mProdCat">${opts}</select></div><div class="field"><label>SORT ORDER</label><input id="mProdSort" type="number" value="${Number(p?.sort_order||0)}"></div><div class="field full"><label>DESCRIPTION</label><textarea id="mProdDesc" rows="3">${esc(p?.description||'')}</textarea></div><div class="field full"><label>IMAGE URL</label><input id="mProdImage" value="${esc(p?.image_url||'')}"></div><div class="field"><label>AVAILABLE</label><select id="mProdAvail"><option value="true" ${p?.is_available!==false?'selected':''}>Available</option><option value="false" ${p?.is_available===false?'selected':''}>Hidden</option></select></div><div class="field"><label>FEATURED</label><select id="mProdFeatured"><option value="false" ${!p?.is_featured?'selected':''}>No</option><option value="true" ${p?.is_featured?'selected':''}>Yes</option></select></div></div><div style="display:flex;justify-content:end;gap:8px;margin-top:18px"><button class="btn ghost" onclick="closeModal()">Cancel</button>${p?`<button class="btn danger" onclick="deleteProduct('${p.id}')">Delete</button>`:''}<button class="btn primary" onclick="saveProduct('${id||''}')">Save Product</button></div>`;openModalRaw();}
+async function saveProduct(id){try{const payload={restaurant_id:RESTAURANT_ID,name:document.getElementById('mProdName').value.trim(),price:Number(document.getElementById('mProdPrice').value),description:document.getElementById('mProdDesc').value.trim()||null,category_id:document.getElementById('mProdCat').value||null,sort_order:Number(document.getElementById('mProdSort').value||0),image_url:document.getElementById('mProdImage').value.trim()||null,is_available:document.getElementById('mProdAvail').value==='true',is_featured:document.getElementById('mProdFeatured').value==='true'};if(!payload.name||!Number.isFinite(payload.price))throw new Error('Name and valid price are required');const {error}=id?await supabaseClient.from('products').update(payload).eq('id',id).eq('restaurant_id',RESTAURANT_ID):await supabaseClient.from('products').insert(payload);if(error)throw error;closeModal();showToast('Product saved');await loadProducts();await loadMenu();}catch(e){showToast('Product error: '+e.message)}}
+async function deleteProduct(id){if(!confirm('Delete this product?'))return;try{const {error}=await supabaseClient.from('products').delete().eq('id',id).eq('restaurant_id',RESTAURANT_ID);if(error)throw error;closeModal();showToast('Product deleted');await loadProducts();await loadMenu();}catch(e){showToast('Delete failed: '+e.message)}}
+
+async function loadCustomers(){try{orders=await fetchBaseOrders();const map=new Map();orders.forEach(o=>{const k=o.customer_token||'guest';if(!map.has(k))map.set(k,{token:k,count:0,total:0,last:o.created_at});const c=map.get(k);c.count++;c.total+=Number(o.total||0);if(new Date(o.created_at)>new Date(c.last))c.last=o.created_at});const rows=[...map.values()].sort((a,b)=>b.total-a.total);document.getElementById('customerTable').innerHTML=rows.length?`<table class="table"><thead><tr><th>CUSTOMER</th><th>ORDERS</th><th>TOTAL SPENT</th><th>LAST ORDER</th></tr></thead><tbody>${rows.map(c=>`<tr><td><b>Guest customer</b><small style="display:block;color:#777">Token ${esc(c.token.slice(0,12))}…</small></td><td>${c.count}</td><td class="money">${money(c.total)}</td><td>${new Date(c.last).toLocaleString()}</td></tr>`).join('')}</tbody></table>`:'<div style="padding:20px;color:#777">No customers/orders yet.</div>'}catch(e){showToast('Customers error: '+e.message)}}
+
+async function loadPayments(){try{orders=await fetchBaseOrders();const valid=orders.filter(o=>o.status!=='cancelled');const captured=valid.reduce((a,o)=>a+Number(o.total||0),0),cash=valid.filter(o=>o.payment_method==='cash_on_delivery').reduce((a,o)=>a+Number(o.total||0),0),noncash=captured-cash;const cards=document.querySelectorAll('#payments .stat .num');if(cards[0])cards[0].textContent=money(captured);if(cards[1])cards[1].textContent=money(cash);if(cards[2])cards[2].textContent=money(orders.filter(o=>o.status==='cancelled').reduce((a,o)=>a+Number(o.total||0),0));if(cards[3])cards[3].textContent=money(noncash);document.getElementById('paymentTable').innerHTML=tableFromRows(valid.slice(0,50).map(o=>[`#MOBS-${o.order_number}`,esc(o.payment_method||'—'),money(o.total),badge(statusLabel(o.status)),new Date(o.created_at).toLocaleString()]),['ORDER','METHOD','AMOUNT','STATUS','TIME'],false)}catch(e){showToast('Payments error: '+e.message)}}
+async function loadReports(){try{orders=await fetchBaseOrders();const valid=orders.filter(o=>o.status!=='cancelled');const sales=valid.reduce((a,o)=>a+Number(o.total||0),0),aov=valid.length?sales/valid.length:0;const nums=document.querySelectorAll('#reports .stat .num');if(nums[0])nums[0].textContent=money(sales);if(nums[1])nums[1].textContent=valid.length.toLocaleString();if(nums[2])nums[2].textContent=money(aov);if(nums[3])nums[3].textContent='—';const byCat={};const items=await fetchOrderItems(valid.map(o=>o.id));const p=await fetchProducts();const catMap={};p.forEach(x=>catMap[x.id]=x.menu_categories?.name||'Uncategorized');items.forEach(i=>{const c=catMap[i.product_id]||'Uncategorized';byCat[c]=(byCat[c]||0)+Number(i.line_total||0)});const total=Math.max(Object.values(byCat).reduce((a,b)=>a+b,0),1);const box=document.querySelector('#reports .layout2 .card:first-child .mini-list');if(box)box.innerHTML=Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([c,v])=>`<div class="mini"><span>${esc(c)}</span><b>${Math.round(v/total*100)}%</b></div><div class="bar"><span style="width:${Math.round(v/total*100)}%"></span></div>`).join('')||'<div style="color:#777">No sales yet.</div>';const top={};items.forEach(i=>top[i.product_name]=(top[i.product_name]||0)+Number(i.quantity||0));const tbox=document.querySelector('#reports .layout2 .card:nth-child(2) .mini-list');if(tbox)tbox.innerHTML=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([n,v])=>`<div class="mini"><span>${esc(n)}</span><b>${v}</b></div>`).join('')||'<div style="color:#777">No product sales yet.</div>'}catch(e){showToast('Reports error: '+e.message)}}
+
+function tableFromRows(rows,heads,actions=true){return `<table class="table"><thead><tr>${heads.map(h=>`<th>${h}</th>`).join('')}${actions?'<th></th>':''}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table>`}
+
+async function loadSettings(){try{const {data,error}=await supabaseClient.from('restaurants').select('*').eq('id',RESTAURANT_ID).maybeSingle();if(error)throw error;const inputs=document.querySelectorAll('#settings input');if(data&&inputs.length){inputs[0].value=data.name||'THE MOBS';}}catch(e){console.error(e)}}
+
+async function loadDrivers(){
+  const host=document.getElementById('driverTable');
+  if(!host) return;
+  try{
+    const {data,error}=await supabaseClient
+      .from('driver_profiles')
+      .select('*')
+      .order('created_at',{ascending:false});
+    if(error) throw error;
+
+    const drivers=data||[];
+    const pending=drivers.filter(d=>d.status==='pending').length;
+    const approvedOnline=drivers.filter(d=>d.status==='approved'&&d.availability_status==='online').length;
+    const badge=document.getElementById('pendingDriversCount');
+    if(badge) badge.textContent=pending;
+
+    host.innerHTML=`
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+        <span class="pill graypill">${drivers.length} applications</span>
+        <span class="pill yellow">${pending} pending</span>
+        <span class="pill green">${approvedOnline} online</span>
+      </div>
+      <div style="overflow:auto">
+        <table class="driver-table">
+          <thead><tr><th>DRIVER</th><th>PHONE</th><th>CITY</th><th>VEHICLE</th><th>AVAILABILITY</th><th>STATUS</th><th></th></tr></thead>
+          <tbody>
+            ${drivers.length ? drivers.map(d=>`
+              <tr>
+                <td><b>${esc(d.full_name)}</b><br><small>${esc(d.username)}</small></td>
+                <td>${esc(d.phone||'—')}</td>
+                <td>${esc(d.city||'—')}</td>
+                <td>${esc([d.vehicle_make,d.vehicle_model,d.vehicle_year].filter(Boolean).join(' ')||'—')}</td>
+                <td>${d.status==='approved' ? badge(d.availability_status==='online'?'Online':d.availability_status==='busy'?'Busy':'Offline') : '—'}</td>
+                <td><span class="driver-status ${esc(d.status)}">${esc(d.status)}</span></td>
+                <td><button class="btn ghost" onclick="openDriver('${d.id}')">VIEW</button></td>
+              </tr>`).join('')
+              : '<tr><td colspan="7" style="padding:20px;color:#777">No driver applications yet.</td></tr>'}
+          </tbody>
+        </table>
+      </div>`;
+  }catch(e){
+    host.innerHTML=`<div class="card"><b>Unable to load drivers.</b><p>${esc(e.message)}</p></div>`;
+  }
+}
+async function openDriver(id){
+  try{
+    const {data:d,error}=await supabaseClient.from('driver_profiles').select('*').eq('id',id).single(); if(error) throw error;
+    const modal=document.getElementById('modalbox');
+    const signed=async path=>{if(!path)return null;const r=await supabaseClient.storage.from('driver-documents').createSignedUrl(path,300);return r.data?.signedUrl||null;};
+    const [identity,vehicle,license,registration]=await Promise.all([signed(d.id_document_path),signed(d.vehicle_image_path),signed(d.license_document_path),signed(d.vehicle_registration_path)]);
+    modal.innerHTML=`<h2>${esc(d.full_name)}</h2><p style="color:#777;font-size:12px">Driver application · <b>${esc(d.status)}</b></p><div class="formgrid"><div class="field"><label>USERNAME</label><input value="${esc(d.username)}" disabled></div><div class="field"><label>PHONE</label><input value="${esc(d.phone||'')}" disabled></div><div class="field"><label>EMAIL</label><input value="${esc(d.email||'')}" disabled></div><div class="field"><label>CITY</label><input value="${esc(d.city||'')}" disabled></div><div class="field full"><label>NATIONAL ADDRESS</label><textarea rows="3" disabled>${esc(d.national_address||'')}</textarea></div><div class="field"><label>ID / IQAMA</label><input value="${esc(d.id_number||'')}" disabled></div><div class="field"><label>VEHICLE</label><input value="${esc([d.vehicle_make,d.vehicle_model,d.vehicle_year,d.plate_number].filter(Boolean).join(' · '))}" disabled></div></div><div class="doc-grid">${identity?`<div class="doc-card"><b>IDENTITY</b><img src="${identity}" alt="Identity"></div>`:''}${vehicle?`<div class="doc-card"><b>VEHICLE</b><img src="${vehicle}" alt="Vehicle"></div>`:''}${license?`<div class="doc-card"><b>LICENSE</b><img src="${license}" alt="License"></div>`:''}${registration?`<div class="doc-card"><b>REGISTRATION</b><img src="${registration}" alt="Registration"></div>`:''}</div><div class="driver-actions">${d.status==='pending'?`<button class="btn primary" onclick="setDriverStatus('${d.id}','approved')">APPROVE DRIVER</button><button class="btn danger" onclick="setDriverStatus('${d.id}','rejected')">REJECT</button>`:''}${d.status==='approved'?`<button class="btn danger" onclick="setDriverStatus('${d.id}','suspended')">SUSPEND</button>`:''}${d.status==='suspended'?`<button class="btn primary" onclick="setDriverStatus('${d.id}','approved')">REACTIVATE</button>`:''}<button class="btn ghost" onclick="closeModal()">CLOSE</button></div>`;
+    openModalRaw();
+  }catch(e){showToast('Driver error: '+e.message);}
+}
+
+async function setDriverStatus(id,status){
+  try{const reason=status==='rejected'?prompt('Reason for rejection:')||'Not approved by Admin.':null;const payload={status,rejection_reason:reason};if(status==='approved'){payload.approved_by=(await supabaseClient.auth.getUser()).data.user.id;payload.approved_at=new Date().toISOString();}const {error}=await supabaseClient.from('driver_profiles').update(payload).eq('id',id);if(error)throw error;closeModal();showToast(`Driver ${status}.`);await loadDrivers();}catch(e){showToast('Driver update failed: '+e.message);}
+}
+
+function renderStaticModule(id){
+  const data={
+    modifiers:[['Extra Cheese','+4 SAR','Products','Active'],['Extra Patty','+8 SAR','Burgers','Active'],['BBQ Sauce','+2 SAR','Burgers','Active']],
+    drivers:[],
+    branches:[['THE MOBS','Restaurant ID connected to Supabase','Active']],
+    inventory:[['Inventory module','No inventory table exists in current schema','—','—']],
+    promos:[['Promotions module','No promotions table exists in current schema','—','—']],
+    notifications:[['Operational alerts','Notifications table not configured','—','—']],
+    staff:[['Admin access','Use Supabase Auth for production admin accounts','Recommended','—']],
+    audit:[['Audit log','Audit table not configured in current schema','—','—']]
+  }[id];
+  const el=document.getElementById(id+'Table')||document.querySelector('#'+id+' .card');
+  if(!el)return;
+  const heads={modifiers:['GROUP / OPTION','PRICE','APPLIES TO','STATUS'],drivers:['DRIVER','ID','VEHICLE','STATUS','TODAY','RATING'],branches:['BRANCH','DETAIL','STATUS'],inventory:['ITEM','ON HAND','REORDER AT','STATUS'],promos:['CODE','OFFER','AUDIENCE','STATUS'],notifications:['TITLE','MESSAGE','AUDIENCE','STATUS'],staff:['USER','EMAIL','ROLE','STATUS'],audit:['USER','ACTION','TYPE','WHEN']}[id]||[];
+  el.innerHTML=tableFromRows(data.map(r=>r.map((x,i)=>i===r.length-1?badge(x):esc(x))),heads,false);
+}
+
+function globalSearch(v){
+  if(!v.trim())return;
+  const q=v.trim().toLowerCase();
+  const match=orders.find(o=>String(o.order_number).includes(q)||String(o.customer_token||'').toLowerCase().includes(q));
+  if(match){go('orders');setTimeout(()=>openOrder(match.id),50);} else showToast('No matching order found');
+}
+
+
+async function signIn(){
+  const email=document.getElementById('adminEmail')?.value.trim();
+  const password=document.getElementById('adminPassword')?.value||'';
+  if(!email||!password){showToast('Enter your email and password.');return;}
+  try{
+    const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+    if(error) throw error;
+    const {data:isAdmin,error:adminError}=await supabaseClient.rpc('is_mobs_admin');
+    if(adminError || !isAdmin){ await supabaseClient.auth.signOut(); throw new Error('This account is not the THE MOBS admin account.'); }
+    enter();
+  }catch(e){showToast('Sign in failed: '+(e.message||'Invalid credentials'));}
+}
+async function signOut(){
+  await stopAdminRealtime();
+  await supabaseClient.auth.signOut();
+  document.getElementById('app').style.display='none';
+  document.getElementById('login').style.display='flex';
+}
 
 /* =========================================================
-   MAKE FUNCTIONS AVAILABLE TO HTML onclick=""
+   ADMIN PASSWORD RECOVERY
+   Supabase Auth recovery flow
    ========================================================= */
 
-window.openOrder =
-  openOrder;
+let passwordRecoveryActive = false;
 
-window.closeModal =
-  closeModal;
+function adminRecoveryRedirectUrl(){
+  // Keep the recovery link on the actual Admin page.
+  // Example: http://localhost:3000/admin/?reset=1
+  return `${window.location.origin}${window.location.pathname}?reset=1`;
+}
 
-window.setOrderStatus =
-  setOrderStatus;
+function showLoginScreen(){
+  const login=document.getElementById('login');
+  const reset=document.getElementById('resetPassword');
+  const app=document.getElementById('app');
 
-window.saveOrderAssignment =
-  saveOrderAssignment;
+  if(reset) reset.style.display='none';
+  if(login) login.style.display='grid';
+  if(app) app.style.display='none';
+}
 
-window.saveOrderDetails =
-  saveOrderDetails;
+function showResetPasswordScreen(){
+  passwordRecoveryActive=true;
 
-window.updateModalStatus =
-  updateModalStatus;
+  const login=document.getElementById('login');
+  const reset=document.getElementById('resetPassword');
+  const app=document.getElementById('app');
+
+  if(app) app.style.display='none';
+  if(login) login.style.display='none';
+  if(reset) reset.style.display='grid';
+
+  const message=document.getElementById('resetMessage');
+  if(message){
+    message.textContent='';
+    message.style.color='#777';
+  }
+
+  document.getElementById('newAdminPassword')?.focus();
+}
+
+async function showForgotPassword(){
+  const email=document.getElementById('adminEmail')?.value.trim();
+
+  if(!email){
+    showToast('Enter your admin email first.');
+    document.getElementById('adminEmail')?.focus();
+    return;
+  }
+
+  try{
+    const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{
+      redirectTo:adminRecoveryRedirectUrl()
+    });
+
+    if(error) throw error;
+
+    showToast('Reset email sent. Check your inbox.');
+  }catch(e){
+    console.error('Password reset request failed:',e);
+    showToast('Could not send reset email: '+(e.message||'Unknown error'));
+  }
+}
+
+async function updateAdminPassword(){
+  const password=document.getElementById('newAdminPassword')?.value||'';
+  const confirm=document.getElementById('confirmAdminPassword')?.value||'';
+  const message=document.getElementById('resetMessage');
+
+  if(password.length<8){
+    if(message){
+      message.textContent='Password must be at least 8 characters.';
+      message.style.color='#b33';
+    }
+    return;
+  }
+
+  if(password!==confirm){
+    if(message){
+      message.textContent='Passwords do not match.';
+      message.style.color='#b33';
+    }
+    return;
+  }
+
+  try{
+    if(message){
+      message.textContent='Updating password…';
+      message.style.color='#777';
+    }
+
+    const {data,error:userError}=await supabaseClient.auth.getUser();
+    if(userError) throw userError;
+
+    if(!data?.user){
+      throw new Error('Recovery session not found. Please request a new reset email.');
+    }
+
+    const {error}=await supabaseClient.auth.updateUser({password});
+    if(error) throw error;
+
+    if(message){
+      message.textContent='Password updated successfully.';
+      message.style.color='#16713a';
+    }
+
+    setTimeout(async()=>{
+      passwordRecoveryActive=false;
+      await supabaseClient.auth.signOut();
+
+      document.getElementById('newAdminPassword').value='';
+      document.getElementById('confirmAdminPassword').value='';
+
+      window.history.replaceState({},document.title,window.location.pathname);
+      showLoginScreen();
+
+      const email=document.getElementById('adminEmail');
+      if(email && data.user.email) email.value=data.user.email;
+
+      showToast('Password changed. You can sign in now.');
+    },1200);
+
+  }catch(e){
+    console.error('Password update failed:',e);
+
+    if(message){
+      message.textContent=e.message||'Failed to update password.';
+      message.style.color='#b33';
+    }
+  }
+}
+
+function backToLogin(){
+  passwordRecoveryActive=false;
+
+  document.getElementById('newAdminPassword').value='';
+  document.getElementById('confirmAdminPassword').value='';
+
+  window.history.replaceState({},document.title,window.location.pathname);
+  showLoginScreen();
+}
+
+supabaseClient.auth.onAuthStateChange(async(event,session)=>{
+  console.log('Supabase auth event:',event);
+
+  if(event==='PASSWORD_RECOVERY'){
+    showResetPasswordScreen();
+    return;
+  }
+
+  if(event==='SIGNED_OUT' && passwordRecoveryActive){
+    showLoginScreen();
+  }
+});
+
+function checkPasswordRecoveryUrl(){
+  const params=new URLSearchParams(window.location.search);
+  const hash=window.location.hash||'';
+
+  const recoveryByQuery=params.get('reset')==='1';
+  const recoveryByHash=
+    hash.includes('type=recovery') ||
+    hash.includes('access_token=');
+
+  if(recoveryByQuery || recoveryByHash){
+    // Supabase normally emits PASSWORD_RECOVERY after processing the URL.
+    // Show the screen immediately as a fallback while that event is handled.
+    showResetPasswordScreen();
+  }
+}
+
+async function restoreAdminSession(){
+  if(passwordRecoveryActive){
+    showResetPasswordScreen();
+    return;
+  }
+
+  const {data}=await supabaseClient.auth.getSession();
+  if(data.session){ const {data:isAdmin,error:adminError}=await supabaseClient.rpc('is_mobs_admin'); if(adminError||!isAdmin){await supabaseClient.auth.signOut();document.getElementById('login').style.display='flex';document.getElementById('app').style.display='none';return;} enter(); }
+  else {
+    document.getElementById('login').style.display='flex';
+    document.getElementById('app').style.display='none';
+  }
+}
+
+function enter(){document.getElementById('login').style.display='none';document.getElementById('app').style.display='flex';startAdminRealtime();loadPage('dashboard');}
+function openModal(type){if(type==='product'){openProductEditor();return;}openOrderCreate();}
+function openOrderCreate(){
+  document.getElementById('modalbox').innerHTML=`<h2>Create New Order</h2><p style="color:#777;font-size:12px">This creates an order directly in the connected Supabase database.</p><div class="formgrid"><div class="field"><label>CUSTOMER TOKEN (OPTIONAL)</label><input id="mOrderToken" placeholder="UUID token"></div><div class="field"><label>PAYMENT</label><select id="mOrderPayment"><option value="cash_on_delivery">Cash on delivery</option><option value="card">Card</option></select></div><div class="field"><label>DELIVERY FEE</label><input id="mOrderFee" type="number" step="0.01" value="0"></div><div class="field full"><label>ADDRESS</label><input id="mOrderAddress" placeholder="Delivery address"></div><div class="field full"><label>INSTRUCTIONS</label><textarea id="mOrderInstructions" rows="3"></textarea></div><div class="field full"><label>ITEMS (one per line: Product × quantity)</label><textarea id="mOrderItems" rows="5" placeholder="Classic Burger × 1\nFrench Fries × 1"></textarea></div></div><div style="display:flex;justify-content:end;gap:8px;margin-top:18px"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="createOrder()">Create Order</button></div>`;openModalRaw();}
+async function createOrder(){
+  try{
+    const lines=document.getElementById('mOrderItems').value.split('\n').map(x=>x.trim()).filter(Boolean);if(!lines.length)throw new Error('Add at least one item');
+    products=products.length?products:await fetchProducts();const parsed=[];for(const line of lines){const m=line.match(/^(.+?)\s*[×x*]\s*(\d+)$/);if(!m)throw new Error('Use: Product × quantity');const p=products.find(x=>x.name.toLowerCase()===m[1].trim().toLowerCase());if(!p)throw new Error('Product not found: '+m[1]);parsed.push({product:p,qty:Number(m[2])});}
+    const subtotal=parsed.reduce((a,x)=>a+Number(x.product.price)*x.qty,0),fee=Number(document.getElementById('mOrderFee').value||0),tax=Math.round(subtotal*0.15*100)/100,total=subtotal+fee+tax;
+    const token=document.getElementById('mOrderToken').value.trim();const customer_token=token||crypto.randomUUID();
+    const {data:o,error}=await supabaseClient.from('orders').insert({restaurant_id:RESTAURANT_ID,customer_token,status:'pending',payment_method:document.getElementById('mOrderPayment').value,subtotal,delivery_fee:fee,tax,total,delivery_address:document.getElementById('mOrderAddress').value.trim()||null,delivery_instructions:document.getElementById('mOrderInstructions').value.trim()||null}).select().single();if(error)throw error;
+    const rows=parsed.map(x=>({order_id:o.id,product_id:x.product.id,product_name:x.product.name,unit_price:x.product.price,quantity:x.qty,line_total:Number(x.product.price)*x.qty}));const {error:ie}=await supabaseClient.from('order_items').insert(rows);if(ie)throw ie;
+    closeModal();showToast('Order created');await loadDashboard();
+  }catch(e){showToast('Create order failed: '+e.message)}
+}
+
+// Hook the UI controls that existed as static demo controls.
+document.querySelectorAll('#orders .filters input, #orders .filters select').forEach(x=>x.addEventListener('input',loadOrders));
+const categoryAddButton=document.querySelector('#categories .titlebar .btn.primary');
+if(categoryAddButton) categoryAddButton.onclick=()=>openCategoryEditor();
+document.querySelectorAll('#settings .btn.primary').forEach(b=>b.onclick=async()=>{try{const name=document.querySelector('#settings input')?.value?.trim();if(!name)throw new Error('Restaurant name required');const {error}=await supabaseClient.from('restaurants').update({name}).eq('id',RESTAURANT_ID);if(error)throw error;showToast('Settings saved')}catch(e){showToast('Settings error: '+e.message)}});
+
+// Dashboard is loaded after successful authentication.
+
+
+/* =========================================================
+   V1 UI ADAPTER
+   Connects the existing V1 interface buttons to the
+   real Supabase-backed Admin logic above.
+   ========================================================= */
+
+window.openModal = function(type, id=null){
+  if(type === 'product') return openProductEditor(id);
+  if(type === 'category') return openCategoryEditor(id);
+  if(type === 'newOrder') return openOrderCreate();
+  if(type === 'driver') return showToast('Drivers apply from the Delivery app. Review pending applications in Drivers.');
+  if(type === 'modifier' || type === 'branch' ||
+     type === 'stock' || type === 'promo' || type === 'notification' ||
+     type === 'staff'){
+    showToast('This module is not connected to a database table yet.');
+    return;
+  }
+};
+
+window.saveSettings = async function(){
+  try{
+    const name = document.getElementById('settingName')?.value.trim();
+    if(!name) throw new Error('Restaurant name is required.');
+
+    const prep = document.getElementById('settingPrep')?.value.trim();
+    const taxText = document.getElementById('settingTax')?.value.trim();
+    const taxRate = Number(String(taxText || '').replace('%',''));
+
+    const payload = { name };
+    if(prep) payload.order_prep_time = prep;
+    if(Number.isFinite(taxRate)) payload.tax_rate = taxRate;
+
+    const {error} = await supabaseClient
+      .from('restaurants')
+      .update(payload)
+      .eq('id', RESTAURANT_ID);
+
+    if(error) throw error;
+    showToast('Settings saved to Supabase.');
+  }catch(e){
+    console.error(e);
+    showToast('Settings error: ' + e.message);
+  }
+};
+
+window.loadPage = loadPage;
+
+/* Refresh live data automatically while the Admin is open. */
+setInterval(async () => {
+  try{
+    const active = document.querySelector('.page.show')?.id;
+    if(active) await loadPage(active);
+  }catch(e){
+    console.error('Auto refresh:', e);
+  }
+}, 15000);
+
+
+let adminRealtimeChannel=null;
+
+function startAdminRealtime(){
+  if(adminRealtimeChannel) return;
+  adminRealtimeChannel=supabaseClient.channel('mobs-admin-live')
+    .on('postgres_changes',{event:'*',schema:'public',table:'orders',filter:`restaurant_id=eq.${RESTAURANT_ID}`},async()=>{
+      const page=document.querySelector('.page.show')?.id;
+      if(page) await loadPage(page);
+    })
+    .on('postgres_changes',{event:'*',schema:'public',table:'driver_profiles'},async()=>{
+      const page=document.querySelector('.page.show')?.id;
+      if(page==='drivers') await loadDrivers();
+      const badge=document.getElementById('pendingDriversCount');
+      if(badge){
+        const {count}=await supabaseClient.from('driver_profiles').select('id',{count:'exact',head:true}).eq('status','pending');
+        badge.textContent=count||0;
+      }
+    })
+    .subscribe();
+}
+
+async function stopAdminRealtime(){
+  if(adminRealtimeChannel){
+    await supabaseClient.removeChannel(adminRealtimeChannel);
+    adminRealtimeChannel=null;
+  }
+}
+
+/* First live load. */
+checkPasswordRecoveryUrl();
+restoreAdminSession();
+
+
+
+window.toggleKdsSound = function(button){
+  if(!button) return;
+  const on = button.textContent.includes('On');
+  button.textContent = on ? '🔕 Sound Off' : '🔔 Sound On';
+};
+window.exportCSV = function(){
+  const rows = [['order_number','customer','total','status','created_at']].concat((orders||[]).map(o=>[o.order_number,customerDisplay(o),o.total,o.status,o.created_at]));
+  const csv = rows.map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='mobs-orders.csv'; a.click(); URL.revokeObjectURL(a.href);
+};
+window.exportReport = window.exportCSV;
