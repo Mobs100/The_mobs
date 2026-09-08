@@ -3,8 +3,6 @@
 -- This migration only adds delivery fields if they do not exist.
 alter table if exists public.orders add column if not exists customer_name text;
 alter table if exists public.orders add column if not exists phone text;
-alter table if exists public.orders add column if not exists delivery_address text;
-alter table if exists public.orders add column if not exists delivery_instructions text;
 alter table if exists public.orders add column if not exists latitude double precision;
 alter table if exists public.orders add column if not exists longitude double precision;
 alter table if exists public.orders add column if not exists delivery_started_at timestamptz;
@@ -382,63 +380,94 @@ with check (
   )
 );
 
--- Refresh PostgREST schema cache after applying the new order columns.
-notify pgrst, 'reload schema';
 
 -- =========================================================
--- ADMIN ORDER ACCESS / ORDER ITEM INTEGRITY
+-- ORDER SCHEMA ALIGNMENT / ADMIN ACCESS
 -- =========================================================
--- The Admin Console reads and edits orders directly with the authenticated
--- admin session. Explicit policies are required when RLS is enabled.
+alter table if exists public.orders add column if not exists customer_name text;
+alter table if exists public.orders add column if not exists phone text;
+alter table if exists public.orders add column if not exists payment_method text;
+alter table if exists public.orders add column if not exists subtotal numeric;
+alter table if exists public.orders add column if not exists delivery_fee numeric;
+alter table if exists public.orders add column if not exists tax numeric;
+alter table if exists public.orders add column if not exists total numeric;
+alter table if exists public.orders add column if not exists delivery_address text;
+alter table if exists public.orders add column if not exists delivery_instructions text;
+alter table if exists public.orders add column if not exists latitude double precision;
+alter table if exists public.orders add column if not exists longitude double precision;
+alter table if exists public.orders add column if not exists driver_id uuid;
+
+alter table if exists public.order_items add column if not exists product_price numeric;
+alter table if exists public.order_items add column if not exists unit_price numeric;
+alter table if exists public.order_items add column if not exists line_total numeric;
+
+create or replace function public.sync_order_item_prices()
+returns trigger language plpgsql as $$
+begin
+  if new.unit_price is null and new.product_price is not null then
+    new.unit_price := new.product_price;
+  elsif new.product_price is null and new.unit_price is not null then
+    new.product_price := new.unit_price;
+  end if;
+  if new.line_total is null and new.unit_price is not null and new.quantity is not null then
+    new.line_total := round((new.unit_price * new.quantity)::numeric, 2);
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_sync_order_item_prices on public.order_items;
+create trigger trg_sync_order_item_prices
+before insert or update on public.order_items
+for each row execute function public.sync_order_item_prices();
+
+alter table if exists public.orders enable row level security;
+alter table if exists public.order_items enable row level security;
+alter table if exists public.products enable row level security;
+alter table if exists public.menu_categories enable row level security;
+alter table if exists public.restaurants enable row level security;
 
 drop policy if exists "admin read orders" on public.orders;
-create policy "admin read orders" on public.orders
-for select to authenticated
-using (public.is_mobs_admin());
-
+create policy "admin read orders" on public.orders for select to authenticated using (public.is_mobs_admin());
 drop policy if exists "admin insert orders" on public.orders;
-create policy "admin insert orders" on public.orders
-for insert to authenticated
-with check (public.is_mobs_admin());
+create policy "admin insert orders" on public.orders for insert to authenticated with check (public.is_mobs_admin());
+drop policy if exists "admin update orders" on public.orders;
+create policy "admin update orders" on public.orders for update to authenticated using (public.is_mobs_admin()) with check (public.is_mobs_admin());
+drop policy if exists "admin delete orders" on public.orders;
+create policy "admin delete orders" on public.orders for delete to authenticated using (public.is_mobs_admin());
 
 drop policy if exists "admin read order items" on public.order_items;
-create policy "admin read order items" on public.order_items
-for select to authenticated
-using (public.is_mobs_admin());
-
+create policy "admin read order items" on public.order_items for select to authenticated using (public.is_mobs_admin());
 drop policy if exists "admin insert order items" on public.order_items;
-create policy "admin insert order items" on public.order_items
-for insert to authenticated
-with check (public.is_mobs_admin());
-
+create policy "admin insert order items" on public.order_items for insert to authenticated with check (public.is_mobs_admin());
 drop policy if exists "admin update order items" on public.order_items;
-create policy "admin update order items" on public.order_items
-for update to authenticated
-using (public.is_mobs_admin())
-with check (public.is_mobs_admin());
+create policy "admin update order items" on public.order_items for update to authenticated using (public.is_mobs_admin()) with check (public.is_mobs_admin());
+drop policy if exists "admin delete order items" on public.order_items;
+create policy "admin delete order items" on public.order_items for delete to authenticated using (public.is_mobs_admin());
 
--- Keep the historical product price on every order item. This is the value
--- used for the receipt/order snapshot and is required by the current schema.
-do $$
-begin
-  if exists (
-    select 1 from information_schema.columns
-    where table_schema='public' and table_name='order_items' and column_name='product_price'
-  ) then
-    if exists (
-      select 1 from information_schema.columns
-      where table_schema='public' and table_name='order_items' and column_name='unit_price'
-    ) then
-      execute 'update public.order_items set product_price = coalesce(product_price, unit_price) where product_price is null';
-    end if;
+drop policy if exists "admin read products" on public.products;
+create policy "admin read products" on public.products for select to authenticated using (public.is_mobs_admin());
+drop policy if exists "admin insert products" on public.products;
+create policy "admin insert products" on public.products for insert to authenticated with check (public.is_mobs_admin());
+drop policy if exists "admin update products" on public.products;
+create policy "admin update products" on public.products for update to authenticated using (public.is_mobs_admin()) with check (public.is_mobs_admin());
+drop policy if exists "admin delete products" on public.products;
+create policy "admin delete products" on public.products for delete to authenticated using (public.is_mobs_admin());
 
-    if exists (
-      select 1 from information_schema.columns
-      where table_schema='public' and table_name='products' and column_name='price'
-    ) then
-      execute 'update public.order_items oi set product_price = p.price from public.products p where oi.product_id = p.id and oi.product_price is null';
-    end if;
-  end if;
-end $$;
+drop policy if exists "admin read menu categories" on public.menu_categories;
+create policy "admin read menu categories" on public.menu_categories for select to authenticated using (public.is_mobs_admin());
+drop policy if exists "admin insert menu categories" on public.menu_categories;
+create policy "admin insert menu categories" on public.menu_categories for insert to authenticated with check (public.is_mobs_admin());
+drop policy if exists "admin update menu categories" on public.menu_categories;
+create policy "admin update menu categories" on public.menu_categories for update to authenticated using (public.is_mobs_admin()) with check (public.is_mobs_admin());
+drop policy if exists "admin delete menu categories" on public.menu_categories;
+create policy "admin delete menu categories" on public.menu_categories for delete to authenticated using (public.is_mobs_admin());
 
-notify pgrst, 'reload schema';
+drop policy if exists "admin read restaurant" on public.restaurants;
+create policy "admin read restaurant" on public.restaurants for select to authenticated using (public.is_mobs_admin());
+drop policy if exists "admin update restaurant" on public.restaurants;
+create policy "admin update restaurant" on public.restaurants for update to authenticated using (public.is_mobs_admin()) with check (public.is_mobs_admin());
+
+-- ONE-TIME ADMIN SEED:
+-- Create the admin user in Supabase Authentication, copy its UUID, then run:
+-- insert into public.admin_users(user_id) values ('YOUR-AUTH-USER-UUID') on conflict (user_id) do nothing;
