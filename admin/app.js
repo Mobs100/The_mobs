@@ -14,12 +14,12 @@ let orderFilter = 'all';
 
 const STATUS_LABELS = {
   pending: 'New', confirmed: 'Confirmed', preparing: 'Preparing', ready: 'Ready',
-  out_for_delivery: 'Out for delivery', delivered: 'Delivered', cancelled: 'Cancelled'
+  out_for_delivery: 'Out for delivery', arrived: 'Arrived', delivered: 'Delivered', cancelled: 'Cancelled'
 };
 
 const STATUS_CLASS = {
   pending:'graypill', confirmed:'blue', preparing:'yellow', ready:'green',
-  out_for_delivery:'blue', delivered:'green', cancelled:'red'
+  out_for_delivery:'blue', arrived:'graypill', delivered:'green', cancelled:'red'
 };
 
 function esc(v){return String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
@@ -64,7 +64,7 @@ async function fetchBaseOrders(limit=1000){
 
 async function fetchOrderItems(orderIds){
   if(!orderIds.length) return [];
-  const {data,error}=await supabaseClient.from('order_items').select('id,order_id,product_id,product_name,unit_price,quantity,line_total').in('order_id',orderIds);
+  const {data,error}=await supabaseClient.from('order_items').select('id,order_id,product_id,product_name,product_price,unit_price,quantity,line_total').in('order_id',orderIds);
   if(error) throw error;
   return data||[];
 }
@@ -157,17 +157,28 @@ async function loadKitchen(){
 
 async function openOrder(id){
   try{
-    const o=orders.find(x=>x.id===id)||(await supabaseClient.from('orders').select('*').eq('id',id).single()).data;
-    if(!o)return;
+    const {data:o,error:orderError}=await supabaseClient
+      .from('orders')
+      .select('*')
+      .eq('id',id)
+      .eq('restaurant_id',RESTAURANT_ID)
+      .maybeSingle();
+    if(orderError) throw orderError;
+    if(!o) throw new Error('Order not found or you do not have permission to view it.');
     currentOrder=o;
 
     const [{data:items,error:itemError},{data:drivers,error:driverError}]=await Promise.all([
-      supabaseClient.from('order_items').select('id,order_id,product_id,product_name,unit_price,quantity,line_total').eq('order_id',id),
-      supabaseClient.from('driver_profiles').select('id,user_id,username,full_name,phone,availability_status,status').eq('status','approved').order('full_name')
+      supabaseClient.from('order_items')
+        .select('id,order_id,product_id,product_name,product_price,unit_price,quantity,line_total')
+        .eq('order_id',id).order('created_at'),
+      supabaseClient.from('driver_profiles')
+        .select('id,user_id,username,full_name,phone,availability_status,status')
+        .eq('status','approved').order('full_name')
     ]);
-    if(itemError)throw itemError;
-    if(driverError)throw driverError;
+    if(itemError) throw new Error('Cannot read order items: '+itemError.message);
+    if(driverError) throw new Error('Cannot load drivers: '+driverError.message);
 
+    const safeItems=items||[];
     const steps=['pending','confirmed','preparing','ready','out_for_delivery','arrived','delivered'];
     const idx=steps.indexOf(o.status);
     const labels=['Order placed','Accepted by kitchen','Preparing','Ready for pickup','Out for delivery','Arrived','Delivered'];
@@ -176,11 +187,13 @@ async function openOrder(id){
         ${esc(d.full_name)} · @${esc(d.username)} · ${esc(d.availability_status||'offline')}
       </option>`).join('');
 
+    const payment=o.payment_method||'cash_on_delivery';
     document.getElementById('modalbox').innerHTML=`
       <div class="titlebar">
         <div class="title"><h1>#MOBS-${esc(o.order_number)}</h1><p>${new Date(o.created_at).toLocaleString()}</p></div>
         ${badge(statusLabel(o.status))}
       </div>
+
       <div class="detail">
         <div class="card">
           <h3>Order Timeline</h3>
@@ -193,6 +206,17 @@ async function openOrder(id){
         </div>
 
         <div class="card">
+          <h3>Customer & Delivery</h3>
+          <div class="formgrid">
+            <div class="field"><label>CUSTOMER NAME</label><input id="modalCustomerName" value="${esc(o.customer_name||'')}"></div>
+            <div class="field"><label>PHONE</label><input id="modalCustomerPhone" inputmode="numeric" maxlength="10" value="${esc(o.phone||o.customer_phone||'')}"></div>
+            <div class="field full"><label>ADDRESS</label><input id="modalAddress" value="${esc(o.delivery_address||'')}"></div>
+            <div class="field full"><label>INSTRUCTIONS</label><textarea id="modalInstructions" rows="3">${esc(o.delivery_instructions||'')}</textarea></div>
+          </div>
+          <button class="btn primary" style="width:100%;margin-top:12px" onclick="saveOrderDetails()">SAVE ORDER DETAILS</button>
+        </div>
+
+        <div class="card">
           <h3>Dispatch</h3>
           <div class="field">
             <label>ASSIGN APPROVED DRIVER</label>
@@ -202,32 +226,60 @@ async function openOrder(id){
             </select>
           </div>
           <button class="btn primary" style="width:100%;margin-top:10px" onclick="saveOrderAssignment()">SAVE DRIVER</button>
-          <p style="color:#777;font-size:11px;margin-top:9px">Only approved drivers can be assigned. The driver sees the order when it is ready.</p>
+          <p style="color:#777;font-size:11px;margin-top:9px">Only approved drivers can be assigned.</p>
         </div>
 
         <div class="card">
           <h3>Order Summary</h3>
-          <div class="mini"><span>Customer</span><b>${esc(customerDisplay(o))}</b></div>
-          <div class="mini"><span>Items</span><b>${items.reduce((a,x)=>a+Number(x.quantity||0),0)}</b></div>
+          <div class="mini"><span>Items</span><b>${safeItems.reduce((a,x)=>a+Number(x.quantity||0),0)}</b></div>
+          <div class="mini"><span>Subtotal</span><b>${money(o.subtotal)}</b></div>
+          <div class="mini"><span>Delivery</span><b>${money(o.delivery_fee)}</b></div>
+          <div class="mini"><span>Tax</span><b>${money(o.tax)}</b></div>
           <div class="mini"><span>Total</span><b>${money(o.total)}</b></div>
-          <div class="mini"><span>Payment</span><b>${esc(o.payment_method||'—')}</b></div>
-          <div class="mini"><span>Address</span><b>${esc(o.delivery_address||'—')}</b></div>
-          <div class="mini"><span>Instructions</span><b>${esc(o.delivery_instructions||'—')}</b></div>
+          <div class="mini"><span>Payment</span><b>${esc(payment)}</b></div>
           <div style="margin-top:15px">
             <label style="font-size:11px;font-weight:800">UPDATE STATUS</label>
             <select id="modalStatus" style="width:100%;margin-top:6px;padding:10px;border:1px solid var(--line);border-radius:9px">
               ${Object.entries(STATUS_LABELS).map(([v,l])=>`<option value="${v}" ${v===o.status?'selected':''}>${l}</option>`).join('')}
             </select>
-            <button class="btn primary" style="margin-top:10px;width:100%" onclick="updateModalStatus()">Update Status</button>
+            <button class="btn primary" style="margin-top:10px;width:100%" onclick="updateModalStatus()">UPDATE STATUS</button>
           </div>
         </div>
       </div>
+
       <div class="card" style="margin-top:16px">
-        <h3>Order Items</h3>
-        ${items.length?items.map(i=>`<div class="mini"><span>${esc(i.product_name)} × ${i.quantity}</span><b>${money(i.line_total)}</b></div>`).join(''):'<div style="color:#777">No item details.</div>'}
-      </div>`;
+        <div class="titlebar" style="margin-bottom:8px"><div class="title"><h3>Order Items</h3><p>${safeItems.length} line item${safeItems.length===1?'':'s'}</p></div></div>
+        ${safeItems.length?safeItems.map(i=>`<div class="mini"><span>${esc(i.product_name)} × ${Number(i.quantity||0)}</span><b>${money(i.line_total)}</b></div>`).join(''):'<div style="color:#777">No item details found.</div>'}
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="btn ghost" onclick="closeModal()">CLOSE</button></div>`;
     openModalRaw();
-  }catch(e){showToast('Order error: '+e.message)}
+    document.getElementById('modalCustomerPhone')?.addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,10);});
+  }catch(e){
+    console.error('Order view error:',e);
+    showToast('Order error: '+(e.message||'Unable to open order.'));
+  }
+}
+
+async function saveOrderDetails(){
+  if(!currentOrder) return;
+  try{
+    const customerName=document.getElementById('modalCustomerName')?.value.trim()||null;
+    const phone=(document.getElementById('modalCustomerPhone')?.value||'').replace(/\D/g,'').slice(0,10)||null;
+    const address=document.getElementById('modalAddress')?.value.trim()||null;
+    const instructions=document.getElementById('modalInstructions')?.value.trim()||null;
+    if(phone && !/^05\d{8}$/.test(phone)) throw new Error('Phone must be exactly 10 digits and start with 05.');
+    const {data,error}=await supabaseClient.from('orders')
+      .update({customer_name:customerName,phone:phone,delivery_address:address,delivery_instructions:instructions})
+      .eq('id',currentOrder.id).eq('restaurant_id',RESTAURANT_ID).select('*').single();
+    if(error) throw error;
+    currentOrder=data;
+    orders=orders.map(o=>o.id===data.id?{...o,...data}:o);
+    showToast('Order details saved.');
+    await loadOrders();
+  }catch(e){
+    console.error('Save order details error:',e);
+    showToast('Could not save order: '+(e.message||'Unknown error'));
+  }
 }
 async function saveOrderAssignment(){
   if(!currentOrder)return;
@@ -244,7 +296,7 @@ async function saveOrderAssignment(){
     openOrder(currentOrder.id);
   }catch(e){showToast('Assignment failed: '+e.message)}
 }
-async function updateModalStatus(){const s=document.getElementById('modalStatus').value;await setOrderStatus(currentOrder.id,s,true);}
+async function updateModalStatus(){const s=document.getElementById('modalStatus')?.value;if(!currentOrder||!s)return;await setOrderStatus(currentOrder.id,s,true);}
 async function setOrderStatus(id,status,close=false){
   try{
     const existing=orders.find(o=>o.id===id);
@@ -375,24 +427,36 @@ function globalSearch(v){
 }
 
 
+async function verifyAdminSession(){
+  const {data:{user},error:userError}=await supabaseClient.auth.getUser();
+  if(userError||!user) return false;
+
+  const {data:isAdmin,error:rpcError}=await supabaseClient.rpc('is_mobs_admin');
+  if(!rpcError) return !!isAdmin;
+
+  // Fallback for deployments where the latest RPC has not been applied yet.
+  // admin_users already has a policy allowing the signed-in admin to read own row.
+  const {data:row,error:rowError}=await supabaseClient
+    .from('admin_users').select('user_id').eq('user_id',user.id).maybeSingle();
+  if(rowError) throw new Error('Admin verification failed: '+rowError.message);
+  return !!row;
+}
+
 async function signIn(){
   const email=document.getElementById('adminEmail')?.value.trim();
   const password=document.getElementById('adminPassword')?.value||'';
   if(!email||!password){showToast('Enter your email and password.');return;}
+  const button=document.querySelector('#login button'); if(button){button.disabled=true;button.textContent='Signing in…';}
   try{
-    const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+    const {error}=await supabaseClient.auth.signInWithPassword({email,password});
     if(error) throw error;
-    const {data:isAdmin,error:adminError}=await supabaseClient.rpc('is_mobs_admin');
-    if(adminError){
-      await supabaseClient.auth.signOut();
-      throw new Error('Admin check failed: '+(adminError.message||'RPC is_mobs_admin is unavailable.'));
-    }
-    if(!isAdmin){
+    if(!(await verifyAdminSession())){
       await supabaseClient.auth.signOut();
       throw new Error('This account is not the THE MOBS admin account.');
     }
     enter();
-  }catch(e){showToast('Sign in failed: '+(e.message||'Invalid credentials'));}
+  }catch(e){console.error('Admin sign-in failed:',e);showToast('Sign in failed: '+(e.message||'Invalid credentials'));}
+  finally{const button=document.querySelector('#login button');if(button){button.disabled=false;button.textContent='Sign in →';}}
 }
 async function signOut(){
   await stopAdminRealtime();
@@ -400,20 +464,199 @@ async function signOut(){
   document.getElementById('app').style.display='none';
   document.getElementById('login').style.display='flex';
 }
+
+/* =========================================================
+   ADMIN PASSWORD RECOVERY
+   Supabase Auth recovery flow
+   ========================================================= */
+
+let passwordRecoveryActive = false;
+
+function adminRecoveryRedirectUrl(){
+  // Keep the recovery link on the actual Admin page.
+  // Example: http://localhost:3000/admin/?reset=1
+  return `${window.location.origin}${window.location.pathname}?reset=1`;
+}
+
+function showLoginScreen(){
+  const login=document.getElementById('login');
+  const reset=document.getElementById('resetPassword');
+  const app=document.getElementById('app');
+
+  if(reset) reset.style.display='none';
+  if(login) login.style.display='grid';
+  if(app) app.style.display='none';
+}
+
+function showResetPasswordScreen(){
+  passwordRecoveryActive=true;
+
+  const login=document.getElementById('login');
+  const reset=document.getElementById('resetPassword');
+  const app=document.getElementById('app');
+
+  if(app) app.style.display='none';
+  if(login) login.style.display='none';
+  if(reset) reset.style.display='grid';
+
+  const message=document.getElementById('resetMessage');
+  if(message){
+    message.textContent='';
+    message.style.color='#777';
+  }
+
+  document.getElementById('newAdminPassword')?.focus();
+}
+
+async function showForgotPassword(){
+  const email=document.getElementById('adminEmail')?.value.trim();
+
+  if(!email){
+    showToast('Enter your admin email first.');
+    document.getElementById('adminEmail')?.focus();
+    return;
+  }
+
+  try{
+    const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{
+      redirectTo:adminRecoveryRedirectUrl()
+    });
+
+    if(error) throw error;
+
+    showToast('Reset email sent. Check your inbox.');
+  }catch(e){
+    console.error('Password reset request failed:',e);
+    showToast('Could not send reset email: '+(e.message||'Unknown error'));
+  }
+}
+
+async function updateAdminPassword(){
+  const password=document.getElementById('newAdminPassword')?.value||'';
+  const confirm=document.getElementById('confirmAdminPassword')?.value||'';
+  const message=document.getElementById('resetMessage');
+
+  if(password.length<8){
+    if(message){
+      message.textContent='Password must be at least 8 characters.';
+      message.style.color='#b33';
+    }
+    return;
+  }
+
+  if(password!==confirm){
+    if(message){
+      message.textContent='Passwords do not match.';
+      message.style.color='#b33';
+    }
+    return;
+  }
+
+  try{
+    if(message){
+      message.textContent='Updating password…';
+      message.style.color='#777';
+    }
+
+    const {data,error:userError}=await supabaseClient.auth.getUser();
+    if(userError) throw userError;
+
+    if(!data?.user){
+      throw new Error('Recovery session not found. Please request a new reset email.');
+    }
+
+    const {error}=await supabaseClient.auth.updateUser({password});
+    if(error) throw error;
+
+    if(message){
+      message.textContent='Password updated successfully.';
+      message.style.color='#16713a';
+    }
+
+    setTimeout(async()=>{
+      passwordRecoveryActive=false;
+      await supabaseClient.auth.signOut();
+
+      document.getElementById('newAdminPassword').value='';
+      document.getElementById('confirmAdminPassword').value='';
+
+      window.history.replaceState({},document.title,window.location.pathname);
+      showLoginScreen();
+
+      const email=document.getElementById('adminEmail');
+      if(email && data.user.email) email.value=data.user.email;
+
+      showToast('Password changed. You can sign in now.');
+    },1200);
+
+  }catch(e){
+    console.error('Password update failed:',e);
+
+    if(message){
+      message.textContent=e.message||'Failed to update password.';
+      message.style.color='#b33';
+    }
+  }
+}
+
+function backToLogin(){
+  passwordRecoveryActive=false;
+
+  document.getElementById('newAdminPassword').value='';
+  document.getElementById('confirmAdminPassword').value='';
+
+  window.history.replaceState({},document.title,window.location.pathname);
+  showLoginScreen();
+}
+
+supabaseClient.auth.onAuthStateChange(async(event,session)=>{
+  console.log('Supabase auth event:',event);
+
+  if(event==='PASSWORD_RECOVERY'){
+    showResetPasswordScreen();
+    return;
+  }
+
+  if(event==='SIGNED_OUT' && passwordRecoveryActive){
+    showLoginScreen();
+  }
+});
+
+function checkPasswordRecoveryUrl(){
+  const params=new URLSearchParams(window.location.search);
+  const hash=window.location.hash||'';
+
+  const recoveryByQuery=params.get('reset')==='1';
+  const recoveryByHash=
+    hash.includes('type=recovery') ||
+    hash.includes('access_token=');
+
+  if(recoveryByQuery || recoveryByHash){
+    // Supabase normally emits PASSWORD_RECOVERY after processing the URL.
+    // Show the screen immediately as a fallback while that event is handled.
+    showResetPasswordScreen();
+  }
+}
+
 async function restoreAdminSession(){
+  if(passwordRecoveryActive){
+    showResetPasswordScreen();
+    return;
+  }
+
   const {data}=await supabaseClient.auth.getSession();
   if(data.session){
-    const {data:isAdmin,error:adminError}=await supabaseClient.rpc('is_mobs_admin');
-    if(adminError||!isAdmin){
+    try{
+      if(!(await verifyAdminSession())) throw new Error('Not an admin account.');
+      enter();
+    }catch(e){
+      console.error('Admin session restore failed:',e);
       await supabaseClient.auth.signOut();
       document.getElementById('login').style.display='flex';
       document.getElementById('app').style.display='none';
-      if(adminError) showToast('Admin check failed: '+(adminError.message||'RPC is_mobs_admin is unavailable.'));
-      return;
+      showToast(e.message||'Unable to restore admin session.');
     }
-    enter();
-  }
-  else {
+  } else {
     document.getElementById('login').style.display='flex';
     document.getElementById('app').style.display='none';
   }
@@ -430,7 +673,7 @@ async function createOrder(){
     const subtotal=parsed.reduce((a,x)=>a+Number(x.product.price)*x.qty,0),fee=Number(document.getElementById('mOrderFee').value||0),tax=Math.round(subtotal*0.15*100)/100,total=subtotal+fee+tax;
     const token=document.getElementById('mOrderToken').value.trim();const customer_token=token||crypto.randomUUID();
     const {data:o,error}=await supabaseClient.from('orders').insert({restaurant_id:RESTAURANT_ID,customer_token,status:'pending',payment_method:document.getElementById('mOrderPayment').value,subtotal,delivery_fee:fee,tax,total,delivery_address:document.getElementById('mOrderAddress').value.trim()||null,delivery_instructions:document.getElementById('mOrderInstructions').value.trim()||null}).select().single();if(error)throw error;
-    const rows=parsed.map(x=>({order_id:o.id,product_id:x.product.id,product_name:x.product.name,unit_price:x.product.price,quantity:x.qty,line_total:Number(x.product.price)*x.qty}));const {error:ie}=await supabaseClient.from('order_items').insert(rows);if(ie)throw ie;
+    const rows=parsed.map(x=>({order_id:o.id,product_id:x.product.id,product_name:x.product.name,product_price:Number(x.product.price),unit_price:Number(x.product.price),quantity:x.qty,line_total:Number(x.product.price)*x.qty}));const {error:ie}=await supabaseClient.from('order_items').insert(rows);if(ie)throw ie;
     closeModal();showToast('Order created');await loadDashboard();
   }catch(e){showToast('Create order failed: '+e.message)}
 }
@@ -489,6 +732,13 @@ window.saveSettings = async function(){
   }
 };
 
+// Inline HTML handlers must be exposed because this file is loaded as an ES module.
+Object.assign(window, {
+  backToLogin, closeModal, exportCSV, exportReport, globalSearch, go,
+  openModal, openOrder, saveOrderDetails, saveOrderAssignment, saveSettings, setOrderStatus, showForgotPassword, showToast, signIn, toggle,
+  toggleKdsSound, updateAdminPassword
+});
+
 window.loadPage = loadPage;
 
 /* Refresh live data automatically while the Admin is open. */
@@ -531,6 +781,7 @@ async function stopAdminRealtime(){
 }
 
 /* First live load. */
+checkPasswordRecoveryUrl();
 restoreAdminSession();
 
 

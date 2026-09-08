@@ -159,9 +159,10 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:fle
 <div class="mobilebar"><button onclick="go('dashboard')"><b>⌂</b>Home</button><button onclick="go('orders')"><b>◫</b>Orders</button><button onclick="go('kitchen')"><b>◉</b>Kitchen</button><button onclick="go('menu')"><b>☰</b>Menu</button><button onclick="go('settings')"><b>⚙</b>More</button></div>
 <div id="modal" class="modal" onclick="if(event.target===this)closeModal()"><div class="modalbox" id="modalbox"></div></div><div id="toast" class="toast"></div>
 
-<script type="module" src="../shared/config.js"></script>
-<script type="module" src="../shared/supabase.js"></script>
-<script type="module" src="./app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/config.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="app.js" defer></script>
 
 </body>
 </html>

@@ -384,3 +384,61 @@ with check (
 
 -- Refresh PostgREST schema cache after applying the new order columns.
 notify pgrst, 'reload schema';
+
+-- =========================================================
+-- ADMIN ORDER ACCESS / ORDER ITEM INTEGRITY
+-- =========================================================
+-- The Admin Console reads and edits orders directly with the authenticated
+-- admin session. Explicit policies are required when RLS is enabled.
+
+drop policy if exists "admin read orders" on public.orders;
+create policy "admin read orders" on public.orders
+for select to authenticated
+using (public.is_mobs_admin());
+
+drop policy if exists "admin insert orders" on public.orders;
+create policy "admin insert orders" on public.orders
+for insert to authenticated
+with check (public.is_mobs_admin());
+
+drop policy if exists "admin read order items" on public.order_items;
+create policy "admin read order items" on public.order_items
+for select to authenticated
+using (public.is_mobs_admin());
+
+drop policy if exists "admin insert order items" on public.order_items;
+create policy "admin insert order items" on public.order_items
+for insert to authenticated
+with check (public.is_mobs_admin());
+
+drop policy if exists "admin update order items" on public.order_items;
+create policy "admin update order items" on public.order_items
+for update to authenticated
+using (public.is_mobs_admin())
+with check (public.is_mobs_admin());
+
+-- Keep the historical product price on every order item. This is the value
+-- used for the receipt/order snapshot and is required by the current schema.
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema='public' and table_name='order_items' and column_name='product_price'
+  ) then
+    if exists (
+      select 1 from information_schema.columns
+      where table_schema='public' and table_name='order_items' and column_name='unit_price'
+    ) then
+      execute 'update public.order_items set product_price = coalesce(product_price, unit_price) where product_price is null';
+    end if;
+
+    if exists (
+      select 1 from information_schema.columns
+      where table_schema='public' and table_name='products' and column_name='price'
+    ) then
+      execute 'update public.order_items oi set product_price = p.price from public.products p where oi.product_id = p.id and oi.product_price is null';
+    end if;
+  end if;
+end $$;
+
+notify pgrst, 'reload schema';
